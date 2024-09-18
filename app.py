@@ -198,8 +198,8 @@ app.layout = html.Div(
 
 	#dascher etc
 	html.Div(id='sped',children = [
-		html.H2("Spedition Table"),
-		html.Button('Save Table', id='sped_button', n_clicks=None),
+		html.H2("Spedition Tabelle"),
+		html.Button('Save Tabelle', id='sped_button', n_clicks=None),
 		],
 		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'cadetblue'}
 		),
@@ -220,8 +220,8 @@ app.layout = html.Div(
 
 	#pal and picks tables
 	html.Div(id='pal',children = [
-		html.H2("Pal & PU Table"),
-		html.Button('Save Table', id='pal_button', n_clicks=None),
+		html.H2("Pal & PU Tabelle"),
+		html.Button('Save Tabelle', id='pal_button', n_clicks=None),
 		],
 		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'cadetblue'}
 		),
@@ -317,8 +317,8 @@ app.layout = html.Div(
 
 	##combined
 	html.Div(id='ver',children = [
-		html.H2("Vereint Data Tables"),
-		html.Button('Save Table', id='ver_button', n_clicks=None),
+		html.H2("Vereint Data Tabelle"),
+		html.Button('Save Tabelle', id='ver_button', n_clicks=None),
 		],
 		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'cadetblue'}
 		),
