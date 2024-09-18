@@ -102,7 +102,7 @@ class DataPreprocessing:
 		fig.update_layout(
 			title='Picks Distribution',
 			xaxis_title='Selected values',
-			yaxis_title='Count',
+			yaxis_title='Summe',
 			template='plotly_white',
 			plot_bgcolor='lightcyan',
 			paper_bgcolor='lightcyan',
@@ -418,7 +418,7 @@ class DataPreprocessing:
 		fig.update_layout(
 		    title='AME Distribution',
 		    xaxis_title='Selected values',
-		    yaxis_title='Count',
+		    yaxis_title='Summe',
 		    template='plotly_white',
 		    plot_bgcolor='lightcyan',
 		    paper_bgcolor='lightcyan',
@@ -450,7 +450,7 @@ class DataPreprocessing:
 		fig2.update_layout(
 			title='BME Distribution',
 			xaxis_title='Selected values',
-			yaxis_title='Count',
+			yaxis_title='Summe',
 			template='plotly_white',
 			plot_bgcolor='lightcyan',
 			paper_bgcolor='lightcyan',
@@ -469,7 +469,7 @@ class DataPreprocessing:
 			datahalf, 
 			x="date", 
 			y="Picks", 
-			labels={"date": "Date", "Picks": "Total Pick Values"},
+			labels={"date": "Datum", "Picks": "Picks"},
 			title="Picks Bar Chart"
 		)
 
@@ -488,7 +488,7 @@ class DataPreprocessing:
 			datahalf, 
 			x="date", 
 			y="Pallets", 
-			labels={"date": "Date", "Picks": "Total Pick Values"},
+			labels={"date": "Datum", "Picks": "Pallets"},
 			title="Pallets Bar Chart"
 		)
 
@@ -511,7 +511,7 @@ class DataPreprocessing:
 			x="date", 
 			y="Picks", 
 			color="new_col", 
-			labels={"date": "Date", "Picks": "Total Pick Values"},
+			labels={"date": "Datum", "Picks": "Picks"},
 			title="Picks Bar Chart"
 		)
 
@@ -531,7 +531,7 @@ class DataPreprocessing:
 			x="date", 
 			y="Pallets", 
 			color="new_col",
-			labels={"date": "Date", "Picks": "Total Pick Values"},
+			labels={"date": "Datum", "Picks": "Pallets"},
 			title="Pallets Bar Chart"
 		)
 
@@ -585,7 +585,7 @@ class DataPreprocessing:
 		fig.add_trace(go.Bar(
 		    x=[str(d) for d in keys_sorted],
 		    y=values_1_sorted,
-		    name='Other Receivers',
+		    name='Andere',
 		    marker_color='slateblue',
 		    width=width
 		))
@@ -593,7 +593,7 @@ class DataPreprocessing:
 		fig.add_trace(go.Bar(
 		    x=[str(d) for d in keys_sorted],
 		    y=values_2_sorted,
-		    name='Own Receivers',
+		    name='Eigene',
 		    marker_color='lightseagreen',
 		    width=width
 		))
@@ -638,7 +638,7 @@ class DataPreprocessing:
 
 
 		colors = ['slateblue', 'lightseagreen']
-		ls = ["Other Receivers", "Own"]
+		ls = ["Andere", "Eigene"]
 		ls2 = [val1, val2]
 
 		df = pd.DataFrame({'Keys': ls, 'Values': ls2})
