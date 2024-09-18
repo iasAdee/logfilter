@@ -46,8 +46,8 @@ nav_content = html.Div([
     dcc.Upload(
         id='upload-data',
         children=html.Div([
-            'Drag and Drop or ',
-            html.A('Select Files')
+            'Drag & Drop or ',
+            html.A('Datei auswählen')
         ]),
         style={
             'width': '100%',
@@ -63,21 +63,21 @@ nav_content = html.Div([
         multiple=True
     ),
 
-    html.Button('Compute Analysis', id='update-button', n_clicks=None),
+    html.Button('Start', id='update-button', n_clicks=None),
     html.Hr(style={'backgroundColor': 'azure'}),
 
 
     #navigation controls
-    html.H5("Navigations"),
-    html.A("Pal & PU", href="#pal",style={'color': 'azure'}),
+    html.H5("Navigation"),
+    html.A("Pal & PU Tabelle", href="#pal",style={'color': 'azure'}),
     html.Hr(style={'backgroundColor': 'azure'}),
     html.A("Pal & PU charts", href="#palc",style={'color': 'azure'}),
     html.Hr(style={'backgroundColor': 'azure'}),
-    html.A("Spedition", href="#sped",style={'color': 'azure'}),
+    html.A("Spedition Tabelle", href="#sped",style={'color': 'azure'}),
     html.Hr(style={'backgroundColor': 'azure'}),
     html.A("Spedition Charts", href="#spedc",style={'color': 'azure'}),
     html.Hr(style={'backgroundColor': 'azure'}),
-    html.A("Vereint Data Tables", href="#ver",style={'color': 'azure'}),
+    html.A("Vereint Data Tabelle", href="#ver",style={'color': 'azure'}),
     html.Hr(style={'backgroundColor': 'azure'}),
     html.A("Vereint data Charts", href="#verc",style={'color': 'azure'}),
     html.Hr(style={'backgroundColor': 'azure'}),
