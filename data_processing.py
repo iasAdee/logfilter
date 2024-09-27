@@ -430,7 +430,7 @@ class DataPreprocessing:
 
 		value_counts = datahalf['BME'].value_counts()
 
-		print(value_counts)
+		#print(value_counts)
 
 		colors = ['darkkhaki', 'indianred']
 		text_positions = ['inside' if y >= 100 else 'outside' for y in value_counts.values]
