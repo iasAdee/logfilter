@@ -6,6 +6,7 @@ from dash.dependencies import Input, Output
 
 from styles import external_stylesheets, nav_style
 from components import nav_content
+from components2 import nav_content2
 from dash import dcc
 
 
@@ -29,6 +30,7 @@ warnings.filterwarnings('ignore')
 
 
 @callback(
+	Output("download-dataframe-csv3", "data"),
 	Input('stored-data1', 'data'),
 	Input('sped_button', 'n_clicks'),
 
@@ -37,11 +39,12 @@ warnings.filterwarnings('ignore')
 def save_data(data1, n_clicks):
 	if(n_clicks != None):
 		df = pd.DataFrame(data1)
+		#df.to_csv("sped_data.csv", index=False)
+		return dcc.send_data_frame(df.to_csv, "sped_data.csv", index=False)
 
-		print(df)
-		df.to_csv("sped_data.csv", index=False)
 
 @callback(
+	Output("download-dataframe-csv2", "data"),
 	Input('stored-data2', 'data'),
 	Input('pal_button', 'n_clicks'),
 
@@ -50,9 +53,11 @@ def save_data(data1, n_clicks):
 def save_data(data1, n_clicks):
 	if(n_clicks != None):
 		df = pd.DataFrame(data1)
-		df.to_csv("pal_data.csv", index=False)
+		#df.to_csv("pal_data.csv", index=False)
+		return dcc.send_data_frame(df.to_csv, "pal_data.csv", index=False)
 
 @callback(
+	Output("download-dataframe-csv1", "data"),
 	Input('stored-data3', 'data'),
 	Input('ver_button', 'n_clicks'),
 
@@ -61,8 +66,19 @@ def save_data(data1, n_clicks):
 def save_data(data1, n_clicks):
 	if(n_clicks != None):
 		df = pd.DataFrame(data1)
-		df.to_csv("ver_data.csv", index=False)
+		return dcc.send_data_frame(df.to_csv, "ver_data.csv", index=False)
 
+
+@callback(
+	Output("download-dataframe-csv", "data"),
+	Input('stored-data-3formated', 'data'),
+	Input('btn', 'n_clicks'),
+	)
+
+def save_data(data1, n_clicks):
+	if(n_clicks != None):
+		df = pd.DataFrame(data1)
+		return dcc.send_data_frame(df.to_csv, "filter_data.csv", index=False)
 
 
 @callback(
@@ -107,6 +123,81 @@ def update_graph(data, n_clicks):
 
 
 		return fig, ls ,fig2, fig3,fig4, fig5,fig6,fig7,fig8 ,ls2 ,ls3, n_clicks, data_req, data1, data2
+
+
+def format_to_int(value):
+	formatted_value = value.replace('.', '').replace(',', '.')
+	return int(float(formatted_value))
+
+@callback(
+    Output('data_tab', 'children'),
+    Output('stored-data-3formated', 'data'),
+ 
+    Input('stored-data-2', 'data'),
+    Input('stored-data-3', 'data'),
+    )
+def update_second(input1, input2):
+
+	df1 = pd.DataFrame(input1)
+	df1 = df1.iloc[:, :4]
+
+	data_dict = {}
+	for i in range(len(df1)):
+		id = df1["Unnamed: 1"][i]
+		if(pd.isna(id)):
+			continue
+		else:
+			if(id.isnumeric()):
+				data = df1["Unnamed: 3"][i+1]
+				data_dict[id] = data
+	
+
+	df2 = pd.DataFrame(input2)
+	df2 = df2.iloc[3:]
+
+	
+	if(len(df2) > 1):
+		data_check = dict(zip(df2["Unnamed: 0"], df2["Unnamed: 1"]))
+		ls = []
+		for key in data_check:
+			if(key in data_dict.keys()):
+				result = data_check[key] - format_to_int(data_dict[key])
+				ls.append([key, data_check[key], format_to_int(data_dict[key]), result])
+
+		data_df = pd.DataFrame(ls, columns=["Key", "input", "in system", "Differenz"])
+
+		#print(data_df)
+
+		ls = []
+		ls.append(html.Div([
+		html.H2("Tabelle"),
+		dash_table.DataTable(
+		    style_table={'height': '800px', 'overflowY': 'auto', 'width':'98%', 'margin-left':'4px'},
+		    data=data_df.to_dict('records'),
+		    columns=[{"name": i, "id": i} for i in data_df.columns],
+		    
+		    sort_action="native",
+		    style_data={
+            'backgroundColor': 'lightcyan',
+            
+        	},
+		    style_header={
+		        'backgroundColor': 'darkslategrey',
+		        'color': 'white',
+		        'fontWeight': 'bold',
+		        'textAlign': 'center',
+		        'border': '1px solid black'
+		    }),html.Hr()])
+		)
+
+		#print(ls)
+
+		return ls ,data_df.to_dict('records')
+
+
+
+	return html.Div([html.H2("Tabelle")]), {}
+
 
 
 def parse_contents(contents, filename, date):
@@ -163,6 +254,31 @@ def update_output(list_of_contents, list_of_names, list_of_dates):
         return df_combined.to_dict('records')
     return {}
 
+
+
+@callback(
+    #Output('output-data-upload', 'children'),
+    Output('stored-data-2', 'data'),
+    Output('stored-data-3', 'data'),
+    [Input('upload-data-2', 'contents')],
+    [State('upload-data-2', 'filename'),
+     State('upload-data-2', 'last_modified')]
+)
+def update_output2(list_of_contents, list_of_names, list_of_dates):
+
+    if list_of_contents is not None:
+        children = []
+        df_combined = pd.DataFrame()
+        for c, n, d in zip(list_of_contents, list_of_names, list_of_dates):
+            child, df = parse_contents(c, n, d)
+            
+            children.append(df)
+        
+        return children[0].to_dict('records'),children[1].to_dict('records')
+    return {}, {}
+
+
+
 @callback(
     Output('plot7', 'figure'),  # Update this div with the output
     Input('submit-button', 'n_clicks'),  # Trigger on button click
@@ -184,8 +300,8 @@ def update_output(n_clicks, input_value,data):
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 server = app.server
 
-# App layout
-app.layout = html.Div(
+
+page_1_layout = html.Div(
 	className="app-container", 
 
 	children=[
@@ -314,6 +430,9 @@ app.layout = html.Div(
 		),
 
 
+	dcc.Download(id="download-dataframe-csv2"),
+	dcc.Download(id="download-dataframe-csv3"),
+	dcc.Download(id="download-dataframe-csv1"),
 
 	##combined
 	html.Div(id='ver',children = [
@@ -398,7 +517,54 @@ app.layout = html.Div(
 
 	    ],
 	id="theme_change"
+
 	)
+
+page_2_layout = html.Div([
+	html.Div(style=nav_style, children=[nav_content2]),
+	dcc.Store(id='stored-data-2'),
+	dcc.Store(id='stored-data-3'),
+	dcc.Store(id='stored-data-3formated'),
+
+	#html.H2(id= "idd",children =["Tabelle"],style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'cadetblue'}),
+
+	html.Div(id='data_tab',children = [
+		
+		],
+		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'cadetblue'}
+		),
+
+	html.Div(id= "This")
+])
+
+# App layout
+app.layout = html.Div([
+	dcc.Location(id='url', refresh=False),
+	html.Div(id='page-content'),
+	dcc.Download(id="download-dataframe-csv"),
+	html.Div(id='page-1-content', style={'display': 'block'}, children=[
+	    page_1_layout
+	]),
+
+	html.Div(id='page-2-content', style={'display': 'none'}, children=[
+	    page_2_layout
+	])
+
+	])
+
+
+@app.callback(
+    [Output('page-1-content', 'style'),
+     Output('page-2-content', 'style')],
+    [Input('url', 'pathname')]
+)
+def display_page(pathname):
+    if pathname == '/page-2':
+        return {'display': 'block'}, {'display': 'none'}
+    else:
+        return {'display': 'none'}, {'display': 'block'}
+
+
 
 app.css.append_css({
     'external_url': 'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css'
