@@ -83,6 +83,8 @@ nav_content = html.Div([
     html.Hr(style={'backgroundColor': 'azure'}),
     html.A("Neue Update Charts", href="#neue",style={'color': 'azure'}),
     html.Hr(style={'backgroundColor': 'azure'}),
+
+    dcc.Link('New Filter', href='/',style={'color': 'azure'}),
     
 ])
 
