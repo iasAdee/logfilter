@@ -30,6 +30,7 @@ nav_content2 = html.Div([
         multiple=True
     ),
 
+    html.H6(id="status2"),
     html.Button('Save Tabelle', id='btn', n_clicks=None),
 
     #html.Button('Start', id='update-button-2', n_clicks=None),
