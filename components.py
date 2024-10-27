@@ -63,6 +63,8 @@ nav_content = html.Div([
         multiple=True
     ),
 
+    html.H6(id="status"),
+
     html.Button('Start', id='update-button', n_clicks=None),
     html.Hr(style={'backgroundColor': 'azure'}),
 
