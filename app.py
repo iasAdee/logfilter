@@ -132,6 +132,7 @@ def format_to_int(value):
 @callback(
     Output('data_tab', 'children'),
     Output('stored-data-3formated', 'data'),
+    Output('status2', 'children'),
  
     Input('stored-data-2', 'data'),
     Input('stored-data-3', 'data'),
@@ -192,11 +193,11 @@ def update_second(input1, input2):
 
 		#print(ls)
 
-		return ls ,data_df.to_dict('records')
+		return ls ,data_df.to_dict('records'), "data processed successfully"
 
 
 
-	return html.Div([html.H2("Tabelle")]), {}
+	return html.Div([html.H2("Tabelle")]), {}, "data not uploaded"
 
 
 
@@ -234,6 +235,7 @@ def parse_contents(contents, filename, date):
 @callback(
     #Output('output-data-upload', 'children'),
     Output('stored-data', 'data'),
+     Output('status', 'children'),
     [Input('upload-data', 'contents')],
     [State('upload-data', 'filename'),
      State('upload-data', 'last_modified')]
@@ -251,8 +253,8 @@ def update_output(list_of_contents, list_of_names, list_of_dates):
             child, df = parse_contents(c, n, d)
             children.append(child)
             df_combined = pd.concat([df_combined, df], ignore_index=True)
-        return df_combined.to_dict('records')
-    return {}
+        return df_combined.to_dict('records'), "data loaded successfully"
+    return {}, ""
 
 
 
