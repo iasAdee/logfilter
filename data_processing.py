@@ -608,6 +608,8 @@ class DataPreprocessing:
 		    xaxis_tickangle=-90,  
 		    template='plotly_white',
 		    legend_title='Type',
+		    plot_bgcolor='lightcyan',
+			paper_bgcolor='lightcyan',
 
 		)
 
@@ -654,6 +656,8 @@ class DataPreprocessing:
 		        #textposition=text_positions  
 		    )
 		])
+
+
 
 				# Update layout to adjust x-axis labels
 		fig.update_layout(
