@@ -22,7 +22,7 @@ nav_style = {
     'height': '100%',
     'padding': '20px',
     'overflow': 'auto',
-    'background-color': 'teal'
+    'background-color': 'dimgray'
 }
 
 
