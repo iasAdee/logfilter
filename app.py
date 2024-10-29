@@ -316,40 +316,40 @@ page_1_layout = html.Div(
 
 	#dascher etc
 	html.Div(id='sped',children = [
-		html.H2("Spedition Tabelle"),
-		html.Button('Save Tabelle', id='sped_button', n_clicks=None),
+		html.H2("Spedition Tabelle",style={'color': 'firebrick'}),
+		html.Button('Save Tabelle', id='sped_button', n_clicks=None,style={'backgroundColor': 'yellow','fontSize':"12px"}),
 		],
-		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'cadetblue'}
+		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
 		),
 
 	html.Div(id='output-data-upload2',
-		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'cadetblue'}
+		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
 		),
 
 	html.Div(id='spedc',children = [
-		html.H2("Spedition Chart"),
+		html.H2("Spedition Chart",style={'color': 'firebrick'}),
 		],
-		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'cadetblue'}
+		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
 		),
 	dcc.Graph(id='inflation-plot',
-		style={"height": "80%", 'width': '80%', 'float': 'right', 'backgroundColor': 'cadetblue'}
+		style={"height": "80%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
 		),
 
 
 	#pal and picks tables
 	html.Div(id='pal',children = [
-		html.H2("Pal & PU Tabelle"),
-		html.Button('Save Tabelle', id='pal_button', n_clicks=None),
+		html.H2("Pal & PU Tabelle",style={'color': 'firebrick'}),
+		html.Button('Save Tabelle', id='pal_button', n_clicks=None,style={'backgroundColor': 'yellow','fontSize':"12px"}),
 		],
-		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'cadetblue'}
+		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
 		),
 	html.Div(id='output-data-upload3',
-		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'cadetblue'}
+		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
 		),
 	html.Div(id='palc',children = [
-		html.H2("Pal & PU Chart"),
+		html.H2("Pal & PU Chart",style={'color': 'firebrick'}),
 		],
-		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'cadetblue'}
+		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
 		),
 
 	html.Div(
@@ -388,7 +388,7 @@ page_1_layout = html.Div(
 		        ),
 		])
 		],
-		style={"height": "50%", 'width': '80%', 'float': 'right', 'backgroundColor': 'cadetblue'}
+		style={"height": "50%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
 		),
 
 
@@ -428,7 +428,7 @@ page_1_layout = html.Div(
 		        ),
 		])
 		],
-		style={"height": "50%", 'width': '80%', 'float': 'right', 'backgroundColor': 'cadetblue'}
+		style={"height": "50%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
 		),
 
 
@@ -438,29 +438,29 @@ page_1_layout = html.Div(
 
 	##combined
 	html.Div(id='ver',children = [
-		html.H2("Vereint Data Tabelle"),
-		html.Button('Save Tabelle', id='ver_button', n_clicks=None),
+		html.H2("Vereint Data Tabelle",style={'color': 'firebrick'}),
+		html.Button('Save Tabelle', id='ver_button', n_clicks=None,style={'backgroundColor': 'yellow','fontSize':"12px"}),
 		],
-		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'cadetblue'}
+		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
 		),
 	html.Div(id='output-data-upload4',
-		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'cadetblue'}
+		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
 		),
 	html.Div(id='verc',children = [
-		html.H2("Vereint Data  Chart"),
+		html.H2("Vereint Data  Chart",style={'color': 'firebrick'}),
 		],
-		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'cadetblue'}
+		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
 		),
 	dcc.Graph(id='inflation-plot-4',
-		style={"height": "80%", 'width': '80%', 'float': 'right', 'backgroundColor': 'cadetblue'}
+		style={"height": "80%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
 		),
 
 	dcc.Graph(id='inflation-plot-5',
-		style={"height": "80%", 'width': '80%', 'float': 'right', 'backgroundColor': 'cadetblue'}
+		style={"height": "80%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
 		),
 
 	html.Div(id='neue',children = [
-		html.H2("Neue Updated Charts"),
+		html.H2("Neue Updated Charts",style={'color': 'firebrick'}),
 		dcc.Input(
 		id='text-input', 
 		type='text', 
@@ -470,10 +470,10 @@ page_1_layout = html.Div(
 		html.Button(
 		'Submit', 
 		id='submit-button', 
-		n_clicks=None
+		n_clicks=None,style={'backgroundColor': 'yellow','fontSize':"12px"}
 		),
 		],
-		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'cadetblue'}
+		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
 		),
 
 	html.Div(
@@ -512,7 +512,7 @@ page_1_layout = html.Div(
 		        ),
 		])
 		],
-		style={"height": "50%", 'width': '80%', 'float': 'right', 'backgroundColor': 'cadetblue'}
+		style={"height": "50%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
 		),
 	
 
@@ -533,7 +533,7 @@ page_2_layout = html.Div([
 	html.Div(id='data_tab',children = [
 		
 		],
-		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'cadetblue'}
+		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
 		),
 
 	html.Div(id= "This")
@@ -563,8 +563,10 @@ app.layout = html.Div([
 def display_page(pathname):
     if pathname == '/page-2':
         return {'display': 'block'}, {'display': 'none'}
-    else:
+    elif(pathname == "/page1"):
         return {'display': 'none'}, {'display': 'block'}
+    else:
+    	return {'display': 'none'}, {'display': 'block'}
 
 
 
