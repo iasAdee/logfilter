@@ -171,7 +171,7 @@ def update_second(input1, input2):
 
 		ls = []
 		ls.append(html.Div([
-		html.H2("Tabelle"),
+		html.H2("Tabelle",style={'color': 'firebrick'}),
 		dash_table.DataTable(
 		    style_table={'height': '800px', 'overflowY': 'auto', 'width':'98%', 'margin-left':'4px'},
 		    data=data_df.to_dict('records'),
@@ -197,7 +197,7 @@ def update_second(input1, input2):
 
 
 
-	return html.Div([html.H2("Tabelle")]), {}, "data not uploaded"
+	return html.Div([html.H2("Tabelle",style={'color': 'firebrick'})]), {}, "data not uploaded"
 
 
 
@@ -531,13 +531,65 @@ page_2_layout = html.Div([
 	#html.H2(id= "idd",children =["Tabelle"],style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'cadetblue'}),
 
 	html.Div(id='data_tab',children = [
-		
 		],
 		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
 		),
 
 	html.Div(id= "This")
 ])
+
+page_3_layout = html.Div([
+	#html.Div(style=nav_style, children=[nav_content2]),
+
+
+	html.Div(
+	    [
+	    	html.H1("Login page"),
+	        html.H6("ID", style={'font-size': '13px'}),
+	        dcc.Input(id='input-text1', 
+	                  type='text', 
+	                  value='', 
+	                  style={"width": "100%"}),
+
+	        html.H6("Password", style={'font-size': '13px'}),
+	        dcc.Input(id='input-text2', 
+	                  type='password', 
+	                  value='', 
+	                  style={"width": "100%"}),
+
+	        html.Br(),
+	        dcc.Link('Login', href='/page-2',style={'color': 'yellow','fontWeight': 'bold'}),
+	        html.Div(id='success'),
+	    ],
+	    style={
+	        "display": "flex",
+	        "flexDirection": "column",
+	        "alignItems": "center",
+	        "justifyContent": "center",
+	        "width": "300px",  # Set fixed width
+	        "height": "300px",  # Set fixed height
+	        "margin": "auto",  # Center horizontally
+	        "position": "absolute",
+	        "color":"white",
+	        "top": "50%",
+	        "left": "50%",
+	        "transform": "translate(-50%, -50%)",
+	        "border": "1px solid #ccc",
+	        "padding": "20px",
+	        "boxShadow": "0px 0px 10px rgba(0, 0, 0, 0.1)",
+	        "borderRadius": "8px",
+	        "backgroundColor": "firebrick"
+	    }
+	),
+
+	#dcc.Link('New Filter', href='/page1',style={'color': 'yellow','fontWeight': 'bold'}),
+	#dcc.Link('Go back to Logfilter', href='/page-2',style={'color': 'Yellow', 'fontWeight':'bold'}),
+
+	#html.Div(id= "This")
+])
+
+
+
 
 # App layout
 app.layout = html.Div([
@@ -550,6 +602,10 @@ app.layout = html.Div([
 
 	html.Div(id='page-2-content', style={'display': 'none'}, children=[
 	    page_2_layout
+	]),
+
+	html.Div(id='page-3-content', style={'display': 'none'}, children=[
+	    page_3_layout
 	])
 
 	])
@@ -557,16 +613,31 @@ app.layout = html.Div([
 
 @app.callback(
     [Output('page-1-content', 'style'),
-     Output('page-2-content', 'style')],
-    [Input('url', 'pathname')]
+     Output('page-2-content', 'style'),
+     Output('page-3-content', 'style'),
+     Output('success', 'children')
+     ],
+    [Input('url', 'pathname'),
+    Input('input-text1', 'value'),
+    Input('input-text2', 'value'),
+    ]
 )
-def display_page(pathname):
-    if pathname == '/page-2':
-        return {'display': 'block'}, {'display': 'none'}
-    elif(pathname == "/page1"):
-        return {'display': 'none'}, {'display': 'block'}
-    else:
-    	return {'display': 'none'}, {'display': 'block'}
+def display_page(pathname,id_, pass_):
+
+	if(id_ == "log" and pass_ == "C3asar!"):
+	
+	    if pathname == '/page-2':
+	        return {'display': 'block'}, {'display': 'none'} ,{'display': 'none'}, ""
+	    elif(pathname == "/page1"):
+	        return {'display': 'none'}, {'display': 'block'} ,{'display': 'none'}, ""
+	    else:
+	    	return {'display': 'none'}, {'display': 'none'}, {'display': 'block'}, ""
+	elif(id_ == "" and pass_ == ""):
+		return {'display': 'none'}, {'display': 'none'}, {'display': 'block'},"please enter id and password"
+	else:
+		return {'display': 'none'}, {'display': 'none'}, {'display': 'block'},""
+
+
 
 
 
