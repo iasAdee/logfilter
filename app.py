@@ -171,7 +171,7 @@ def update_second(input1, input2):
 
 		ls = []
 		ls.append(html.Div([
-		html.H2("Tabelle",style={'color': 'firebrick'}),
+		html.H2("Tabelle",style={'color': 'black','font-size': '13px'}),
 		dash_table.DataTable(
 		    style_table={'height': '800px', 'overflowY': 'auto', 'width':'98%', 'margin-left':'4px'},
 		    data=data_df.to_dict('records'),
@@ -197,7 +197,7 @@ def update_second(input1, input2):
 
 
 
-	return html.Div([html.H2("Tabelle",style={'color': 'firebrick'})]), {}, "data not uploaded"
+	return html.Div([html.H2("Tabelle",style={'color': 'black','font-size': '13px'})]), {}, "data not uploaded"
 
 
 
@@ -316,7 +316,7 @@ page_1_layout = html.Div(
 
 	#dascher etc
 	html.Div(id='sped',children = [
-		html.H2("Spedition Tabelle",style={'color': 'firebrick'}),
+		html.H2("Spedition Tabelle",style={'color': 'black','font-size': '13px'}),
 		html.Button('Save Tabelle', id='sped_button', n_clicks=None,style={'backgroundColor': 'yellow','fontSize':"12px"}),
 		],
 		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
@@ -327,7 +327,7 @@ page_1_layout = html.Div(
 		),
 
 	html.Div(id='spedc',children = [
-		html.H2("Spedition Chart",style={'color': 'firebrick'}),
+		html.H2("Spedition Chart",style={'color': 'black','font-size': '13px'}),
 		],
 		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
 		),
@@ -338,7 +338,7 @@ page_1_layout = html.Div(
 
 	#pal and picks tables
 	html.Div(id='pal',children = [
-		html.H2("Pal & PU Tabelle",style={'color': 'firebrick'}),
+		html.H2("Pal & PU Tabelle",style={'color': 'black','font-size': '13px'}),
 		html.Button('Save Tabelle', id='pal_button', n_clicks=None,style={'backgroundColor': 'yellow','fontSize':"12px"}),
 		],
 		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
@@ -347,7 +347,7 @@ page_1_layout = html.Div(
 		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
 		),
 	html.Div(id='palc',children = [
-		html.H2("Pal & PU Chart",style={'color': 'firebrick'}),
+		html.H2("Pal & PU Chart",style={'color': 'black','font-size': '13px'}),
 		],
 		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
 		),
@@ -438,7 +438,7 @@ page_1_layout = html.Div(
 
 	##combined
 	html.Div(id='ver',children = [
-		html.H2("Vereint Data Tabelle",style={'color': 'firebrick'}),
+		html.H2("Vereint Data Tabelle",style={'color': 'black','font-size': '13px'}),
 		html.Button('Save Tabelle', id='ver_button', n_clicks=None,style={'backgroundColor': 'yellow','fontSize':"12px"}),
 		],
 		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
@@ -447,7 +447,7 @@ page_1_layout = html.Div(
 		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
 		),
 	html.Div(id='verc',children = [
-		html.H2("Vereint Data  Chart",style={'color': 'firebrick'}),
+		html.H2("Vereint Data  Chart",style={'color': 'black','font-size': '13px'}),
 		],
 		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
 		),
@@ -460,7 +460,7 @@ page_1_layout = html.Div(
 		),
 
 	html.Div(id='neue',children = [
-		html.H2("Neue Updated Charts",style={'color': 'firebrick'}),
+		html.H2("Neue Updated Charts",style={'color': 'black','font-size': '13px'}),
 		dcc.Input(
 		id='text-input', 
 		type='text', 
@@ -544,21 +544,21 @@ page_3_layout = html.Div([
 
 	html.Div(
 	    [
-	    	html.H1("Login page"),
-	        html.H6("ID", style={'font-size': '13px'}),
+	    	html.H1("Login", style={ "color":"black"}),
+	        html.H6("ID", style={'font-size': '13px', "color":"black"}),
 	        dcc.Input(id='input-text1', 
 	                  type='text', 
 	                  value='', 
 	                  style={"width": "100%"}),
 
-	        html.H6("Password", style={'font-size': '13px'}),
+	        html.H6("Password", style={'font-size': '13px', "color":"black"}),
 	        dcc.Input(id='input-text2', 
 	                  type='password', 
 	                  value='', 
 	                  style={"width": "100%"}),
 
 	        html.Br(),
-	        dcc.Link('Login', href='/page-2',style={'color': 'yellow','fontWeight': 'bold'}),
+	        dcc.Link('Login', href='/page-2',style={'color': 'firebrick','fontWeight': 'bold'}),
 	        html.Div(id='success'),
 	    ],
 	    style={
@@ -578,7 +578,7 @@ page_3_layout = html.Div([
 	        "padding": "20px",
 	        "boxShadow": "0px 0px 10px rgba(0, 0, 0, 0.1)",
 	        "borderRadius": "8px",
-	        "backgroundColor": "firebrick"
+	        "backgroundColor": "#FFCC33"
 	    }
 	),
 
@@ -633,7 +633,7 @@ def display_page(pathname,id_, pass_):
 	    else:
 	    	return {'display': 'none'}, {'display': 'none'}, {'display': 'block'}, ""
 	elif(id_ == "" and pass_ == ""):
-		return {'display': 'none'}, {'display': 'none'}, {'display': 'block'},"please enter id and password"
+		return {'display': 'none'}, {'display': 'none'}, {'display': 'block'},html.H6("Bitte ID und Passwort eintragen",style={"color":"black"})
 	else:
 		return {'display': 'none'}, {'display': 'none'}, {'display': 'block'},""
 
