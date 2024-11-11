@@ -14,7 +14,7 @@ next_date = current_date + timedelta(days=1)
 nav_content = html.Div([
 
     html.Hr(style={'backgroundColor': 'yellow'}),
-    html.H2("LogFilter",style={'color': 'firebrick'}),
+    html.H2("LogFilter",style={'color': 'black'}),
 
     html.Hr(style={'backgroundColor': 'yellow'}),
 
@@ -48,7 +48,7 @@ nav_content = html.Div([
 
     #navigation controls
 
-    html.H5("Navigation",style={'color': 'firebrick'}),
+    html.H5("Navigation",style={'color': 'black'}),
     html.Hr(style={'backgroundColor': 'yellow'}),
     html.A("Pal & PU Tabelle", href="#pal",style={'color': 'azure','fontSize':"12px"}),
     html.Br(),
