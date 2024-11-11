@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 nav_content2 = html.Div([
 
     html.Hr(style={'backgroundColor': 'yellow'}),
-    html.H2('New Filter',style={'color': 'firebrick'}),
+    html.H2('New Filter',style={'color': 'black'}),
 
     html.Hr(style={'backgroundColor': 'yellow'}),
 
