@@ -98,6 +98,7 @@ def save_data(data1, n_clicks):
     Output('stored-data1', 'data'),
     Output('stored-data2', 'data'),
     Output('stored-data3', 'data'),
+    Output('stored-data4', 'data'),
     
 
     Input('stored-data', 'data'),
@@ -105,14 +106,28 @@ def save_data(data1, n_clicks):
     
 )
 
+
 def update_graph(data, n_clicks):
 	
 	if(n_clicks == None):
-		return {}, html.Div(),{},{},{},{},{},{},{}, html.Div(),html.Div(),None,{}, {}, {}
+		return {}, html.Div(),{},{},{},{},{},{},{}, html.Div(),html.Div(),None,{}, {}, {}, []
 	else:
 
 		df = pd.DataFrame(data)
-		#print(df.head())
+		
+		names_update_lower = {key.lower(): value for key, value in names_update.items()}
+		#print(names_update_lower)
+		df.columns = [names_update_lower.get(col.lower().strip(), col) for col in df.columns]
+
+		#df["Summe von BrGew_Offen"] = df["Summe von BrGew_Offen"].str.strip().str.replace('.', '').str.replace(',', '.').astype(float)
+
+
+		ls = []
+		for i, val in enumerate(df["Summe von BrGew_Offen"]):
+		    ls.append(float(str(val).strip().replace(",", ".").replace(".","")))
+
+		df["Summe von BrGew_Offen"] = ls
+
 		
 		data_preprocessor2 = DataPreprocessing(df)
 		data_req, ls, fig = data_preprocessor2.clac_2()
@@ -122,12 +137,62 @@ def update_graph(data, n_clicks):
 
 
 
-		return fig, ls ,fig2, fig3,fig4, fig5,fig6,fig7,fig8 ,ls2 ,ls3, n_clicks, data_req, data1, data2
+		return fig, ls ,fig2, fig3,fig4, fig5,fig6,fig7,fig8 ,ls2 ,ls3, n_clicks, data_req, data1, data2,data
 
 
 def format_to_int(value):
 	formatted_value = value.replace('.', '').replace(',', '.')
 	return int(float(formatted_value))
+
+
+
+names_update = {
+	"VStl": "Versandstelle",
+	"Route": "Route",
+	"Spediteur": "Forwarder",
+	"VkOrg": "VKOrg",
+	"VWeg": "VWEG",
+	"SP": "Sparte",
+	"VkBür": "VKBüro",
+	"Angel.von": "SO_angelegt_von",
+	"AuftrGeber": "AG-ID",
+	"Warenempf.": "WE-ID",
+	"Adresse": "WE-tatsächlich_ID",
+	"Verursach.": "SalesOrder",
+	"Eint": "SO_ATP_Einteilung",
+	"AuftrMenge": "Auftragsmenge",
+	"Bestä.Mg": "Auftragsmenge_Bestätigt",
+	"Offene Mng": "Auftragsmenge_Offen",
+	"gelMenge": "Auftragsmenge_bereits_geliefert",
+	"ME": "AME",
+	"BME": "BME",
+	"KumAuMenge": "Auftragsmenge_Gesamt",
+	"Werk": "Werk",
+	"Kundenreferenz": "BestellNr_Kunde",
+	"Versandbed": "Versandbedingung",
+	"Zähler": "Zähler",
+	"SKU_Nenner": "SKU_Nenner",
+	"Bereit.Dat": "BereitStellDat",
+	"Name/Warenempfänger": "WE-Name",
+	"Ort/Warenempfänger": "WE-Stadt",
+	"LS": "Liefersperre",
+	"Brutto": "Summe von BrGew_Offen",
+	"KLF": "KomplettLF_KZ",
+	"LfG": "LF-Gruppe",
+	"VArt": "SO_Art",
+	"Belegtyp": "BelegStatus",
+	"Material": "MatNr",
+	"Positionsbezeichnung": "MatBez",
+	"Charge": "Charge_aus_SO",
+	"Etyp": "ATP_Eint_Typ",
+	"FS": "Fakturasperre",
+	"IncTm": "Inco1",
+	"Incoterms 2": "Inco2",
+	"BDAr": "ATP_Bedarfsart",
+	"Plz/WEMPF": "WE_PLZ"
+}
+
+
 
 @callback(
     Output('data_tab', 'children'),
@@ -285,12 +350,19 @@ def update_output2(list_of_contents, list_of_names, list_of_dates):
     Output('plot7', 'figure'),  # Update this div with the output
     Input('submit-button', 'n_clicks'),  # Trigger on button click
     Input('text-input', 'value'),  # Get the value from the text input
-    Input('stored-data', 'data'),
+    Input('stored-data4', 'data'),
 )
 def update_output(n_clicks, input_value,data):
 	if n_clicks != None:  
 		#print(input_value)
 		df = pd.DataFrame(data)
+
+		names_update_lower = {key.lower(): value for key, value in names_update.items()}
+		#print(names_update_lower)
+		df.columns = [names_update_lower.get(col.lower().strip(), col) for col in df.columns]
+
+		#print(df)
+		#print(input_value)
 		
 		data_preprocessor2 = DataPreprocessing(df)
 		fig =data_preprocessor2.make_customized_plot(input_value)
@@ -312,6 +384,8 @@ page_1_layout = html.Div(
 	dcc.Store(id='stored-data1'),
 	dcc.Store(id='stored-data2'),
 	dcc.Store(id='stored-data3'),
+	dcc.Store(id='stored-data4'),
+	
 
 
 	#dascher etc
@@ -624,7 +698,7 @@ app.layout = html.Div([
 )
 def display_page(pathname,id_, pass_):
 
-	if(id_ == "log" and pass_ == "C3asar!"):
+	if(id_ == "log" and pass_ == "log"):#C3asar!
 	
 	    if pathname == '/page-2':
 	        return {'display': 'block'}, {'display': 'none'} ,{'display': 'none'}, ""
