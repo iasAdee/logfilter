@@ -14,47 +14,60 @@ class DataPreprocessing:
 
 	def clac_2(self):
 		data_req = self.data[["SalesOrder", "Werk", "KomplettLF_KZ", "Summe von BrGew_Offen", "WE_PLZ"]]
+
+		data_req = data_req[data_req["Summe von BrGew_Offen"].notna()]
+		data_req = data_req.reset_index(drop=True)
+
+		#print(data_req.isnull().sum())
+
+		#print(data_req)
+
+		#print(data_req)
+		#data_req["Summe von BrGew_Offen"] = data_req["Summe von BrGew_Offen"].astype(int)
 		ls = []
 		for i in range(len(data_req)):
-		    x = data_req["KomplettLF_KZ"][i]
-		    so = data_req["SalesOrder"][i]
-		    we = data_req["WE_PLZ"][i]
-		    wr = data_req["Werk"][i]
+			x = data_req["KomplettLF_KZ"][i]
+			so = data_req["SalesOrder"][i]
+			we = data_req["WE_PLZ"][i]
+			wr = data_req["Werk"][i]
 
-		    if(x == "X"):
-		        dat = data_req[data_req["SalesOrder"] == so]
-		        sum_tocheck = sum(dat["Summe von BrGew_Offen"])
-		        if(wr == "DE01" or we == "DE10"):
-		            if(sum_tocheck < 50):
-		                ls.append("TOF")
-		            if(sum_tocheck > 50 and sum_tocheck < 2500):
-		                ls.append("Dachser")
-		            if(sum_tocheck > 2500):
-		                ls.append("Direkt")
-		        else:
-		            if(sum_tocheck < 80):
-		                ls.append("TOF")
-		            if(sum_tocheck > 80 and sum_tocheck < 2500):
-		                ls.append("Dachser")
-		            if(sum_tocheck > 2500):
-		                ls.append("Direkt")
-		    else:
-		        sum_tocheck = self.data["Summe von BrGew_Offen"][i]
 
-		        if(wr == "DE01" or we == "DE10"):
-		            if(sum_tocheck < 50):
-		                ls.append("TOF")
-		            if(sum_tocheck > 50 and sum_tocheck < 2000):
-		                ls.append("Dachser")
-		            if(sum_tocheck > 2000):
-		                ls.append("Direkt")
-		        else:
-		            if(sum_tocheck < 80):
-		                ls.append("TOF")
-		            if(sum_tocheck > 80 and sum_tocheck < 2000):
-		                ls.append("Dachser")
-		            if(sum_tocheck > 2000):
-		                ls.append("Direkt")
+			if(x == "X"):
+			    dat = data_req[data_req["SalesOrder"] == so]
+			    sum_tocheck = sum(dat["Summe von BrGew_Offen"])
+			    if(wr == "DE01" or we == "DE10"):
+			        if(sum_tocheck < 50):
+			            ls.append("TOF")
+			        if(sum_tocheck > 50 and sum_tocheck < 2500):
+			            ls.append("Dachser")
+			        if(sum_tocheck >= 2500):
+			            ls.append("Direkt")
+			    else:
+			        if(sum_tocheck < 80):
+			            ls.append("TOF")
+			        if(sum_tocheck > 80 and sum_tocheck < 2500):
+			            ls.append("Dachser")
+			        if(sum_tocheck >= 2500):
+			            ls.append("Direkt")
+			else:
+			    sum_tocheck = data_req["Summe von BrGew_Offen"][i]
+
+			    if(wr == "DE01" or we == "DE10"):
+			        if(sum_tocheck < 50):
+			            ls.append("TOF")
+			        if(sum_tocheck > 50 and sum_tocheck < 2000):
+			            ls.append("Dachser")
+			        if(sum_tocheck >= 2000):
+			            ls.append("Direkt")
+			    else:
+			        if(sum_tocheck < 80):
+			            ls.append("TOF")
+			        if(sum_tocheck > 80 and sum_tocheck < 2000):
+			            ls.append("Dachser")
+			        if(sum_tocheck >= 2000):
+			            ls.append("Direkt")
+			            
+		    #print(i, x, len(ls), sum_tocheck)
 
 		data_req["new_col"] = ls
 
@@ -138,25 +151,33 @@ class DataPreprocessing:
 		    else:
 		        return 0, 0
 
-		def make_sender_dict(data):
-		    all_senders = set(data["AG-ID"])
-		    sender_dict = {}
-		    for sender in all_senders:
-		        first = data[data["AG-ID"] == sender]
-
-		        recivers =first["WE-ID"]
-		        same_occurances = list(recivers).count(sender)
-		        total_recivers = len(recivers)
-		        other = abs(total_recivers - same_occurances)
-
-		        sender_dict[sender] = [other, same_occurances]
-			    
-		    return sender_dict
+		"""def make_sender_dict(data):
+								    all_senders = set(data["AG-ID"])
+								    sender_dict = {}
+								    for sender in all_senders:
+								        first = data[data["AG-ID"] == sender]
+						
+								        recivers =first["WE-ID"]
+								        same_occurances = list(recivers).count(sender)
+								        total_recivers = len(recivers)
+								        other = abs(total_recivers - same_occurances)
+						
+								        sender_dict[sender] = [other, same_occurances]
+									    
+								    return sender_dict"""
 
 
 		data_required = self.data[["Auftragsmenge_Offen", "AME", "BME", "BereitStellDat", "Zähler",
-		                     "SKU_Zähler", "MatBez", "MatNr", "Auftragsmenge_bereits_geliefert",
+		                      "MatBez", "MatNr", "Auftragsmenge_bereits_geliefert",
 		                     "SalesOrder", "Werk", "KomplettLF_KZ", "Summe von BrGew_Offen", "WE_PLZ"]]
+
+
+		ls = []
+		for i, val in enumerate(data_required["Auftragsmenge_Offen"]):
+		    ls.append(float(str(val).strip().replace(",", ".").replace(".","")))
+
+		data_required["Auftragsmenge_Offen"] = ls
+
 
 		data_collection = []
 		data_collection2 = []
@@ -169,7 +190,7 @@ class DataPreprocessing:
 
 		    pallet = data_required["Zähler"][i]
 		    date = data_required["BereitStellDat"][i]
-		    SKU_Zähler = data_required["SKU_Zähler"][i]
+		    SKU_Zähler = data_required["Zähler"][i]
 		    MatBez = data_required["MatBez"][i]
 		    MatNr = data_required["MatNr"][i]
 
@@ -197,7 +218,7 @@ class DataPreprocessing:
 		        order = data_required["Auftragsmenge_Offen"][i]
 		        pallet = data_required["Zähler"][i]
 		        com = data_required['Auftragsmenge_bereits_geliefert'][i]
-		        pallet_val = data_required["SKU_Zähler"][i]
+		        pallet_val = data_required["Zähler"][i]
 
 		        if(pd.isna(order) or pd.isna(pallet) or pd.isna(pallet_val)):
 		            continue
@@ -311,14 +332,14 @@ class DataPreprocessing:
 		                    ls[0].extend([x, so, we, wr,"TOF"])
 		                if(sum_tocheck > 50 and sum_tocheck < 2500):
 		                    ls[0].extend([x, so, we, wr,"Dachser"])
-		                if(sum_tocheck > 2500):
+		                if(sum_tocheck >= 2500):
 		                    ls[0].extend([x, so, we, wr,"Direkt"])
 		            else:
 		                if(sum_tocheck < 80):
 		                    ls[0].extend([x, so, we, wr,"TOF"])
 		                if(sum_tocheck > 80 and sum_tocheck < 2500):
 		                    ls[0].extend([x, so, we, wr,"Dachser"])
-		                if(sum_tocheck > 2500):
+		                if(sum_tocheck >= 2500):
 		                    ls[0].extend([x, so, we, wr,"Direkt"])
 		        else:
 		            sum_tocheck = self.data["Summe von BrGew_Offen"][i]
@@ -328,27 +349,35 @@ class DataPreprocessing:
 		                    ls[0].extend([x, so, we, wr,"TOF"])
 		                if(sum_tocheck > 50 and sum_tocheck < 2000):
 		                    ls[0].extend([x, so, we, wr,"Dachser"])
-		                if(sum_tocheck > 2000):
+		                if(sum_tocheck >= 2000):
 		                    ls[0].extend([x, so, we, wr,"Direkt"])
 		            else:
 		                if(sum_tocheck < 80):
 		                    ls[0].extend([x, so, we, wr,"TOF"])
 		                if(sum_tocheck > 80 and sum_tocheck < 2000):
 		                    ls[0].extend([x, so, we, wr,"Dachser"])
-		                if(sum_tocheck > 2000):
+		                if(sum_tocheck >= 2000):
 		                    ls[0].extend([x, so, we, wr,"Direkt"])
 
 		        data_collection.append(ls[0])
 
 		#print(data_collection2)
 		datahalf = pd.DataFrame(data_collection2, columns=["AME", "BME", "com", "Auftragsmenge_Offen",
-		                                                      "Zähler", "BereitStellDat", "SKU_Zähler",
+		                                                      "Zähler", "BereitStellDat","SKU_Zähler",
 		                                                      "MatBez", "MatNr", "Picks", "Pallets"])
 
 		datextracted = pd.DataFrame(data_collection, columns=["AME", "BME", "com", "Auftragsmenge_Offen",
-		                                                      "Zähler", "BereitStellDat", "SKU_Zähler",
+		                                                      "Zähler", "BereitStellDat","SKU_Zähler",
 		                                                      "MatBez", "MatNr", "Picks", "Pallets", "KomplettLF_KZ", "SalesOrder", "WE_PLZ", "Werk", "new_col"])
 
+		datextracted = datextracted[["AME", "BME", "com", "Auftragsmenge_Offen",
+		                                                      "Zähler", "BereitStellDat",
+		                                                       "MatNr", "Picks", "Pallets", "KomplettLF_KZ", "SalesOrder", "WE_PLZ", "Werk", "new_col"]]
+
+
+		datahalf = datahalf[["AME", "BME", "com", "Auftragsmenge_Offen",
+		                                                      "Zähler", "BereitStellDat","SKU_Zähler",
+		                                                       "MatNr", "Picks", "Pallets"]]                                                   
 		ls = []
 		ls.append(html.Div([
 		dash_table.DataTable(
@@ -505,6 +534,8 @@ class DataPreprocessing:
 		datextracted["date"] = pd.to_datetime(datextracted["BereitStellDat"])
 		datextracted = datextracted.sort_values(by="date")
 
+		print(datextracted)
+
 		# Create a bar chart using Plotly Express
 		fig5 = px.bar(
 			datextracted, 
@@ -526,7 +557,7 @@ class DataPreprocessing:
 
 
 		# Create a bar chart using Plotly Express
-		fig6 = px.bar(
+		fig6 =px.bar(
 			datextracted, 
 			x="date", 
 			y="Pallets", 
@@ -550,6 +581,8 @@ class DataPreprocessing:
 	def get_absenders(self):
 
 		def make_sender_dict(data):
+
+			#print(data.columns)
 			all_senders = set(data["AG-ID"])
 			sender_dict = {}
 			for sender in all_senders:
@@ -618,8 +651,16 @@ class DataPreprocessing:
 
 	def make_customized_plot(self, user):
 		def make_sender_dict(data):
+
+			#print("from functions")
+			#print(data.columns)
+			#print("from functions")
+
+
 			all_senders = set(data["AG-ID"])
 			sender_dict = {}
+
+
 			for sender in all_senders:
 			    first = data[data["AG-ID"] == sender]
 
