@@ -698,7 +698,7 @@ app.layout = html.Div([
 )
 def display_page(pathname,id_, pass_):
 
-	if(id_ == "log" and pass_ == "#C3asar!"):
+	if(id_ == "log" and pass_ == "C3asar!"):
 	
 	    if pathname == '/page-2':
 	        return {'display': 'block'}, {'display': 'none'} ,{'display': 'none'}, ""
