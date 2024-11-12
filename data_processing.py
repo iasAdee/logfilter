@@ -282,13 +282,15 @@ class DataPreprocessing:
 		        nodata = True
 		    if(ame == "L" and bme == "ST"):
 		        order = data_required["Auftragsmenge_Offen"][i]
-		        com = data_required['Auftragsmenge_bereits_geliefert'][i]
+		        com = float(data_required['Auftragsmenge_bereits_geliefert'][i])
 		        pallet = data_required["Zähler"][i]
 
 		        text = data_required["MatBez"][i]
 		        n1, n2 = get_number2(text)
 
 		        if(com != 0):
+		            print(type(com), com)
+
 		            num = int(order / com)
 		            if(num < pallet):
 		                ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, int(num), 0])
@@ -490,7 +492,10 @@ class DataPreprocessing:
 		)
 
 
-		datahalf["date"] = pd.to_datetime(datahalf["BereitStellDat"])
+		
+		#data_required["BereitStellDat"] = pd.to_datetime(data_required["BereitStellDat"])
+		datahalf["date"] = pd.to_datetime(datahalf["BereitStellDat"], format="%d.%m.%Y", errors="coerce")
+
 		datahalf = datahalf.sort_values(by="date")
 
 		# Create a bar chart using Plotly Express
@@ -531,7 +536,8 @@ class DataPreprocessing:
 		)
 
 
-		datextracted["date"] = pd.to_datetime(datextracted["BereitStellDat"])
+		#datextracted["date"] = pd.to_datetime(datextracted["BereitStellDat"])
+		datextracted["date"] = pd.to_datetime(datextracted["BereitStellDat"], format="%d.%m.%Y", errors="coerce")
 		datextracted = datextracted.sort_values(by="date")
 
 		print(datextracted)
