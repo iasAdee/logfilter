@@ -6,7 +6,7 @@ from dash.dependencies import Input, Output
 
 from styles import external_stylesheets, nav_style
 from components import nav_content
-from components2 import nav_content2
+from components2 import nav_content2,nav_content3
 from dash import dcc
 
 
@@ -122,8 +122,11 @@ def update_graph(data, n_clicks):
 		#df["Summe von BrGew_Offen"] = df["Summe von BrGew_Offen"].str.strip().str.replace('.', '').str.replace(',', '.').astype(float)
 
 
+		print(df["Summe von BrGew_Offen"])
 		ls = []
 		for i, val in enumerate(df["Summe von BrGew_Offen"]):
+
+		    print(val)
 		    ls.append(float(str(val).strip().replace(",", ".").replace(".","")))
 
 		df["Summe von BrGew_Offen"] = ls
@@ -278,6 +281,11 @@ def parse_contents(contents, filename, date):
         elif 'xls' in filename:
             # Assume that the user uploaded an excel file
             df = pd.read_excel(io.BytesIO(decoded))
+
+        elif 'xlsx' in filename.lower():
+            # Assume that the user uploaded an excel file
+            #print("I am here")
+            df = pd.read_excel(io.BytesIO(decoded))
     except Exception as e:
         print(e)
         return html.Div([
@@ -322,6 +330,160 @@ def update_output(list_of_contents, list_of_names, list_of_dates):
     return {}, ""
 
 
+@callback(
+    #Output('output-data-upload', 'children'),
+    Output('stored-data-5', 'data'),
+     Output('status3', 'children'),
+    [Input('upload-data-3', 'contents')],
+    [State('upload-data-3', 'filename'),
+     State('upload-data-3', 'last_modified')]
+)
+def update_output3(list_of_contents, list_of_names, list_of_dates):
+
+    if list_of_contents is not None:
+        children = []
+        df_combined = pd.DataFrame()
+        for c, n, d in zip(list_of_contents, list_of_names, list_of_dates):
+            child, df = parse_contents(c, n, d)
+            children.append(child)
+            df_combined = pd.concat([df_combined, df], ignore_index=True)
+        return df_combined.to_dict('records'), "data loaded successfully"
+    return {}, ""
+
+
+def process_data(data):
+    column_values = []
+    previous_value = ""
+    for i, row in data.iterrows():
+        if(i < 3):
+            continue
+
+        new_value = ""
+        for j, val in enumerate(row):
+            if(not pd.isna(val)):
+                if(j == 5):
+                    #print(j, val)
+                    new_value = row[1]
+
+        if(new_value == ""):
+            column_values.append([previous_value, pd.to_datetime(row[8], format="%d.%m.%Y"),row[9], row[14]])
+
+        else:
+            previous_value = new_value 
+    data_1 = pd.DataFrame(column_values,columns= ["order_id", "date", "value", "client"] ) 
+    data_1 = data_1.dropna().reset_index(drop=True)
+    ls = []
+    for i, val in enumerate(data_1["value"]):
+        ls.append(abs(float(str(val).strip().replace(",", "."))))
+
+
+    data_1["value"] = ls
+    
+    
+    
+    return data_1
+
+def make_barchart(order_id, proccessed_data):
+
+    
+    filtered_data = proccessed_data[proccessed_data['order_id'] == order_id]
+
+    # Group by client and calculate the sum of value
+    client_values = filtered_data.groupby('client')['value'].sum().reset_index()
+
+    # Create an interactive bar chart using Plotly
+    fig = px.bar(
+        client_values,
+        x='client',
+        y='value',
+        text='value',  # Display values on the bars
+        labels={'client': 'Client ID', 'value': 'Total Value'},  # Customize axis labels
+        title=f'Total Value by Client for Order ID {order_id}'
+    )
+
+    # Customize appearance
+    fig.update_traces(marker_color='skyblue', textposition='outside')  # Bar color and text position
+    fig.update_layout(
+        xaxis=dict(title='Client ID', tickmode='linear'),
+        yaxis=dict(title='Total Value'),
+        title=dict(font=dict(size=18), x=0.5),  # Center-align title
+        template='plotly_white'  # Use a clean theme
+    )
+
+    # Show the figure
+    return fig
+
+
+import plotly.express as px
+
+def make_linechart(order_id, proccessed_data):
+    
+    
+    filtered_data = proccessed_data[proccessed_data['order_id'] == order_id]
+
+    # Sort data by date to ensure proper line chart visualization
+    filtered_data = filtered_data.sort_values(by='date')
+
+    # Create a line chart using Plotly
+    fig = px.line(
+        filtered_data,
+        x='date',
+        y='value',
+        labels={'date': 'Date', 'value': 'Value'},
+        title=f'Value Over Time for Order ID {order_id}',
+        markers=True  # Add markers to indicate data points
+    )
+
+    # Customize appearance
+    fig.update_traces(line_color='skyblue', marker=dict(size=8))
+    fig.update_layout(
+        xaxis=dict(title='Date', tickformat='%Y-%m-%d'),
+        yaxis=dict(title='Value'),
+        title=dict(font=dict(size=18), x=0.5),  # Center-align title
+        template='plotly_white'
+    )
+
+    # Show the figure
+    return fig
+
+def make_dropdowns(lss):
+	dropdown_options = []
+	for value in lss:
+		dropdown_options.append(
+	    	{'label': value, 'value': value})
+	return dropdown_options
+
+@callback(
+    #Output('output-data-upload', 'children'),
+   	Output('status4', 'children'),
+   	Output('plot30', 'figure'),
+   	Output('plot40', 'figure'),
+   	Output('search-input9', 'options'),
+    Input('stored-data-5', 'data'),
+    Input('search-input9', 'value'),
+    
+) 
+def get_new_Data(data,order_id):
+
+	data = pd.DataFrame(data)
+
+	if(len(data) > 0):
+		print(data)
+		proccessed_data = process_data(data)
+		lss = set(proccessed_data.order_id)
+		options =make_dropdowns(lss)
+		if(order_id == ""):
+			return "please select client id", {}, {}, options
+		else:
+			fig1=make_barchart(order_id, proccessed_data)
+			fig2=make_linechart(order_id, proccessed_data)
+			return "data recived for processing", fig1, fig2, options
+	else:
+		return "data not recived yet for processing", {}, {}, []
+
+
+
+
 
 @callback(
     #Output('output-data-upload', 'children'),
@@ -343,6 +505,9 @@ def update_output2(list_of_contents, list_of_names, list_of_dates):
         
         return children[0].to_dict('records'),children[1].to_dict('records')
     return {}, {}
+
+
+
 
 
 
@@ -612,6 +777,39 @@ page_2_layout = html.Div([
 	html.Div(id= "This")
 ])
 
+page_4_layout = html.Div([
+	html.Div(style=nav_style, children=[nav_content3]),
+	dcc.Store(id='stored-data-5'),
+	html.Div(id='data_tab3',children = [
+		html.Div(
+		            dcc.Graph(id='plot30',
+		                #figure=fig4
+		                ),
+		            
+		            style={"height": "100%", 'width': '100%', 'float': 'right','padding': '10px'}
+		        ),
+	
+		],
+		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
+		),
+	html.Div(id='data_tab4',children = [
+		html.Div(
+		            dcc.Graph(id='plot40',
+		                #figure=fig4
+		                ),
+		            
+		            style={"height": "100%", 'width': '100%', 'float': 'right','padding': '10px'}
+		        ),
+	
+		],
+		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
+		),
+
+	html.Div(id= "page_3")
+])
+
+
+
 page_3_layout = html.Div([
 	#html.Div(style=nav_style, children=[nav_content2]),
 
@@ -677,6 +875,9 @@ app.layout = html.Div([
 	html.Div(id='page-2-content', style={'display': 'none'}, children=[
 	    page_2_layout
 	]),
+	html.Div(id='page-4-content', style={'display': 'none'}, children=[
+	    page_4_layout
+	]),
 
 	html.Div(id='page-3-content', style={'display': 'none'}, children=[
 	    page_3_layout
@@ -689,6 +890,7 @@ app.layout = html.Div([
     [Output('page-1-content', 'style'),
      Output('page-2-content', 'style'),
      Output('page-3-content', 'style'),
+     Output('page-4-content', 'style'),
      Output('success', 'children')
      ],
     [Input('url', 'pathname'),
@@ -698,18 +900,20 @@ app.layout = html.Div([
 )
 def display_page(pathname,id_, pass_):
 
-	if(id_ == "log" and pass_ == "C3asar!"):
+	if(id_ == "log" and pass_ == "C3asar"):#C3asar!
 	
 	    if pathname == '/page-2':
-	        return {'display': 'block'}, {'display': 'none'} ,{'display': 'none'}, ""
+	        return {'display': 'block'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'none'},""
 	    elif(pathname == "/page1"):
-	        return {'display': 'none'}, {'display': 'block'} ,{'display': 'none'}, ""
+	        return {'display': 'none'}, {'display': 'block'} ,{'display': 'none'},{'display': 'none'}, ""
+	    elif(pathname == "/page-3"):
+	        return {'display': 'none'}, {'display': 'block'} ,{'display': 'none'}, {'display': 'block'},""
 	    else:
-	    	return {'display': 'none'}, {'display': 'none'}, {'display': 'block'}, ""
+	    	return {'display': 'none'}, {'display': 'none'}, {'display': 'block'},{'display': 'none'}, ""
 	elif(id_ == "" and pass_ == ""):
-		return {'display': 'none'}, {'display': 'none'}, {'display': 'block'},html.H6("Bitte ID und Passwort eintragen",style={"color":"black"})
+		return {'display': 'none'}, {'display': 'none'}, {'display': 'block'},{'display': 'none'},html.H6("Bitte ID und Passwort eintragen",style={"color":"black"})
 	else:
-		return {'display': 'none'}, {'display': 'none'}, {'display': 'block'},""
+		return {'display': 'none'}, {'display': 'none'}, {'display': 'block'},{'display': 'none'},""
 
 
 
@@ -719,7 +923,7 @@ app.css.append_css({
     'external_url': 'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css'
 })
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=True, port="8090")
 
 
 
