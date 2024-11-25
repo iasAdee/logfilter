@@ -178,6 +178,9 @@ class DataPreprocessing:
 
 		data_required["Auftragsmenge_Offen"] = ls
 
+		for i in range(len(data_required)):
+			data_required["SKU_Zähler"] = 1
+
 
 		data_collection = []
 		data_collection2 = []
@@ -190,7 +193,7 @@ class DataPreprocessing:
 
 		    pallet = data_required["Zähler"][i]
 		    date = data_required["BereitStellDat"][i]
-		    SKU_Zähler = data_required["Zähler"][i]
+		    SKU_Zähler = data_required["SKU_Zähler"][i]
 		    MatBez = data_required["MatBez"][i]
 		    MatNr = data_required["MatNr"][i]
 
@@ -218,7 +221,7 @@ class DataPreprocessing:
 		        order = data_required["Auftragsmenge_Offen"][i]
 		        pallet = data_required["Zähler"][i]
 		        com = data_required['Auftragsmenge_bereits_geliefert'][i]
-		        pallet_val = data_required["Zähler"][i]
+		        pallet_val = data_required["SKU_Zähler"][i]
 
 		        if(pd.isna(order) or pd.isna(pallet) or pd.isna(pallet_val)):
 		            continue
@@ -372,14 +375,14 @@ class DataPreprocessing:
 		                                                      "Zähler", "BereitStellDat","SKU_Zähler",
 		                                                      "MatBez", "MatNr", "Picks", "Pallets", "KomplettLF_KZ", "SalesOrder", "WE_PLZ", "Werk", "new_col"])
 
-		datextracted = datextracted[["AME", "BME", "com", "Auftragsmenge_Offen",
-		                                                      "Zähler", "BereitStellDat",
-		                                                       "MatNr", "Picks", "Pallets", "KomplettLF_KZ", "SalesOrder", "WE_PLZ", "Werk", "new_col"]]
-
-
-		datahalf = datahalf[["AME", "BME", "com", "Auftragsmenge_Offen",
-		                                                      "Zähler", "BereitStellDat","SKU_Zähler",
-		                                                       "MatNr", "Picks", "Pallets"]]                                                   
+		"""datextracted = datextracted[["AME", "BME", "com", "Auftragsmenge_Offen",
+								                                                      "Zähler", "BereitStellDat",
+								                                                       "MatNr", "Picks", "Pallets", "KomplettLF_KZ", "SalesOrder", "WE_PLZ", "Werk", "new_col"]]
+						
+						
+								datahalf = datahalf[["AME", "BME", "com", "Auftragsmenge_Offen",
+								                                                      "Zähler", "BereitStellDat","SKU_Zähler",
+								                                                       "MatNr", "Picks", "Pallets"]]                                                   """
 		ls = []
 		ls.append(html.Div([
 		dash_table.DataTable(
@@ -387,7 +390,7 @@ class DataPreprocessing:
 		    data=datahalf.to_dict('records'),
 		    columns=[{"name": i, "id": i} for i in datahalf.columns],
 		    #editable=True,
-		    #filter_action="native",
+		    filter_action="native",
 		    sort_action="native",
 		    #page_action="native",
 		    style_data={
