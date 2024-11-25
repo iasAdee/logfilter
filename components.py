@@ -34,7 +34,7 @@ nav_content = html.Div([
             'borderColor': 'yellow',
             'textAlign': 'center',
             'margin': '10px',
-            'color':'firebrick'
+            'color':'black'
         },
         # Allow multiple files to be uploaded
         multiple=True
@@ -73,6 +73,8 @@ nav_content = html.Div([
 
 
     dcc.Link('New Filter', href='/page1',style={'color': 'yellow','fontWeight': 'bold'}),
+    html.Br(),
+    dcc.Link('Latest Filter', href='/page-3',style={'color': 'Yellow', 'fontWeight':'bold'}),
     
 ])
 
