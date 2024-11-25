@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 nav_content2 = html.Div([
 
     html.Hr(style={'backgroundColor': 'yellow'}),
-    html.H2('New Filter',style={'color': 'black'}),
+    html.H2('New Filter',style={'color': 'firebrick'}),
 
     html.Hr(style={'backgroundColor': 'yellow'}),
 
@@ -39,7 +39,59 @@ nav_content2 = html.Div([
     #html.Button('Start', id='update-button-2', n_clicks=None),
     html.Hr(style={'backgroundColor': 'yellow'}),
     
-    dcc.Link('Go back to Logfilter', href='/page-2',style={'color': 'Yellow', 'fontWeight':'bold'}),
+    dcc.Link('Logfilter', href='/page-2',style={'color': 'Yellow', 'fontWeight':'bold'}),
+    html.Br(),
+    dcc.Link('Latest Filter', href='/page-3',style={'color': 'Yellow', 'fontWeight':'bold'}),
+    
+])
+
+available_layouts1 = []
+nav_content3 = html.Div([
+
+    html.Hr(style={'backgroundColor': 'yellow'}),
+    html.H2('Latest Filter',style={'color': 'firebrick'}),
+
+    html.Hr(style={'backgroundColor': 'yellow'}),
+
+    dcc.Upload(
+        id='upload-data-3',
+        children=html.Div([
+            'Drag & Drop or ',
+            html.A('Datei auswählen')
+        ]),
+        style={
+            'width': '100%',
+            'height': '60px',
+            'lineHeight': '60px',
+            'borderWidth': '1px',
+            'borderStyle': 'dashed',
+            'borderRadius': '5px',
+            'textAlign': 'center',
+            'borderColor': 'yellow',
+            'margin': '10px',
+            'color':'firebrick'
+        },
+        # Allow multiple files to be uploaded
+        multiple=True
+    ),
+
+    html.H6(id="status3"),
+    html.H6(id="status4"),
+
+    html.H6("Select client id",style={'font-size': '13px'}),
+    dcc.Dropdown(id='search-input9',
+        multi=False,
+        placeholder='select algorithm',
+        options=available_layouts1,
+        value='',disabled=False,style={'color': 'black','display': 'block'}),
+    html.Div(id="sc2"),
+
+    #html.Button('Start', id='update-button-2', n_clicks=None),
+    html.Hr(style={'backgroundColor': 'yellow'}),
+    
+    dcc.Link('Logfilter', href='/page-2',style={'color': 'Yellow', 'fontWeight':'bold'}),
+    html.Br(),
+    dcc.Link('New filter', href='/page1',style={'color': 'Yellow', 'fontWeight':'bold'}),
     
 ])
 
