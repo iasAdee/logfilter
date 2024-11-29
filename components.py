@@ -74,7 +74,7 @@ nav_content = html.Div([
 
     dcc.Link('New Filter', href='/page1',style={'color': 'yellow','fontWeight': 'bold'}),
     html.Br(),
-    dcc.Link('Latest Filter', href='/page-3',style={'color': 'Yellow', 'fontWeight':'bold'}),
+    dcc.Link('M7 Kundenbestellungen', href='/page-3',style={'color': 'Yellow', 'fontWeight':'bold'}),
     
 ])
 
