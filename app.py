@@ -1033,7 +1033,7 @@ app.css.append_css({
     'external_url': 'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css'
 })
 if __name__ == '__main__':
-    app.run_server(debug=True, port="8090")
+    app.run_server(host='0.0.0.0', debug=True, port="8090")
 
 
 
