@@ -326,7 +326,7 @@ def update_output(list_of_contents, list_of_names, list_of_dates):
             child, df = parse_contents(c, n, d)
             children.append(child)
             df_combined = pd.concat([df_combined, df], ignore_index=True)
-        return df_combined.to_dict('records'), "data loaded successfully"
+        return df_combined.to_dict('records'), "Daten erfolgreich geladen"
     return {}, ""
 
 
@@ -347,7 +347,7 @@ def update_output3(list_of_contents, list_of_names, list_of_dates):
             child, df = parse_contents(c, n, d)
             children.append(child)
             df_combined = pd.concat([df_combined, df], ignore_index=True)
-        return df_combined.to_dict('records'), "data loaded successfully"
+        return df_combined.to_dict('records'), "Daten erfolgreich geladen"
     return {}, ""
 
 
@@ -398,16 +398,18 @@ def make_barchart(order_id, proccessed_data):
         y='value',
         text='value',  # Display values on the bars
         labels={'client': 'Client ID', 'value': 'Total Value'},  # Customize axis labels
-        title=f'Total Value by Client for Order ID {order_id}'
+        title=f' Gesamtanzahl des Kunden xyz nach Artikel {order_id}'
     )
 
     # Customize appearance
     fig.update_traces(marker_color='skyblue', textposition='outside')  # Bar color and text position
     fig.update_layout(
-        xaxis=dict(title='Client ID', tickmode='linear'),
-        yaxis=dict(title='Total Value'),
+        xaxis=dict(title='KundenNr.', tickmode='linear'),
+        yaxis=dict(title='Gesamtwert'),
         title=dict(font=dict(size=18), x=0.5),  # Center-align title
-        template='plotly_white'  # Use a clean theme
+        template='plotly_white',  # Use a clean theme
+        plot_bgcolor='lightcyan',
+		paper_bgcolor='lightcyan',
     )
 
     # Show the figure
@@ -440,7 +442,9 @@ def make_linechart(order_id, proccessed_data):
         xaxis=dict(title='Date', tickformat='%Y-%m-%d'),
         yaxis=dict(title='Value'),
         title=dict(font=dict(size=18), x=0.5),  # Center-align title
-        template='plotly_white'
+        template='plotly_white',
+        plot_bgcolor='lightcyan',
+		paper_bgcolor='lightcyan',
     )
 
     # Show the figure
@@ -453,17 +457,87 @@ def make_dropdowns(lss):
 	    	{'label': value, 'value': value})
 	return dropdown_options
 
+def make_barchart_client(client_id, proccessed_data):
+
+    
+    filtered_data = proccessed_data[proccessed_data['client'] == client_id]
+
+    # Group by client and calculate the sum of value
+    client_values = filtered_data.groupby('order_id')['value'].sum().reset_index()
+
+    # Create an interactive bar chart using Plotly
+    fig = px.bar(
+        client_values,
+        x='order_id',
+        y='value',
+        text='value',  # Display values on the bars
+        labels={'client': 'Client ID', 'value': 'Total Value'},  # Customize axis labels
+        title=f' Gesamtanzahl des Artikels xyz nach Kunden: {client_id}'
+    )
+
+    # Customize appearance
+    fig.update_traces(marker_color='skyblue', textposition='outside')  # Bar color and text position
+    fig.update_layout(
+        xaxis=dict(title='ArtikelNr.', tickmode='linear'),
+        yaxis=dict(title='Gesamtwert'),
+        title=dict(font=dict(size=18), x=0.5),  # Center-align title
+        template='plotly_white',  # Use a clean theme
+        plot_bgcolor='lightcyan',
+		paper_bgcolor='lightcyan',
+    )
+
+    # Show the figure
+    return fig
+
+
+def make_linechart_client(client_id, proccessed_data):
+    
+    
+    filtered_data = proccessed_data[proccessed_data['client'] == client_id]
+
+    # Sort data by date to ensure proper line chart visualization
+    filtered_data = filtered_data.sort_values(by='date')
+
+    # Create a line chart using Plotly
+    fig = px.line(
+        filtered_data,
+        x='date',
+        y='value',
+        labels={'date': 'Date', 'value': 'Value'},
+        title=f'Value Over Time for Client ID {client_id}',
+        markers=True,  # Add markers to indicate data points,
+       
+    )
+
+    # Customize appearance
+    fig.update_traces(line_color='skyblue', marker=dict(size=8))
+    fig.update_layout(
+        xaxis=dict(title='Date', tickformat='%Y-%m-%d'),
+        yaxis=dict(title='Value'),
+        title=dict(font=dict(size=18), x=0.5),  # Center-align title
+        template='plotly_white',
+        plot_bgcolor='lightcyan',
+		paper_bgcolor='lightcyan',
+    )
+
+    # Show the figure
+    return fig
+
 @callback(
     #Output('output-data-upload', 'children'),
    	Output('status4', 'children'),
    	Output('plot30', 'figure'),
    	Output('plot40', 'figure'),
+   	Output('plot31', 'figure'),
+   	Output('plot41', 'figure'),
    	Output('search-input9', 'options'),
+   	Output('search-input10', 'options'),
     Input('stored-data-5', 'data'),
     Input('search-input9', 'value'),
+    Input('search-input10', 'value'),
     
 ) 
-def get_new_Data(data,order_id):
+def get_new_Data(data,order_id, client_id):
 
 	data = pd.DataFrame(data)
 
@@ -471,15 +545,19 @@ def get_new_Data(data,order_id):
 		print(data)
 		proccessed_data = process_data(data)
 		lss = set(proccessed_data.order_id)
+		lss2 = set(proccessed_data.client)
 		options =make_dropdowns(lss)
-		if(order_id == ""):
-			return "please select client id", {}, {}, options
+		options2 =make_dropdowns(lss2)
+		if(order_id == "" and client_id == ""):
+			return "wähle ArtikelNr. & KundenNr.", {}, {}, {}, {}, options, options2
 		else:
-			fig1=make_barchart(order_id, proccessed_data)
-			fig2=make_linechart(order_id, proccessed_data)
-			return "data recived for processing", fig1, fig2, options
+			fig1 = make_barchart(order_id, proccessed_data)
+			fig2 = make_linechart(order_id, proccessed_data)
+			fig3 = make_barchart_client(client_id, proccessed_data)
+			fig4 = make_linechart_client(client_id, proccessed_data)
+			return "Erhaltene Daten zum verarbeiten", fig1, fig2, fig3, fig4, options,options2
 	else:
-		return "data not recived yet for processing", {}, {}, []
+		return "data not recived yet for processing", {}, {},{},{}, [],[]
 
 
 
@@ -505,10 +583,6 @@ def update_output2(list_of_contents, list_of_names, list_of_dates):
         
         return children[0].to_dict('records'),children[1].to_dict('records')
     return {}, {}
-
-
-
-
 
 
 @callback(
@@ -780,19 +854,24 @@ page_2_layout = html.Div([
 page_4_layout = html.Div([
 	html.Div(style=nav_style, children=[nav_content3]),
 	dcc.Store(id='stored-data-5'),
-	html.Div(id='data_tab3',children = [
+
+	html.Div(children = [
+		html.H5("ArtikelNr. Charts"),
+		],
+		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
+		),
+	html.Div(children = [
 		html.Div(
 		            dcc.Graph(id='plot30',
 		                #figure=fig4
 		                ),
-		            
 		            style={"height": "100%", 'width': '100%', 'float': 'right','padding': '10px'}
 		        ),
 	
 		],
 		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
 		),
-	html.Div(id='data_tab4',children = [
+	html.Div(children = [
 		html.Div(
 		            dcc.Graph(id='plot40',
 		                #figure=fig4
@@ -804,8 +883,38 @@ page_4_layout = html.Div([
 		],
 		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
 		),
+	
+	html.Div(children = [
+		html.H5("KundenNr. Charts"),
+		],
+		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
+		),
+	html.Div(children = [
+		html.Div(
+		            dcc.Graph(id='plot31',
+		                #figure=fig4
+		                ),
+		            
+		            style={"height": "100%", 'width': '100%', 'float': 'right','padding': '10px'}
+		        ),
+	
+		],
+		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
+		),
+	html.Div(children = [
+		html.Div(
+		            dcc.Graph(id='plot41',
+		                #figure=fig4
+		                ),
+		            
+		            style={"height": "100%", 'width': '100%', 'float': 'right','padding': '10px'}
+		        ),
+	
+		],
+		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
+		),
 
-	html.Div(id= "page_3")
+	html.Div()
 ])
 
 
@@ -866,8 +975,9 @@ page_3_layout = html.Div([
 # App layout
 app.layout = html.Div([
 	dcc.Location(id='url', refresh=False),
-	html.Div(id='page-content'),
+	#html.Div(id='page-content'),
 	dcc.Download(id="download-dataframe-csv"),
+
 	html.Div(id='page-1-content', style={'display': 'block'}, children=[
 	    page_1_layout
 	]),
@@ -900,14 +1010,14 @@ app.layout = html.Div([
 )
 def display_page(pathname,id_, pass_):
 
-	if(id_ == "log" and pass_ == "C3asar"):#C3asar!
+	if(id_ == "log" and pass_ == "log"):#C3asar!
 	
 	    if pathname == '/page-2':
 	        return {'display': 'block'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'none'},""
 	    elif(pathname == "/page1"):
 	        return {'display': 'none'}, {'display': 'block'} ,{'display': 'none'},{'display': 'none'}, ""
 	    elif(pathname == "/page-3"):
-	        return {'display': 'none'}, {'display': 'block'} ,{'display': 'none'}, {'display': 'block'},""
+	        return {'display': 'none'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'block'},""
 	    else:
 	    	return {'display': 'none'}, {'display': 'none'}, {'display': 'block'},{'display': 'none'}, ""
 	elif(id_ == "" and pass_ == ""):
