@@ -432,7 +432,7 @@ def make_linechart(order_id, proccessed_data):
         x='date',
         y='value',
         labels={'date': 'Date', 'value': 'Value'},
-        title=f'Wert Over Time for ArtikelNr. {order_id}',
+        title=f'wert Over Time for  ArtikelNr. {order_id}',
         markers=True  # Add markers to indicate data points
     )
 
@@ -440,7 +440,7 @@ def make_linechart(order_id, proccessed_data):
     fig.update_traces(line_color='skyblue', marker=dict(size=8))
     fig.update_layout(
         xaxis=dict(title='Datum', tickformat='%d-%m-%y'),
-        yaxis=dict(title='Wert'),
+        yaxis=dict(title='wert'),
         title=dict(font=dict(size=18), x=0.5),  # Center-align title
         template='plotly_white',
         plot_bgcolor='lightcyan',
@@ -501,8 +501,8 @@ def make_linechart_client(client_id, proccessed_data):
     # Create a line chart using Plotly
     fig = px.line(
         filtered_data,
-        x='Datum',
-        y='Wert',
+        x='date',
+        y='value',
         labels={'date': 'Date', 'value': 'Value'},
         title=f'Wert Over Time for KundenNr. {client_id}',
         markers=True,  # Add markers to indicate data points,
@@ -512,8 +512,8 @@ def make_linechart_client(client_id, proccessed_data):
     # Customize appearance
     fig.update_traces(line_color='skyblue', marker=dict(size=8))
     fig.update_layout(
-        xaxis=dict(title='Date',  tickformat='%d-%m-%y'),
-        yaxis=dict(title='Value'),
+        xaxis=dict(title='Datum', tickformat='%d-%m-%y'),
+        yaxis=dict(title='Wert'),
         title=dict(font=dict(size=18), x=0.5),  # Center-align title
         template='plotly_white',
         plot_bgcolor='lightcyan',
@@ -542,12 +542,13 @@ def get_new_Data(data,order_id, client_id):
 	data = pd.DataFrame(data)
 
 	if(len(data) > 0):
-		print(data)
+		#print(data)
 		proccessed_data = process_data(data)
 		lss = set(proccessed_data.order_id)
 		lss2 = set(proccessed_data.client)
 		options =make_dropdowns(lss)
 		options2 =make_dropdowns(lss2)
+        
 		if(order_id == "" or client_id == ""):
 			return "wähle ArtikelNr. & KundenNr.", {}, {}, {}, {}, options, options2
 		else:
@@ -1010,7 +1011,7 @@ app.layout = html.Div([
 )
 def display_page(pathname,id_, pass_):
 
-	if(id_ == "log" and pass_ == "log"):#C3asar!
+	if(id_ == "log" and pass_ == "C3asar!"):#C3asar!
 	
 	    if pathname == '/page-2':
 	        return {'display': 'block'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'none'},""
@@ -1033,8 +1034,4 @@ app.css.append_css({
     'external_url': 'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css'
 })
 if __name__ == '__main__':
-    app.run_server(host='0.0.0.0', debug=True, port="8090")
-
-
-
-
+    app.run_server(debug=True, port="8090")
