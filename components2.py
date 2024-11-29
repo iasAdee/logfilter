@@ -41,7 +41,7 @@ nav_content2 = html.Div([
     
     dcc.Link('Logfilter', href='/page-2',style={'color': 'Yellow', 'fontWeight':'bold'}),
     html.Br(),
-    dcc.Link('Latest Filter', href='/page-3',style={'color': 'Yellow', 'fontWeight':'bold'}),
+    dcc.Link('M7 Kundenbestellungen', href='/page-3',style={'color': 'Yellow', 'fontWeight':'bold'}),
     
 ])
 
@@ -49,14 +49,14 @@ available_layouts1 = []
 nav_content3 = html.Div([
 
     html.Hr(style={'backgroundColor': 'yellow'}),
-    html.H2('Latest Filter',style={'color': 'firebrick'}),
+    html.H2('M7 Kundenbestellungen',style={'color': 'firebrick'}),
 
     html.Hr(style={'backgroundColor': 'yellow'}),
 
     dcc.Upload(
         id='upload-data-3',
         children=html.Div([
-            'Drag & Drop or ',
+            'Drag & Drop oder',
             html.A('Datei auswählen')
         ]),
         style={
@@ -78,13 +78,20 @@ nav_content3 = html.Div([
     html.H6(id="status3"),
     html.H6(id="status4"),
 
-    html.H6("Select client id",style={'font-size': '13px'}),
+    html.H6("wähle ArtikelNr.",style={'font-size': '13px'}),
     dcc.Dropdown(id='search-input9',
         multi=False,
-        placeholder='select algorithm',
+        placeholder='wähle ArtikelNr.',
         options=available_layouts1,
         value='',disabled=False,style={'color': 'black','display': 'block'}),
-    html.Div(id="sc2"),
+    #html.Div(id="sc2"),
+
+    html.H6("wähle KundenNr.",style={'font-size': '13px'}),
+    dcc.Dropdown(id='search-input10',
+        multi=False,
+        placeholder='wähle KundenNr.',
+        options=available_layouts1,
+        value='',disabled=False,style={'color': 'black','display': 'block'}),
 
     #html.Button('Start', id='update-button-2', n_clicks=None),
     html.Hr(style={'backgroundColor': 'yellow'}),
