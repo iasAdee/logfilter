@@ -548,7 +548,7 @@ def get_new_Data(data,order_id, client_id):
 		lss2 = set(proccessed_data.client)
 		options =make_dropdowns(lss)
 		options2 =make_dropdowns(lss2)
-		if(order_id == "" and client_id == ""):
+		if(order_id == "" or client_id == ""):
 			return "wähle ArtikelNr. & KundenNr.", {}, {}, {}, {}, options, options2
 		else:
 			fig1 = make_barchart(order_id, proccessed_data)
