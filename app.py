@@ -432,15 +432,15 @@ def make_linechart(order_id, proccessed_data):
         x='date',
         y='value',
         labels={'date': 'Date', 'value': 'Value'},
-        title=f'Value Over Time for Order ID {order_id}',
+        title=f'Wert Over Time for ArtikelNr. {order_id}',
         markers=True  # Add markers to indicate data points
     )
 
     # Customize appearance
     fig.update_traces(line_color='skyblue', marker=dict(size=8))
     fig.update_layout(
-        xaxis=dict(title='Date', tickformat='%Y-%m-%d'),
-        yaxis=dict(title='Value'),
+        xaxis=dict(title='Datum', tickformat='%d-%m-%y'),
+        yaxis=dict(title='Wert'),
         title=dict(font=dict(size=18), x=0.5),  # Center-align title
         template='plotly_white',
         plot_bgcolor='lightcyan',
@@ -501,10 +501,10 @@ def make_linechart_client(client_id, proccessed_data):
     # Create a line chart using Plotly
     fig = px.line(
         filtered_data,
-        x='date',
-        y='value',
+        x='Datum',
+        y='Wert',
         labels={'date': 'Date', 'value': 'Value'},
-        title=f'Value Over Time for Client ID {client_id}',
+        title=f'Wert Over Time for KundenNr. {client_id}',
         markers=True,  # Add markers to indicate data points,
        
     )
@@ -512,7 +512,7 @@ def make_linechart_client(client_id, proccessed_data):
     # Customize appearance
     fig.update_traces(line_color='skyblue', marker=dict(size=8))
     fig.update_layout(
-        xaxis=dict(title='Date', tickformat='%Y-%m-%d'),
+        xaxis=dict(title='Date',  tickformat='%d-%m-%y'),
         yaxis=dict(title='Value'),
         title=dict(font=dict(size=18), x=0.5),  # Center-align title
         template='plotly_white',
