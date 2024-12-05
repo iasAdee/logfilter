@@ -114,7 +114,8 @@ def update_graph(data, n_clicks):
 	else:
 
 		df = pd.DataFrame(data)
-		
+
+		#print(df.columns)
 		names_update_lower = {key.lower(): value for key, value in names_update.items()}
 		#print(names_update_lower)
 		df.columns = [names_update_lower.get(col.lower().strip(), col) for col in df.columns]
@@ -122,19 +123,15 @@ def update_graph(data, n_clicks):
 		#df["Summe von BrGew_Offen"] = df["Summe von BrGew_Offen"].str.strip().str.replace('.', '').str.replace(',', '.').astype(float)
 
 
-		print(df["Summe von BrGew_Offen"])
 		ls = []
 		for i, val in enumerate(df["Summe von BrGew_Offen"]):
-
-		    print(val)
 		    ls.append(float(str(val).strip().replace(",", ".").replace(".","")))
 
 		df["Summe von BrGew_Offen"] = ls
 
-		
+		#print(df.columns)
 		data_preprocessor2 = DataPreprocessing(df)
 		data_req, ls, fig = data_preprocessor2.clac_2()
-
 		ls2, ls3, data1, data2, fig2, fig3, fig4, fig5, fig6, fig7 = data_preprocessor2.get_calculated_results()
 		fig8 = data_preprocessor2.get_absenders()
 
@@ -1035,3 +1032,7 @@ app.css.append_css({
 })
 if __name__ == '__main__':
     app.run_server(debug=True, port="8090")
+
+
+
+
