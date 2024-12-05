@@ -7,6 +7,7 @@ from dash import dcc, html
 from dash import Dash, dcc, html, dash_table, Input, Output, State, callback
 import re
 import numpy as np
+import json
 
 class DataPreprocessing:
 	def __init__(self, data):
@@ -182,6 +183,11 @@ class DataPreprocessing:
 			data_required["SKU_Zähler"] = 1
 
 
+		with open("data.json", "r") as json_file:
+			loaded_data = json.load(json_file)
+
+		
+
 		data_collection = []
 		data_collection2 = []
 		ls2 = []
@@ -193,17 +199,24 @@ class DataPreprocessing:
 
 		    pallet = data_required["Zähler"][i]
 		    date = data_required["BereitStellDat"][i]
-		    SKU_Zähler = data_required["SKU_Zähler"][i]
+		    #matrial = data_required["Material"][i]
 		    MatBez = data_required["MatBez"][i]
-		    MatNr = data_required["MatNr"][i]
+		    MatNr = str(data_required["MatNr"][i])
+		    SKU_Zähler = data_required["SKU_Zähler"][i]
 
+		    
+		    
+		    if(MatNr not in loaded_data.keys()):
+		    	continue
+
+		    loaded_data
+		    pallet = loaded_data[MatNr]
 
 		    ls = []
 		    nodata = False
 
 		    if(ame == "ST" and bme == "ST"):
 		        order = data_required["Auftragsmenge_Offen"][i]
-		        pallet = data_required["Zähler"][i]
 		        com = data_required['Auftragsmenge_bereits_geliefert'][i]
 
 		        if(pd.isna(order) or pd.isna(pallet) or pd.isna(pallet)):
@@ -219,7 +232,7 @@ class DataPreprocessing:
 		        nodata = True
 		    if(ame == "KAR" and bme == "ST"):
 		        order = data_required["Auftragsmenge_Offen"][i]
-		        pallet = data_required["Zähler"][i]
+		        
 		        com = data_required['Auftragsmenge_bereits_geliefert'][i]
 		        pallet_val = data_required["SKU_Zähler"][i]
 
@@ -238,7 +251,7 @@ class DataPreprocessing:
 		        nodata = True
 		    if(ame == "KG" and bme == "KG"):
 		        order = data_required["Auftragsmenge_Offen"][i]
-		        pallet = data_required["Zähler"][i]
+		        
 		        com = data_required['Auftragsmenge_bereits_geliefert'][i]
 		        if(pd.isna(order) or pd.isna(pallet)):
 		            continue
@@ -262,7 +275,7 @@ class DataPreprocessing:
 		        nodata = True
 		    if(ame == "KG" and bme == "ST"):
 		        order = data_required["Auftragsmenge_Offen"][i]
-		        pallet = data_required["Zähler"][i]
+		        
 		        com = data_required['Auftragsmenge_bereits_geliefert'][i]
 		        if(pd.isna(order) or pd.isna(pallet)):
 		            continue
@@ -286,8 +299,7 @@ class DataPreprocessing:
 		    if(ame == "L" and bme == "ST"):
 		        order = data_required["Auftragsmenge_Offen"][i]
 		        com = float(data_required['Auftragsmenge_bereits_geliefert'][i])
-		        pallet = data_required["Zähler"][i]
-
+		        
 		        text = data_required["MatBez"][i]
 		        n1, n2 = get_number2(text)
 
