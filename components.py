@@ -14,7 +14,7 @@ next_date = current_date + timedelta(days=1)
 nav_content = html.Div([
 
     html.Hr(style={'backgroundColor': 'yellow'}),
-    html.H2("LogFilter",style={'color': 'black'}),
+    html.H2("LogFilter",id="headings", style={'color': 'black'}),
 
     html.Hr(style={'backgroundColor': 'yellow'}),
 
@@ -75,6 +75,8 @@ nav_content = html.Div([
     dcc.Link('New Filter', href='/page1',style={'color': 'yellow','fontWeight': 'bold'}),
     html.Br(),
     dcc.Link('M7 Kundenbestellungen', href='/page-3',style={'color': 'Yellow', 'fontWeight':'bold'}),
+    html.Br(),
+    html.A('Input Filter', href='/page_input',style={'color': 'Yellow', 'fontWeight':'bold'},target='_blank'),
     
 ])
 
