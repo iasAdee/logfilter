@@ -91,6 +91,7 @@ def save_data(data1, n_clicks):
     Output('inflation-plot-4', 'figure'),
     Output('inflation-plot-5', 'figure'),
     Output('inflation-plot-6', 'figure'),
+    Output('inflation-plot-10', 'figure'),
 
     Output('output-data-upload3', 'children'),
 	Output('output-data-upload4', 'children'),
@@ -110,7 +111,7 @@ def save_data(data1, n_clicks):
 def update_graph(data, n_clicks):
 	
 	if(n_clicks == None):
-		return {}, html.Div(),{},{},{},{},{},{},{}, html.Div(),html.Div(),None,{}, {}, {}, []
+		return {}, html.Div(),{},{},{},{},{},{},{},{}, html.Div(),html.Div(),None,{}, {}, {}, []
 	else:
 
 		df = pd.DataFrame(data)
@@ -132,12 +133,12 @@ def update_graph(data, n_clicks):
 		#print(df.columns)
 		data_preprocessor2 = DataPreprocessing(df)
 		data_req, ls, fig = data_preprocessor2.clac_2()
-		ls2, ls3, data1, data2, fig2, fig3, fig4, fig5, fig6, fig7 = data_preprocessor2.get_calculated_results()
+		ls2, ls3, data1, data2, fig2, fig3, fig4, fig5, fig6, fig7, fig10 = data_preprocessor2.get_calculated_results()
 		fig8 = data_preprocessor2.get_absenders()
 
 
 
-		return fig, ls ,fig2, fig3,fig4, fig5,fig6,fig7,fig8 ,ls2 ,ls3, n_clicks, data_req, data1, data2,data
+		return fig, ls ,fig2, fig3,fig4, fig5,fig6,fig7,fig8, fig10 ,ls2 ,ls3, n_clicks, data_req, data1, data2,data
 
 
 def format_to_int(value):
@@ -825,6 +826,13 @@ page_1_layout = html.Div(
 		],
 		style={"height": "50%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
 		),
+
+    html.Div(
+        dcc.Graph(id='inflation-plot-10',
+        style={"height": "50%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
+        ),
+
+    ),
 	
 
 
@@ -999,7 +1007,9 @@ app.layout = html.Div([
      Output('page-2-content', 'style'),
      Output('page-3-content', 'style'),
      Output('page-4-content', 'style'),
-     Output('success', 'children')
+     Output('success', 'children'),
+     Output('headings', 'children'),
+     
      ],
     [Input('url', 'pathname'),
     Input('input-text1', 'value'),
@@ -1008,20 +1018,22 @@ app.layout = html.Div([
 )
 def display_page(pathname,id_, pass_):
 
-	if(id_ == "log" and pass_ == "C3asar!"):#C3asar!
-	
-	    if pathname == '/page-2':
-	        return {'display': 'block'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'none'},""
-	    elif(pathname == "/page1"):
-	        return {'display': 'none'}, {'display': 'block'} ,{'display': 'none'},{'display': 'none'}, ""
-	    elif(pathname == "/page-3"):
-	        return {'display': 'none'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'block'},""
-	    else:
-	    	return {'display': 'none'}, {'display': 'none'}, {'display': 'block'},{'display': 'none'}, ""
-	elif(id_ == "" and pass_ == ""):
-		return {'display': 'none'}, {'display': 'none'}, {'display': 'block'},{'display': 'none'},html.H6("Bitte ID und Passwort eintragen",style={"color":"black"})
-	else:
-		return {'display': 'none'}, {'display': 'none'}, {'display': 'block'},{'display': 'none'},""
+    if((id_ == "log" and pass_ == "log") or pathname== "/page_input"):#C3asar!
+
+        if pathname == '/page-2':
+            return {'display': 'block'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'none'},"", "LogFilter"
+        elif(pathname == "/page1"):
+            return {'display': 'none'}, {'display': 'block'} ,{'display': 'none'},{'display': 'none'}, "", ""
+        elif(pathname == "/page-3"):
+            return {'display': 'none'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'block'},"", ""
+        elif(pathname == "/page_input"):
+            return {'display': 'block'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'none'},"", "Input Filter"
+        else:
+            return {'display': 'none'}, {'display': 'none'}, {'display': 'block'},{'display': 'none'}, "", ""
+    elif(id_ == "" and pass_ == ""):
+        return {'display': 'none'}, {'display': 'none'}, {'display': 'block'},{'display': 'none'},html.H6("Bitte ID und Passwort eintragen",style={"color":"black"}), ""
+    else:
+        return {'display': 'none'}, {'display': 'none'}, {'display': 'block'},{'display': 'none'},"", ""
 
 
 
@@ -1030,6 +1042,8 @@ def display_page(pathname,id_, pass_):
 app.css.append_css({
     'external_url': 'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css'
 })
+
+
 if __name__ == '__main__':
     app.run_server(debug=True, port="8090")
 
