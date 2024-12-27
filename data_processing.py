@@ -68,7 +68,6 @@ class DataPreprocessing:
 			        if(sum_tocheck >= 2000):
 			            ls.append("Direkt")
 			            
-		    #print(i, x, len(ls), sum_tocheck)
 
 		data_req["new_col"] = ls
 
@@ -127,8 +126,6 @@ class DataPreprocessing:
 		return data_req.to_dict('records'), ls, fig
 
 
-
-
 	def get_calculated_results(self):
 
 		def get_number(sentence):
@@ -173,6 +170,7 @@ class DataPreprocessing:
 		                     "SalesOrder", "Werk", "KomplettLF_KZ", "Summe von BrGew_Offen", "WE_PLZ"]]
 
 
+
 		ls = []
 		for i, val in enumerate(data_required["Auftragsmenge_Offen"]):
 		    ls.append(float(str(val).strip().replace(",", ".").replace(".","")))
@@ -186,11 +184,16 @@ class DataPreprocessing:
 		with open("data.json", "r") as json_file:
 			loaded_data = json.load(json_file)
 
-		
 
+		with open("data2.json", "r") as json_file:
+			loaded_data2 = json.load(json_file)
+
+		
 		data_collection = []
 		data_collection2 = []
 		ls2 = []
+
+
 
 		for i in range(len(data_required)):
 		    ame = data_required["AME"][i]
@@ -199,7 +202,6 @@ class DataPreprocessing:
 
 		    pallet = data_required["Zähler"][i]
 		    date = data_required["BereitStellDat"][i]
-		    #matrial = data_required["Material"][i]
 		    MatBez = data_required["MatBez"][i]
 		    MatNr = str(data_required["MatNr"][i])
 		    SKU_Zähler = data_required["SKU_Zähler"][i]
@@ -209,14 +211,20 @@ class DataPreprocessing:
 		    if(MatNr not in loaded_data.keys()):
 		    	continue
 
-		    loaded_data
-		    pallet = loaded_data[MatNr]
+		    if(MatNr in loaded_data2.keys() and MatNr in loaded_data.keys()):
+		    	pallet = loaded_data[MatNr] / loaded_data2[MatNr]
+		    	if(ame == "ST" and bme == "ST"):
+
+		    		order = data_required["Auftragsmenge_Offen"][i]
+		    		order = order/ loaded_data2[MatNr]
+		    		pallet = loaded_data[MatNr] / loaded_data2[MatNr]
+		    else:
+		    	pallet = loaded_data[MatNr]
 
 		    ls = []
 		    nodata = False
 
 		    if(ame == "ST" and bme == "ST"):
-		        order = data_required["Auftragsmenge_Offen"][i]
 		        com = data_required['Auftragsmenge_bereits_geliefert'][i]
 
 		        if(pd.isna(order) or pd.isna(pallet) or pd.isna(pallet)):
@@ -471,6 +479,35 @@ class DataPreprocessing:
 		    height=350,
 		)
 
+		fig10 = go.Figure()
+
+
+		value_counts = data_required['Werk'].value_counts()
+		#colors = ['darkkhaki', 'indianred', 'lightseagreen', 'mediumpurple']
+		text_positions = ['inside' if y >= 200 else 'outside' for y in value_counts.values]
+
+		# Create the bar plot with Plotly
+		fig10 = go.Figure(data=[
+		    go.Bar(
+		        x=value_counts.index,  # Bar labels
+		        y=value_counts.values,  # Bar heights
+		        #marker_color = colors,
+		        text=value_counts.values,  # Text annotations on bars
+		        textposition=text_positions  # Position annotations outside the bars
+		    )
+		])
+
+		# Update layout to match the styling of the Matplotlib plot
+		fig10.update_layout(
+		    title='Werk Distribution',
+		    xaxis_title='Werk',
+		    yaxis_title='Summe',
+		    template='plotly_white',
+		    plot_bgcolor='lightcyan',
+		    paper_bgcolor='lightcyan',
+		    height=350,
+		)
+
 
 		fig2 = go.Figure()
 
@@ -596,7 +633,7 @@ class DataPreprocessing:
 			paper_bgcolor='lightcyan',
 		)
 
-		return ls, ls2, datahalf.to_dict('records'), datextracted.to_dict('records') , fig, fig2, fig3, fig4, fig5, fig6
+		return ls, ls2, datahalf.to_dict('records'), datextracted.to_dict('records') , fig, fig2, fig3, fig4, fig5, fig6, fig10
 
 
 	def get_absenders(self):
@@ -652,8 +689,6 @@ class DataPreprocessing:
 		    width=width
 		))
 
-
-		# Update the layout
 		fig.update_layout(
 		    title='Top 50 abSenders',
 		    xaxis_title='abSenders',
@@ -667,16 +702,10 @@ class DataPreprocessing:
 
 		)
 
-		# Show the figure
 		return fig
 
 	def make_customized_plot(self, user):
 		def make_sender_dict(data):
-
-			#print("from functions")
-			#print(data.columns)
-			#print("from functions")
-
 
 			all_senders = set(data["AG-ID"])
 			sender_dict = {}
@@ -720,8 +749,6 @@ class DataPreprocessing:
 		])
 
 
-
-				# Update layout to adjust x-axis labels
 		fig.update_layout(
 			xaxis_tickformat="%Y-%m-%d", # Format for the date display
 			xaxis_tickangle=45,           # Rotate x-axis labels by 45 degrees
@@ -731,7 +758,6 @@ class DataPreprocessing:
 
 		)
 
-		# Show the figure
 		return fig
         
 
