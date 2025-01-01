@@ -13,10 +13,10 @@ next_date = current_date + timedelta(days=1)
 
 nav_content = html.Div([
 
-    html.Hr(style={'backgroundColor': 'yellow'}),
+    html.Hr(style={'backgroundColor': 'orange'}),
     html.H2("LogFilter",id="headings", style={'color': 'black'}),
 
-    html.Hr(style={'backgroundColor': 'yellow'}),
+    html.Hr(style={'backgroundColor': 'orange'}),
 
     dcc.Upload(
         id='upload-data',
@@ -31,7 +31,7 @@ nav_content = html.Div([
             'borderWidth': '1px',
             'borderStyle': 'dashed',
             'borderRadius': '5px',
-            'borderColor': 'yellow',
+            'borderColor': 'orange',
             'textAlign': 'center',
             'margin': '10px',
             'color':'black'
@@ -42,14 +42,14 @@ nav_content = html.Div([
 
     html.H6(id="status"),
 
-    html.Button('Start', id='update-button', n_clicks=None,style={'backgroundColor': 'yellow'}),
-    html.Hr(style={'backgroundColor': 'yellow'}),
+    html.Button('Start', id='update-button', n_clicks=None,style={'backgroundColor': 'orange'}),
+    html.Hr(style={'backgroundColor': 'orange'}),
 
 
     #navigation controls
 
     html.H5("Navigation",style={'color': 'black'}),
-    html.Hr(style={'backgroundColor': 'yellow'}),
+    html.Hr(style={'backgroundColor': 'orange'}),
     html.A("Pal & PU Tabelle", href="#pal",style={'color': 'azure','fontSize':"12px"}),
     html.Br(),
     #html.Hr(style={'backgroundColor': 'yellow'}),
@@ -69,14 +69,60 @@ nav_content = html.Div([
     #html.Hr(style={'backgroundColor': 'yellow'}),
     html.Br(),
     html.A("Neue Update Charts", href="#neue",style={'color': 'azure','fontSize':"12px"}),
-    html.Hr(style={'backgroundColor': 'yellow'}),
+    html.Hr(style={'backgroundColor': 'orange'}),
 
 
-    dcc.Link('New Filter', href='/page1',style={'color': 'yellow','fontWeight': 'bold'}),
+    dcc.Link('New Filter', href='/page1',style={'color': 'orange','fontWeight': 'bold'}),
     html.Br(),
-    dcc.Link('M7 Kundenbestellungen', href='/page-3',style={'color': 'Yellow', 'fontWeight':'bold'}),
+    dcc.Link('M7 Kundenbestellungen', href='/page-3',style={'color': 'orange', 'fontWeight':'bold'}),
     html.Br(),
-    html.A('Input Filter', href='/page_input',style={'color': 'Yellow', 'fontWeight':'bold'},target='_blank'),
+    html.A('Input Filter', href='/page_input',style={'color': 'orange', 'fontWeight':'bold'},target='_blank'),
+    
+])
+
+
+nav_content5 = html.Div([
+
+    html.Hr(style={'backgroundColor': 'orange'}),
+    html.H2("Input Filter",id="headings2", style={'color': 'black'}),
+
+    html.Hr(style={'backgroundColor': 'orange'}),
+
+    dcc.Upload(
+        id='upload-data2',
+        children=html.Div([
+            'Drag & Drop or ',
+            html.A('Datei auswählen')
+        ]),
+        style={
+            'width': '100%',
+            'height': '60px',
+            'lineHeight': '60px',
+            'borderWidth': '1px',
+            'borderStyle': 'dashed',
+            'borderRadius': '5px',
+            'borderColor': 'orange',
+            'textAlign': 'center',
+            'margin': '10px',
+            'color':'black'
+        },
+        # Allow multiple files to be uploaded
+        multiple=True
+    ),
+
+    html.H6(id="status20"),
+
+    html.Button('Start', id='update-button2', n_clicks=None,style={'backgroundColor': 'orange'}),
+    html.Hr(style={'backgroundColor': 'orange'}),
+
+
+
+
+    dcc.Link('New Filter', href='/page1',style={'color': 'orange','fontWeight': 'bold'}),
+    html.Br(),
+    dcc.Link('M7 Kundenbestellungen', href='/page-3',style={'color': 'orange', 'fontWeight':'bold'}),
+    html.Br(),
+    html.A('Log Filter', href='/page-2',style={'color': 'orange', 'fontWeight':'bold'},target='_blank'),
     
 ])
 
