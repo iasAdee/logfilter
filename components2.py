@@ -6,10 +6,10 @@ from datetime import datetime, timedelta
 
 nav_content2 = html.Div([
 
-    html.Hr(style={'backgroundColor': 'yellow'}),
-    html.H2('New Filter',style={'color': 'firebrick'}),
+    html.Hr(style={'backgroundColor': 'orange'}),
+    html.H2('New Filter',style={'color': 'black'}),
 
-    html.Hr(style={'backgroundColor': 'yellow'}),
+    html.Hr(style={'backgroundColor': 'orange'}),
 
     dcc.Upload(
         id='upload-data-2',
@@ -25,33 +25,33 @@ nav_content2 = html.Div([
             'borderStyle': 'dashed',
             'borderRadius': '5px',
             'textAlign': 'center',
-            'borderColor': 'yellow',
+            'borderColor': 'orange',
             'margin': '10px',
-            'color':'firebrick'
+            'color':'black'
         },
         # Allow multiple files to be uploaded
         multiple=True
     ),
 
     html.H6(id="status2"),
-    html.Button('Save Tabelle', id='btn', n_clicks=None,style={'backgroundColor': 'yellow'}),
+    html.Button('Save Tabelle', id='btn', n_clicks=None,style={'backgroundColor': 'orange'}),
 
     #html.Button('Start', id='update-button-2', n_clicks=None),
-    html.Hr(style={'backgroundColor': 'yellow'}),
+    html.Hr(style={'backgroundColor': 'orange'}),
     
-    dcc.Link('Logfilter', href='/page-2',style={'color': 'Yellow', 'fontWeight':'bold'}),
+    dcc.Link('Logfilter', href='/page-2',style={'color': 'orange', 'fontWeight':'bold'}),
     html.Br(),
-    dcc.Link('M7 Kundenbestellungen', href='/page-3',style={'color': 'Yellow', 'fontWeight':'bold'}),
+    dcc.Link('M7 Kundenbestellungen', href='/page-3',style={'color': 'orange', 'fontWeight':'bold'}),
     
 ])
 
 available_layouts1 = []
 nav_content3 = html.Div([
 
-    html.Hr(style={'backgroundColor': 'yellow'}),
-    html.H2('M7 Kundenbestellungen',style={'color': 'firebrick'}),
+    html.Hr(style={'backgroundColor': 'orange'}),
+    html.H2('M7 Kundenbestellungen',style={'color': 'Black'}),
 
-    html.Hr(style={'backgroundColor': 'yellow'}),
+    html.Hr(style={'backgroundColor': 'orange'}),
 
     dcc.Upload(
         id='upload-data-3',
@@ -67,9 +67,9 @@ nav_content3 = html.Div([
             'borderStyle': 'dashed',
             'borderRadius': '5px',
             'textAlign': 'center',
-            'borderColor': 'yellow',
+            'borderColor': 'orange',
             'margin': '10px',
-            'color':'firebrick'
+            'color':'black'
         },
         # Allow multiple files to be uploaded
         multiple=True
@@ -94,11 +94,11 @@ nav_content3 = html.Div([
         value='',disabled=False,style={'color': 'black','display': 'block'}),
 
     #html.Button('Start', id='update-button-2', n_clicks=None),
-    html.Hr(style={'backgroundColor': 'yellow'}),
+    html.Hr(style={'backgroundColor': 'orange'}),
     
-    dcc.Link('Logfilter', href='/page-2',style={'color': 'Yellow', 'fontWeight':'bold'}),
+    dcc.Link('Logfilter', href='/page-2',style={'color': 'orange', 'fontWeight':'bold'}),
     html.Br(),
-    dcc.Link('New filter', href='/page1',style={'color': 'Yellow', 'fontWeight':'bold'}),
+    dcc.Link('New filter', href='/page1',style={'color': 'orange', 'fontWeight':'bold'}),
     
 ])
 
