@@ -24,6 +24,9 @@ from data_processing import DataPreprocessing
 import base64
 import io
 import plotly.graph_objs as go
+from input import page_5_layout
+
+
 
 import warnings
 warnings.filterwarnings('ignore') 
@@ -55,6 +58,20 @@ def save_data(data1, n_clicks):
 		df = pd.DataFrame(data1)
 		#df.to_csv("pal_data.csv", index=False)
 		return dcc.send_data_frame(df.to_csv, "pal_data.csv", index=False)
+
+
+@callback(
+	Output("download-dataframe-csv2i", "data"),
+	Input('stored-data2i', 'data'),
+	Input('pal_buttoni', 'n_clicks'),
+
+	)
+
+def save_data(data1, n_clicks):
+	if(n_clicks != None):
+		df = pd.DataFrame(data1)
+		#df.to_csv("pal_data.csv", index=False)
+		return dcc.send_data_frame(df.to_csv, "pal_data_input.csv", index=False)
 
 @callback(
 	Output("download-dataframe-csv1", "data"),
@@ -92,6 +109,7 @@ def save_data(data1, n_clicks):
     Output('inflation-plot-5', 'figure'),
     Output('inflation-plot-6', 'figure'),
     Output('inflation-plot-10', 'figure'),
+    Output('inflation-plot-11', 'figure'),
 
     Output('output-data-upload3', 'children'),
 	Output('output-data-upload4', 'children'),
@@ -111,17 +129,35 @@ def save_data(data1, n_clicks):
 def update_graph(data, n_clicks):
 	
 	if(n_clicks == None):
-		return {}, html.Div(),{},{},{},{},{},{},{},{}, html.Div(),html.Div(),None,{}, {}, {}, []
+		return {}, html.Div(),{},{},{},{},{},{},{},{},{}, html.Div(),html.Div(),None,{}, {}, {}, []
 	else:
 
 		df = pd.DataFrame(data)
 
-		#print(df.columns)
+		if("Bestellmengeneinheit" in df.columns):
+			#print(df)
+
+			return {}, html.Div(),{},{},{},{},{},{},{},{},{}, html.Div(),html.Div(),None,{}, {}, {}, []
+
+
+			"""Sales Order = bestellmenge 
+												MatBez = kurztext 
+												Werk = Werk
+												MatNr = Material
+												AME = Bestellmengeneinheit
+												BME = Bestellpreis-ME
+												BereitStellDat = Lieferdatum
+												Auftragsmenge_Offen = Bestellmenge"""
+
+
+
+
+
 		names_update_lower = {key.lower(): value for key, value in names_update.items()}
 		#print(names_update_lower)
 		df.columns = [names_update_lower.get(col.lower().strip(), col) for col in df.columns]
 
-		#df["Summe von BrGew_Offen"] = df["Summe von BrGew_Offen"].str.strip().str.replace('.', '').str.replace(',', '.').astype(float)
+		
 
 
 		ls = []
@@ -133,12 +169,56 @@ def update_graph(data, n_clicks):
 		#print(df.columns)
 		data_preprocessor2 = DataPreprocessing(df)
 		data_req, ls, fig = data_preprocessor2.clac_2()
-		ls2, ls3, data1, data2, fig2, fig3, fig4, fig5, fig6, fig7, fig10 = data_preprocessor2.get_calculated_results()
+		ls2, ls3, data1, data2, fig2, fig3, fig4, fig5, fig6, fig7, fig10, fig20 = data_preprocessor2.get_calculated_results(input=False)
 		fig8 = data_preprocessor2.get_absenders()
 
 
 
-		return fig, ls ,fig2, fig3,fig4, fig5,fig6,fig7,fig8, fig10 ,ls2 ,ls3, n_clicks, data_req, data1, data2,data
+		return fig, ls ,fig2, fig3,fig4, fig5,fig6,fig7,fig8, fig10,fig20 ,ls2 ,ls3, n_clicks, data_req, data1, data2,data
+
+
+
+@callback(
+    Output('ploti1', 'figure'),
+    Output('ploti2', 'figure'),
+    Output('ploti3', 'figure'),
+    Output('ploti4', 'figure'),
+    Output('inflation-plot-10i', 'figure'),
+    Output('inflation-plot-11i', 'figure'),
+    Output('output-data-upload3i', 'children'),
+    Output('stored-data2i', 'data'),
+    
+    Input('stored-data-input', 'data'),
+    Input('update-button2', 'n_clicks'),
+    
+)
+
+
+def update_graph2(data, n_clicks):
+	if(n_clicks == None):
+		return {},{},{},{}, {}, {}, [], {}
+	else:
+		df = pd.DataFrame(data)
+
+
+		col_updates={
+		"kurztext":"MatBez", 
+		"Werk":"Werk",
+		"Material":"MatNr",
+		"Bestellmengeneinheit":"AME",
+		"Bestellpreis-ME":"BME",
+		"Lieferdatum":"BereitStellDat",
+		"Bestellmenge":"Auftragsmenge_Offen",
+		"noch zu liefern (Menge)":"Auftragsmenge_bereits_geliefert"}
+
+
+		col_updates = {key.lower(): value for key, value in col_updates.items()}
+		df.columns = [col_updates.get(col.lower().strip(), col) for col in df.columns]
+
+		data_preprocessor2 = DataPreprocessing(df)
+		ls2, ls3, data1, data2, fig2, fig3, fig4, fig5, fig6, fig7, fig10, fig20 = data_preprocessor2.get_calculated_results(input=True)
+
+		return fig2,fig3,fig4,fig5, fig10, fig20, ls2, data1
 
 
 def format_to_int(value):
@@ -316,6 +396,26 @@ def update_output(list_of_contents, list_of_names, list_of_dates):
     #print(list_of_contents)
     #print(list_of_names)
     #print(list_of_dates)
+
+    if list_of_contents is not None:
+        children = []
+        df_combined = pd.DataFrame()
+        for c, n, d in zip(list_of_contents, list_of_names, list_of_dates):
+            child, df = parse_contents(c, n, d)
+            children.append(child)
+            df_combined = pd.concat([df_combined, df], ignore_index=True)
+        return df_combined.to_dict('records'), "Daten erfolgreich geladen"
+    return {}, ""
+
+@callback(
+    #Output('output-data-upload', 'children'),
+    Output('stored-data-input', 'data'),
+     Output('status20', 'children'),
+    [Input('upload-data2', 'contents')],
+    [State('upload-data2', 'filename'),
+     State('upload-data2', 'last_modified')]
+)
+def update_output20(list_of_contents, list_of_names, list_of_dates):
 
     if list_of_contents is not None:
         children = []
@@ -621,6 +721,7 @@ page_1_layout = html.Div(
 	dcc.Store(id='stored-data'),
 	dcc.Store(id='stored-data1'),
 	dcc.Store(id='stored-data2'),
+	dcc.Store(id='stored-data2i'),
 	dcc.Store(id='stored-data3'),
 	dcc.Store(id='stored-data4'),
 	
@@ -629,7 +730,7 @@ page_1_layout = html.Div(
 	#dascher etc
 	html.Div(id='sped',children = [
 		html.H2("Spedition Tabelle",style={'color': 'black','font-size': '13px'}),
-		html.Button('Save Tabelle', id='sped_button', n_clicks=None,style={'backgroundColor': 'yellow','fontSize':"12px"}),
+		html.Button('Save Tabelle', id='sped_button', n_clicks=None,style={'backgroundColor': 'orange','fontSize':"12px"}),
 		],
 		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
 		),
@@ -651,7 +752,7 @@ page_1_layout = html.Div(
 	#pal and picks tables
 	html.Div(id='pal',children = [
 		html.H2("Pal & PU Tabelle",style={'color': 'black','font-size': '13px'}),
-		html.Button('Save Tabelle', id='pal_button', n_clicks=None,style={'backgroundColor': 'yellow','fontSize':"12px"}),
+		html.Button('Save Tabelle', id='pal_button', n_clicks=None,style={'backgroundColor': 'orange','fontSize':"12px"}),
 		],
 		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
 		),
@@ -751,7 +852,7 @@ page_1_layout = html.Div(
 	##combined
 	html.Div(id='ver',children = [
 		html.H2("Vereint Data Tabelle",style={'color': 'black','font-size': '13px'}),
-		html.Button('Save Tabelle', id='ver_button', n_clicks=None,style={'backgroundColor': 'yellow','fontSize':"12px"}),
+		html.Button('Save Tabelle', id='ver_button', n_clicks=None,style={'backgroundColor': 'orange','fontSize':"12px"}),
 		],
 		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
 		),
@@ -782,7 +883,7 @@ page_1_layout = html.Div(
 		html.Button(
 		'Submit', 
 		id='submit-button', 
-		n_clicks=None,style={'backgroundColor': 'yellow','fontSize':"12px"}
+		n_clicks=None,style={'backgroundColor': 'orange','fontSize':"12px"}
 		),
 		],
 		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
@@ -829,6 +930,13 @@ page_1_layout = html.Div(
 
     html.Div(
         dcc.Graph(id='inflation-plot-10',
+        style={"height": "50%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
+        ),
+
+    ),
+
+    html.Div(
+        dcc.Graph(id='inflation-plot-11',
         style={"height": "50%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
         ),
 
@@ -997,7 +1105,12 @@ app.layout = html.Div([
 
 	html.Div(id='page-3-content', style={'display': 'none'}, children=[
 	    page_3_layout
+	]),
+	html.Div(id='page-5-content', style={'display': 'none'}, children=[
+	    page_5_layout
 	])
+
+	
 
 	])
 
@@ -1007,8 +1120,10 @@ app.layout = html.Div([
      Output('page-2-content', 'style'),
      Output('page-3-content', 'style'),
      Output('page-4-content', 'style'),
+     Output('page-5-content', 'style'),
+
      Output('success', 'children'),
-     Output('headings', 'children'),
+
      
      ],
     [Input('url', 'pathname'),
@@ -1018,22 +1133,22 @@ app.layout = html.Div([
 )
 def display_page(pathname,id_, pass_):
 
-    if((id_ == "log" and pass_ == "C3asar!") or pathname== "/page_input"):#C3asar!
+    if(id_ == "log" and pass_ == "C3asar!"):#C3asar!
 
         if pathname == '/page-2':
-            return {'display': 'block'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'none'},"", "LogFilter"
+            return {'display': 'block'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'none'},{'display': 'none'},""
         elif(pathname == "/page1"):
-            return {'display': 'none'}, {'display': 'block'} ,{'display': 'none'},{'display': 'none'}, "", ""
+            return {'display': 'none'}, {'display': 'block'} ,{'display': 'none'},{'display': 'none'},{'display': 'none'}, ""
         elif(pathname == "/page-3"):
-            return {'display': 'none'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'block'},"", ""
+            return {'display': 'none'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'block'},{'display': 'none'},""
         elif(pathname == "/page_input"):
-            return {'display': 'block'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'none'},"", "Input Filter"
+            return {'display': 'none'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'none'},{'display': 'block'},"" 
         else:
-            return {'display': 'none'}, {'display': 'none'}, {'display': 'block'},{'display': 'none'}, "", ""
+            return {'display': 'none'}, {'display': 'none'}, {'display': 'block'},{'display': 'none'},{'display': 'none'}, ""
     elif(id_ == "" and pass_ == ""):
-        return {'display': 'none'}, {'display': 'none'}, {'display': 'block'},{'display': 'none'},html.H6("Bitte ID und Passwort eintragen",style={"color":"black"}), ""
+        return {'display': 'none'}, {'display': 'none'}, {'display': 'block'},{'display': 'none'},{'display': 'none'},html.H6("Bitte ID und Passwort eintragen",style={"color":"black"})
     else:
-        return {'display': 'none'}, {'display': 'none'}, {'display': 'block'},{'display': 'none'},"", ""
+        return {'display': 'none'}, {'display': 'none'}, {'display': 'block'},{'display': 'none'},{'display': 'none'},""
 
 
 
