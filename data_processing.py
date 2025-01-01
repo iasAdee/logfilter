@@ -651,8 +651,16 @@ class DataPreprocessing:
 
 
 
+		datahalf["Picks"] = datahalf["Picks"].astype(int)
+		datahalf["Pallets"] = datahalf["Pallets"].astype(int)
+
 		grouped_data = pd.DataFrame(datahalf.groupby('Werk')[["Pallets", "Picks"]].sum()).reset_index()
 		#print(grouped_data)
+
+		grouped_data["Picks"] = grouped_data["Picks"].astype(int)
+		grouped_data["Pallets"] = grouped_data["Pallets"].astype(int)
+
+
 
 		fig20 = go.Figure()
 
@@ -660,6 +668,9 @@ class DataPreprocessing:
 		fig20.add_trace(go.Bar(
 		    x=grouped_data['Werk'],
 		    y=grouped_data['Pallets'],
+		    text=grouped_data['Pallets'],  
+		    texttemplate='%{text:d}',     
+		    hoverinfo='text',   
 		    name='Pallets',
 		    marker_color='darkcyan'
 		))
@@ -669,7 +680,10 @@ class DataPreprocessing:
 		    x=grouped_data['Werk'],
 		    y=grouped_data['Picks'],
 		    name='Picks',
-		    marker_color='steelblue'
+		    marker_color='steelblue',
+		    text=grouped_data['Picks'],  
+		    texttemplate='%{text:d}',    
+		    hoverinfo='text'  
 		))
 
 		fig20.update_layout(
