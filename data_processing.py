@@ -126,7 +126,7 @@ class DataPreprocessing:
 		return data_req.to_dict('records'), ls, fig
 
 
-	def get_calculated_results(self):
+	def get_calculated_results(self, input=False):
 
 		def get_number(sentence):
 		    match1 = re.search(r'\((\d+)\)\s*KG', sentence)
@@ -149,25 +149,15 @@ class DataPreprocessing:
 		    else:
 		        return 0, 0
 
-		"""def make_sender_dict(data):
-								    all_senders = set(data["AG-ID"])
-								    sender_dict = {}
-								    for sender in all_senders:
-								        first = data[data["AG-ID"] == sender]
-						
-								        recivers =first["WE-ID"]
-								        same_occurances = list(recivers).count(sender)
-								        total_recivers = len(recivers)
-								        other = abs(total_recivers - same_occurances)
-						
-								        sender_dict[sender] = [other, same_occurances]
-									    
-								    return sender_dict"""
 
-
-		data_required = self.data[["Auftragsmenge_Offen", "AME", "BME", "BereitStellDat", "Zähler",
-		                      "MatBez", "MatNr", "Auftragsmenge_bereits_geliefert",
-		                     "SalesOrder", "Werk", "KomplettLF_KZ", "Summe von BrGew_Offen", "WE_PLZ"]]
+		if(input  == False):
+			data_required = self.data[["Auftragsmenge_Offen", "AME", "BME", "BereitStellDat", "Zähler",
+			                      "MatBez", "MatNr", "Auftragsmenge_bereits_geliefert",
+			                     "SalesOrder", "Werk", "KomplettLF_KZ", "Summe von BrGew_Offen", "WE_PLZ"]]
+		else:
+			data_required = self.data[["Auftragsmenge_Offen", "AME", "BME", "BereitStellDat",
+			                      "MatBez", "MatNr", "Auftragsmenge_bereits_geliefert",
+			                      "Werk"]]
 
 
 
@@ -179,6 +169,7 @@ class DataPreprocessing:
 
 		for i in range(len(data_required)):
 			data_required["SKU_Zähler"] = 1
+			data_required["Zähler"] = 1
 
 
 		with open("data.json", "r") as json_file:
@@ -205,8 +196,13 @@ class DataPreprocessing:
 		    MatBez = data_required["MatBez"][i]
 		    MatNr = str(data_required["MatNr"][i])
 		    SKU_Zähler = data_required["SKU_Zähler"][i]
+		    wr = data_required["Werk"][i]
 
-		    
+
+		    if(pd.isna(MatNr) or MatNr == "nan"):
+		    	continue
+		    else:
+		    	MatNr = str(int(float(MatNr)))
 		    
 		    if(MatNr not in loaded_data.keys()):
 		    	continue
@@ -216,10 +212,12 @@ class DataPreprocessing:
 		    	if(ame == "ST" and bme == "ST"):
 
 		    		order = data_required["Auftragsmenge_Offen"][i]
-		    		order = order/ loaded_data2[MatNr]
+		    		order = order/loaded_data2[MatNr]
 		    		pallet = loaded_data[MatNr] / loaded_data2[MatNr]
-		    else:
+		    elif(MatNr in loaded_data.keys()):
 		    	pallet = loaded_data[MatNr]
+		    else:
+		    	continue
 
 		    ls = []
 		    nodata = False
@@ -230,12 +228,12 @@ class DataPreprocessing:
 		        if(pd.isna(order) or pd.isna(pallet) or pd.isna(pallet)):
 		            continue
 		        if(order < pallet):
-		            ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, order, 0])
+		            ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, order, 0,wr])
 		        else:
 		            pallet_ = int(order / pallet)
 		            pieces = abs(int(order / pallet) * pallet - order)
 
-		            ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, pieces, pallet_])
+		            ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, pieces, pallet_,wr])
 		        data_collection2.append(ls[0].copy())
 		        nodata = True
 		    if(ame == "KAR" and bme == "ST"):
@@ -249,12 +247,12 @@ class DataPreprocessing:
 
 		        comparison = pallet / pallet_val
 		        if(order < comparison):
-		            ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, order, 0])
+		            ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, order, 0,wr])
 		        else:
 		            pallet_ = int(order / comparison)
 		            pieces = abs(int(order / comparison) * comparison - order)
 
-		            ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, pieces, pallet_])
+		            ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, pieces, pallet_,wr])
 		        data_collection2.append(ls[0].copy())
 		        nodata = True
 		    if(ame == "KG" and bme == "KG"):
@@ -273,12 +271,12 @@ class DataPreprocessing:
 		            pallet_actual = pallet / kg
 
 		            if(order_actual < pallet_actual):
-		                ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, order_actual, 0])
+		                ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, order_actual, 0,wr])
 		            else:
 		                pallet_ = int(order_actual / pallet_actual)
 		                pieces = abs(int(order_actual / pallet_actual) * pallet_actual - order_actual)
 
-		                ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, pieces, pallet_])
+		                ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, pieces, pallet_,wr])
 		        data_collection2.append(ls[0].copy())
 		        nodata = True
 		    if(ame == "KG" and bme == "ST"):
@@ -295,12 +293,12 @@ class DataPreprocessing:
 		        else:
 		            req_num = pallet * kg
 		            if(order < req_num):
-		                ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, order, 0])
+		                ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, order, 0,wr])
 		            else:
 		                pallet_ = int(order / req_num)
 		                pieces = abs(int(order / req_num) * req_num - order)
 
-		                ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, pieces, pallet_])
+		                ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, pieces, pallet_,wr])
 
 		        data_collection2.append(ls[0].copy())
 		        nodata = True
@@ -312,16 +310,16 @@ class DataPreprocessing:
 		        n1, n2 = get_number2(text)
 
 		        if(com != 0):
-		            print(type(com), com)
+		            #print(type(com), com)
 
 		            num = int(order / com)
 		            if(num < pallet):
-		                ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, int(num), 0])
+		                ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, int(num), 0,wr])
 		            else:
 		                pallet_ = int(num / pallet)
 		                pieces = abs(int(num / pallet) * pallet - num)
 
-		                ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, pieces, pallet_])
+		                ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, pieces, pallet_,wr])
 		            data_collection2.append(ls[0])
 
 		        elif(n1 != 0 and n2 != 0):
@@ -329,17 +327,17 @@ class DataPreprocessing:
 		            num = int(order / nu)
 		            pallet1 = pallet / nu
 		            if(num < pallet1):
-		                ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, int(num), 0])
+		                ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, int(num), 0,wr])
 		            else:
 		                pallet_ = int(num / pallet)
 		                pieces = abs(int(num / pallet) * pallet - num)
 
-		                ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, pieces, pallet_])
+		                ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, pieces, pallet_,wr])
 		            data_collection2.append(ls[0].copy())
 		            nodata = True
 
 
-		    if(nodata == True):
+		    if(nodata == True and input == False):
 		        #nls = ls[0].copy()
 		        #data_collection2.append(nls)
 
@@ -354,46 +352,53 @@ class DataPreprocessing:
 		            sum_tocheck = sum(dat["Summe von BrGew_Offen"])
 		            if(wr == "DE01" or we == "DE10"):
 		                if(sum_tocheck < 50):
-		                    ls[0].extend([x, so, we, wr,"TOF"])
+		                    ls[0].extend([x, so, we,"TOF"])
 		                if(sum_tocheck > 50 and sum_tocheck < 2500):
-		                    ls[0].extend([x, so, we, wr,"Dachser"])
+		                    ls[0].extend([x, so, we,"Dachser"])
 		                if(sum_tocheck >= 2500):
-		                    ls[0].extend([x, so, we, wr,"Direkt"])
+		                    ls[0].extend([x, so, we,"Direkt"])
 		            else:
 		                if(sum_tocheck < 80):
-		                    ls[0].extend([x, so, we, wr,"TOF"])
+		                    ls[0].extend([x, so, we,"TOF"])
 		                if(sum_tocheck > 80 and sum_tocheck < 2500):
-		                    ls[0].extend([x, so, we, wr,"Dachser"])
+		                    ls[0].extend([x, so, we,"Dachser"])
 		                if(sum_tocheck >= 2500):
-		                    ls[0].extend([x, so, we, wr,"Direkt"])
+		                    ls[0].extend([x, so, we,"Direkt"])
 		        else:
 		            sum_tocheck = self.data["Summe von BrGew_Offen"][i]
 
 		            if(wr == "DE01" or we == "DE10"):
 		                if(sum_tocheck < 50):
-		                    ls[0].extend([x, so, we, wr,"TOF"])
+		                    ls[0].extend([x, so, we,"TOF"])
 		                if(sum_tocheck > 50 and sum_tocheck < 2000):
-		                    ls[0].extend([x, so, we, wr,"Dachser"])
+		                    ls[0].extend([x, so, we,"Dachser"])
 		                if(sum_tocheck >= 2000):
-		                    ls[0].extend([x, so, we, wr,"Direkt"])
+		                    ls[0].extend([x, so, we,"Direkt"])
 		            else:
 		                if(sum_tocheck < 80):
-		                    ls[0].extend([x, so, we, wr,"TOF"])
+		                    ls[0].extend([x, so, we,"TOF"])
 		                if(sum_tocheck > 80 and sum_tocheck < 2000):
-		                    ls[0].extend([x, so, we, wr,"Dachser"])
+		                    ls[0].extend([x, so, we,"Dachser"])
 		                if(sum_tocheck >= 2000):
-		                    ls[0].extend([x, so, we, wr,"Direkt"])
+		                    ls[0].extend([x, so, we,"Direkt"])
 
 		        data_collection.append(ls[0])
 
 		#print(data_collection2)
-		datahalf = pd.DataFrame(data_collection2, columns=["AME", "BME", "com", "Auftragsmenge_Offen",
-		                                                      "Zähler", "BereitStellDat","SKU_Zähler",
-		                                                      "MatBez", "MatNr", "Picks", "Pallets"])
 
-		datextracted = pd.DataFrame(data_collection, columns=["AME", "BME", "com", "Auftragsmenge_Offen",
-		                                                      "Zähler", "BereitStellDat","SKU_Zähler",
-		                                                      "MatBez", "MatNr", "Picks", "Pallets", "KomplettLF_KZ", "SalesOrder", "WE_PLZ", "Werk", "new_col"])
+		if(input == False):
+			datahalf = pd.DataFrame(data_collection2, columns=["AME", "BME", "Auftragsmenge_bereits_geliefert", "Auftragsmenge_Offen",
+			                                                      "Zähler", "BereitStellDat","SKU_Zähler",
+			                                                      "MatBez", "MatNr", "Picks", "Pallets","Werk"])
+
+			datextracted = pd.DataFrame(data_collection, columns=["AME", "BME", "Auftragsmenge_bereits_geliefert", "Auftragsmenge_Offen",
+			                                                      "Zähler", "BereitStellDat","SKU_Zähler",
+			                                                      "MatBez", "MatNr", "Picks", "Pallets","Werk", "KomplettLF_KZ", "SalesOrder", "WE_PLZ", "new_col"])
+
+		else:
+			datahalf = pd.DataFrame(data_collection2, columns=["AME", "BME", "Auftragsmenge_bereits_geliefert", "Auftragsmenge_Offen",
+			                                                      "Zähler", "BereitStellDat","SKU_Zähler",
+			                                                      "MatBez", "MatNr", "Picks", "Pallets","Werk"])
 
 		"""datextracted = datextracted[["AME", "BME", "com", "Auftragsmenge_Offen",
 								                                                      "Zähler", "BereitStellDat",
@@ -426,29 +431,29 @@ class DataPreprocessing:
 		    }),html.Hr()])
 		)
 
-
-		ls2 = []
-		ls2.append(html.Div([
-		dash_table.DataTable(
-		    style_table={'height': '400px', 'overflowY': 'auto', 'width':'98%', 'margin-left':'4px'},
-		    data=datextracted.to_dict('records'),
-		    columns=[{"name": i, "id": i} for i in datextracted.columns],
-		    #editable=True,
-		    filter_action="native",
-		    sort_action="native",
-		    #page_action="native",
-		    style_data={
-            'backgroundColor': 'lightcyan',
-            
-        	},
-		    style_header={
-		        'backgroundColor': 'darkslategrey',
-		        'color': 'white',
-		        'fontWeight': 'bold',
-		        'textAlign': 'center',
-		        'border': '1px solid black'
-		    }),html.Hr()])
-		)
+		if(input == False):
+			ls2 = []
+			ls2.append(html.Div([
+			dash_table.DataTable(
+			    style_table={'height': '400px', 'overflowY': 'auto', 'width':'98%', 'margin-left':'4px'},
+			    data=datextracted.to_dict('records'),
+			    columns=[{"name": i, "id": i} for i in datextracted.columns],
+			    #editable=True,
+			    filter_action="native",
+			    sort_action="native",
+			    #page_action="native",
+			    style_data={
+	            'backgroundColor': 'lightcyan',
+	            
+	        	},
+			    style_header={
+			        'backgroundColor': 'darkslategrey',
+			        'color': 'white',
+			        'fontWeight': 'bold',
+			        'textAlign': 'center',
+			        'border': '1px solid black'
+			    }),html.Hr()])
+			)
 
 		fig = go.Figure()
 
@@ -479,8 +484,8 @@ class DataPreprocessing:
 		    height=350,
 		)
 
-		fig10 = go.Figure()
 
+		fig10 = go.Figure()
 
 		value_counts = data_required['Werk'].value_counts()
 		#colors = ['darkkhaki', 'indianred', 'lightseagreen', 'mediumpurple']
@@ -493,7 +498,8 @@ class DataPreprocessing:
 		        y=value_counts.values,  # Bar heights
 		        #marker_color = colors,
 		        text=value_counts.values,  # Text annotations on bars
-		        textposition=text_positions  # Position annotations outside the bars
+		        textposition=text_positions,  # Position annotations outside the bars
+		        marker_color='steelblue'
 		    )
 		])
 
@@ -546,13 +552,22 @@ class DataPreprocessing:
 
 		
 		#data_required["BereitStellDat"] = pd.to_datetime(data_required["BereitStellDat"])
-		datahalf["date"] = pd.to_datetime(datahalf["BereitStellDat"], format="%d.%m.%Y", errors="coerce")
 
-		datahalf = datahalf.sort_values(by="date")
+		if(input == False):
+			datahalf["date"] = pd.to_datetime(datahalf["BereitStellDat"], format="%d.%m.%Y", errors="coerce")
+		else:
+			datahalf["date"] = pd.to_datetime(datahalf["BereitStellDat"], errors="coerce")
+
+
+		datahalf_picks = datahalf[datahalf["Picks"] > 0]
+		datahalf_pallets = datahalf[datahalf["Pallets"] > 0]
+
+		datahalf_picks = datahalf_picks.sort_values(by="date")
+		datahalf_pallets = datahalf_pallets.sort_values(by="date")
 
 		# Create a bar chart using Plotly Express
 		fig3 = px.bar(
-			datahalf, 
+			datahalf_picks, 
 			x="date", 
 			y="Picks", 
 			labels={"date": "Datum", "Picks": "Picks"},
@@ -571,7 +586,7 @@ class DataPreprocessing:
 
 		# Create a bar chart using Plotly Express
 		fig4 = px.bar(
-			datahalf, 
+			datahalf_pallets, 
 			x="date", 
 			y="Pallets", 
 			labels={"date": "Datum", "Picks": "Pallets"},
@@ -588,52 +603,92 @@ class DataPreprocessing:
 		)
 
 
-		#datextracted["date"] = pd.to_datetime(datextracted["BereitStellDat"])
-		datextracted["date"] = pd.to_datetime(datextracted["BereitStellDat"], format="%d.%m.%Y", errors="coerce")
-		datextracted = datextracted.sort_values(by="date")
+		if(input == False):
+			#datextracted["date"] = pd.to_datetime(datextracted["BereitStellDat"])
+			datextracted["date"] = pd.to_datetime(datextracted["BereitStellDat"], format="%d.%m.%Y", errors="coerce")
+			datextracted = datextracted.sort_values(by="date")
 
-		print(datextracted)
+			#print(datextracted)
 
-		# Create a bar chart using Plotly Express
-		fig5 = px.bar(
-			datextracted, 
-			x="date", 
-			y="Picks", 
-			color="new_col", 
-			labels={"date": "Datum", "Picks": "Picks"},
-			title="Picks Bar Chart"
-		)
+			# Create a bar chart using Plotly Express
+			fig5 = px.bar(
+				datextracted, 
+				x="date", 
+				y="Picks", 
+				color="new_col", 
+				labels={"date": "Datum", "Picks": "Picks"},
+				title="Picks Bar Chart"
+			)
 
-		# Update layout to adjust x-axis labels
-		fig5.update_layout(
-			xaxis_tickformat="%Y-%m-%d", # Format for the date display
-			xaxis_tickangle=45,           # Rotate x-axis labels by 45 degrees
-			height=350,
-			plot_bgcolor='lightcyan',
+			# Update layout to adjust x-axis labels
+			fig5.update_layout(
+				xaxis_tickformat="%Y-%m-%d", # Format for the date display
+				xaxis_tickangle=45,           # Rotate x-axis labels by 45 degrees
+				height=350,
+				plot_bgcolor='lightcyan',
+				paper_bgcolor='lightcyan',
+			)
+
+
+			# Create a bar chart using Plotly Express
+			fig6 =px.bar(
+				datextracted, 
+				x="date", 
+				y="Pallets", 
+				color="new_col",
+				labels={"date": "Datum", "Picks": "Pallets"},
+				title="Pallets Bar Chart"
+			)
+
+			# Update layout to adjust x-axis labels
+			fig6.update_layout(
+				xaxis_tickformat="%Y-%m-%d", # Format for the date display
+				xaxis_tickangle=45,           # Rotate x-axis labels by 45 degrees
+				height=350,
+				plot_bgcolor='lightcyan',
+				paper_bgcolor='lightcyan',
+			)
+
+
+
+		grouped_data = pd.DataFrame(datahalf.groupby('Werk')[["Pallets", "Picks"]].sum()).reset_index()
+		#print(grouped_data)
+
+		fig20 = go.Figure()
+
+		# Add Pallets bar
+		fig20.add_trace(go.Bar(
+		    x=grouped_data['Werk'],
+		    y=grouped_data['Pallets'],
+		    name='Pallets',
+		    marker_color='darkcyan'
+		))
+
+		# Add Picks bar
+		fig20.add_trace(go.Bar(
+		    x=grouped_data['Werk'],
+		    y=grouped_data['Picks'],
+		    name='Picks',
+		    marker_color='steelblue'
+		))
+
+		fig20.update_layout(
+		    title='Werk Based Chart for Pallets and Picks',
+		    xaxis=dict(title='Werk'),
+		    yaxis=dict(title='Values'),
+		    barmode='group',  
+		    #template='plotly',
+		    plot_bgcolor='lightcyan',
 			paper_bgcolor='lightcyan',
 		)
 
 
-		# Create a bar chart using Plotly Express
-		fig6 =px.bar(
-			datextracted, 
-			x="date", 
-			y="Pallets", 
-			color="new_col",
-			labels={"date": "Datum", "Picks": "Pallets"},
-			title="Pallets Bar Chart"
-		)
 
-		# Update layout to adjust x-axis labels
-		fig6.update_layout(
-			xaxis_tickformat="%Y-%m-%d", # Format for the date display
-			xaxis_tickangle=45,           # Rotate x-axis labels by 45 degrees
-			height=350,
-			plot_bgcolor='lightcyan',
-			paper_bgcolor='lightcyan',
-		)
+		if(input == False):
+			return ls, ls2, datahalf.to_dict('records'), datextracted.to_dict('records') , fig, fig2, fig3, fig4, fig5, fig6, fig10, fig20
+		else:
+			return ls, [], datahalf.to_dict('records'), pd.DataFrame().to_dict('records') , fig, fig2, fig3, fig4, {}, {}, fig10, fig20
 
-		return ls, ls2, datahalf.to_dict('records'), datextracted.to_dict('records') , fig, fig2, fig3, fig4, fig5, fig6, fig10
 
 
 	def get_absenders(self):
