@@ -730,7 +730,7 @@ page_1_layout = html.Div(
 	#dascher etc
 	html.Div(id='sped',children = [
 		html.H2("Spedition Tabelle",style={'color': 'black','font-size': '13px'}),
-		html.Button('Save Tabelle', id='sped_button', n_clicks=None,style={'backgroundColor': 'orange','fontSize':"12px"}),
+		html.Button('Tabelle speichern', id='sped_button', n_clicks=None,style={'backgroundColor': '#F5B323','fontSize':"12px"}),
 		],
 		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
 		),
@@ -752,7 +752,7 @@ page_1_layout = html.Div(
 	#pal and picks tables
 	html.Div(id='pal',children = [
 		html.H2("Pal & PU Tabelle",style={'color': 'black','font-size': '13px'}),
-		html.Button('Save Tabelle', id='pal_button', n_clicks=None,style={'backgroundColor': 'orange','fontSize':"12px"}),
+		html.Button('Tabelle speichern', id='pal_button', n_clicks=None,style={'backgroundColor': '#F5B323','fontSize':"12px"}),
 		],
 		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
 		),
@@ -852,7 +852,7 @@ page_1_layout = html.Div(
 	##combined
 	html.Div(id='ver',children = [
 		html.H2("Vereint Data Tabelle",style={'color': 'black','font-size': '13px'}),
-		html.Button('Save Tabelle', id='ver_button', n_clicks=None,style={'backgroundColor': 'orange','fontSize':"12px"}),
+		html.Button('Tabelle speichern', id='ver_button', n_clicks=None,style={'backgroundColor': '#F5B323','fontSize':"12px"}),
 		],
 		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
 		),
@@ -883,7 +883,7 @@ page_1_layout = html.Div(
 		html.Button(
 		'Submit', 
 		id='submit-button', 
-		n_clicks=None,style={'backgroundColor': 'orange','fontSize':"12px"}
+		n_clicks=None,style={'backgroundColor': '#F5B323','fontSize':"12px"}
 		),
 		],
 		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
@@ -1133,7 +1133,7 @@ app.layout = html.Div([
 )
 def display_page(pathname,id_, pass_):
 
-    if(id_ == "log" and pass_ == "C3asar!"):#C3asar!
+    if(id_ == "log" and pass_ == "log"):#C3asar!
 
         if pathname == '/page-2':
             return {'display': 'block'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'none'},{'display': 'none'},""
@@ -1151,7 +1151,7 @@ def display_page(pathname,id_, pass_):
         return {'display': 'none'}, {'display': 'none'}, {'display': 'block'},{'display': 'none'},{'display': 'none'},""
 
 
-
+app.title = "LogFilter"
 
 
 app.css.append_css({
