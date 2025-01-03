@@ -13,10 +13,10 @@ next_date = current_date + timedelta(days=1)
 
 nav_content = html.Div([
 
-    html.Hr(style={'backgroundColor': 'orange'}),
+    html.Hr(style={'backgroundColor': '#F5B323'}),
     html.H2("LogFilter",id="headings", style={'color': 'black'}),
 
-    html.Hr(style={'backgroundColor': 'orange'}),
+    html.Hr(style={'backgroundColor': '#F5B323'}),
 
     dcc.Upload(
         id='upload-data',
@@ -31,7 +31,7 @@ nav_content = html.Div([
             'borderWidth': '1px',
             'borderStyle': 'dashed',
             'borderRadius': '5px',
-            'borderColor': 'orange',
+            'borderColor': '#F5B323',
             'textAlign': 'center',
             'margin': '10px',
             'color':'black'
@@ -42,14 +42,14 @@ nav_content = html.Div([
 
     html.H6(id="status"),
 
-    html.Button('Start', id='update-button', n_clicks=None,style={'backgroundColor': 'orange'}),
+    html.Button('Start', id='update-button', n_clicks=None,style={'backgroundColor': '#F5B323'}),
     html.Hr(style={'backgroundColor': 'orange'}),
 
 
     #navigation controls
 
     html.H5("Navigation",style={'color': 'black'}),
-    html.Hr(style={'backgroundColor': 'orange'}),
+    html.Hr(style={'backgroundColor': '#F5B323'}),
     html.A("Pal & PU Tabelle", href="#pal",style={'color': 'azure','fontSize':"12px"}),
     html.Br(),
     #html.Hr(style={'backgroundColor': 'yellow'}),
@@ -69,24 +69,24 @@ nav_content = html.Div([
     #html.Hr(style={'backgroundColor': 'yellow'}),
     html.Br(),
     html.A("Neue Update Charts", href="#neue",style={'color': 'azure','fontSize':"12px"}),
-    html.Hr(style={'backgroundColor': 'orange'}),
+    html.Hr(style={'backgroundColor': '#F5B323'}),
 
 
-    dcc.Link('New Filter', href='/page1',style={'color': 'orange','fontWeight': 'bold'}),
+    dcc.Link('Neuer Filter', href='/page1',style={'color': '#F5B323','fontWeight': 'bold'}),
     html.Br(),
-    dcc.Link('M7 Kundenbestellungen', href='/page-3',style={'color': 'orange', 'fontWeight':'bold'}),
+    dcc.Link('M7 Kundenbestellungen', href='/page-3',style={'color': '#F5B323', 'fontWeight':'bold'}),
     html.Br(),
-    html.A('Input Filter', href='/page_input',style={'color': 'orange', 'fontWeight':'bold'},target='_blank'),
+    html.A('Wareneingänge', href='/page_input',style={'color': '#F5B323', 'fontWeight':'bold'},target='_blank'),
     
 ])
 
 
 nav_content5 = html.Div([
 
-    html.Hr(style={'backgroundColor': 'orange'}),
-    html.H2("Input Filter",id="headings2", style={'color': 'black'}),
+    html.Hr(style={'backgroundColor': '#F5B323'}),
+    html.H2("Wareneingänge ",id="headings2", style={'color': 'black'}),
 
-    html.Hr(style={'backgroundColor': 'orange'}),
+    html.Hr(style={'backgroundColor': '#F5B323'}),
 
     dcc.Upload(
         id='upload-data2',
@@ -101,7 +101,7 @@ nav_content5 = html.Div([
             'borderWidth': '1px',
             'borderStyle': 'dashed',
             'borderRadius': '5px',
-            'borderColor': 'orange',
+            'borderColor': '#F5B323',
             'textAlign': 'center',
             'margin': '10px',
             'color':'black'
@@ -112,17 +112,17 @@ nav_content5 = html.Div([
 
     html.H6(id="status20"),
 
-    html.Button('Start', id='update-button2', n_clicks=None,style={'backgroundColor': 'orange'}),
-    html.Hr(style={'backgroundColor': 'orange'}),
+    html.Button('Start', id='update-button2', n_clicks=None,style={'backgroundColor': '#F5B323'}),
+    html.Hr(style={'backgroundColor': '#F5B323'}),
 
 
 
 
-    dcc.Link('New Filter', href='/page1',style={'color': 'orange','fontWeight': 'bold'}),
+    dcc.Link('Neuer Filter', href='/page1',style={'color': '#F5B323','fontWeight': 'bold'}),
     html.Br(),
-    dcc.Link('M7 Kundenbestellungen', href='/page-3',style={'color': 'orange', 'fontWeight':'bold'}),
+    dcc.Link('M7 Kundenbestellungen', href='/page-3',style={'color': '#F5B323', 'fontWeight':'bold'}),
     html.Br(),
-    html.A('Log Filter', href='/page-2',style={'color': 'orange', 'fontWeight':'bold'},target='_blank'),
+    html.A('LogFilter', href='/page-2',style={'color': '#F5B323', 'fontWeight':'bold'},target='_blank'),
     
 ])
 
