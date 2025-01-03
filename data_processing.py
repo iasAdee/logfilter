@@ -69,7 +69,7 @@ class DataPreprocessing:
 			            ls.append("Direkt")
 			            
 
-		data_req["new_col"] = ls
+		data_req["Gesamt"] = ls
 
 
 		ls = []
@@ -82,7 +82,7 @@ class DataPreprocessing:
 		    #filter_action="native",
 		    sort_action="native",
 		    style_data={
-            'backgroundColor': 'lightcyan',
+            'backgroundColor': 'white',
             
         	},
 		    #page_action="native",
@@ -97,9 +97,9 @@ class DataPreprocessing:
 
 		fig = go.Figure()
 
-		value_counts = data_req['new_col'].value_counts()
+		value_counts = data_req['Gesamt'].value_counts()
 
-		colors = ['darkkhaki', 'indianred', 'lightseagreen']
+		colors = ['#F5B323', 'dimgrey', 'gainsboro']
 		# Create the bar plot with Plotly
 		fig = go.Figure(data=[
 		    go.Bar(
@@ -114,11 +114,9 @@ class DataPreprocessing:
 		# Update layout to match the styling of the Matplotlib plot
 		fig.update_layout(
 			title='Picks Distribution',
-			xaxis_title='Selected values',
+			xaxis_title='Anzahl',
 			yaxis_title='Summe',
 			template='plotly_white',
-			plot_bgcolor='lightcyan',
-			paper_bgcolor='lightcyan',
 			height=350,
 		)
 
@@ -393,7 +391,7 @@ class DataPreprocessing:
 
 			datextracted = pd.DataFrame(data_collection, columns=["AME", "BME", "Auftragsmenge_bereits_geliefert", "Auftragsmenge_Offen",
 			                                                      "Zähler", "BereitStellDat","SKU_Zähler",
-			                                                      "MatBez", "MatNr", "Picks", "Pallets","Werk", "KomplettLF_KZ", "SalesOrder", "WE_PLZ", "new_col"])
+			                                                      "MatBez", "MatNr", "Picks", "Pallets","Werk", "KomplettLF_KZ", "SalesOrder", "WE_PLZ", "Gesamt"])
 
 		else:
 			datahalf = pd.DataFrame(data_collection2, columns=["AME", "BME", "Auftragsmenge_bereits_geliefert", "Auftragsmenge_Offen",
@@ -419,7 +417,7 @@ class DataPreprocessing:
 		    sort_action="native",
 		    #page_action="native",
 		    style_data={
-            'backgroundColor': 'lightcyan',
+            'backgroundColor': 'white',
             
         	},
 		    style_header={
@@ -443,7 +441,7 @@ class DataPreprocessing:
 			    sort_action="native",
 			    #page_action="native",
 			    style_data={
-	            'backgroundColor': 'lightcyan',
+	            'backgroundColor': 'white',
 	            
 	        	},
 			    style_header={
@@ -459,7 +457,7 @@ class DataPreprocessing:
 
 
 		value_counts = datahalf['AME'].value_counts()
-		colors = ['darkkhaki', 'indianred', 'lightseagreen', 'mediumpurple']
+		colors = ['#F5B323', 'dimgrey', 'black', 'gainsboro']
 		text_positions = ['inside' if y >= 200 else 'outside' for y in value_counts.values]
 
 		# Create the bar plot with Plotly
@@ -476,11 +474,9 @@ class DataPreprocessing:
 		# Update layout to match the styling of the Matplotlib plot
 		fig.update_layout(
 		    title='AME Distribution',
-		    xaxis_title='Selected values',
+		    xaxis_title='Anzahl',
 		    yaxis_title='Summe',
 		    template='plotly_white',
-		    plot_bgcolor='lightcyan',
-		    paper_bgcolor='lightcyan',
 		    height=350,
 		)
 
@@ -488,7 +484,6 @@ class DataPreprocessing:
 		fig10 = go.Figure()
 
 		value_counts = data_required['Werk'].value_counts()
-		#colors = ['darkkhaki', 'indianred', 'lightseagreen', 'mediumpurple']
 		text_positions = ['inside' if y >= 200 else 'outside' for y in value_counts.values]
 
 		# Create the bar plot with Plotly
@@ -499,7 +494,7 @@ class DataPreprocessing:
 		        #marker_color = colors,
 		        text=value_counts.values,  # Text annotations on bars
 		        textposition=text_positions,  # Position annotations outside the bars
-		        marker_color='steelblue'
+		        marker_color='#F5B323'
 		    )
 		])
 
@@ -509,8 +504,6 @@ class DataPreprocessing:
 		    xaxis_title='Werk',
 		    yaxis_title='Summe',
 		    template='plotly_white',
-		    plot_bgcolor='lightcyan',
-		    paper_bgcolor='lightcyan',
 		    height=350,
 		)
 
@@ -521,7 +514,7 @@ class DataPreprocessing:
 
 		#print(value_counts)
 
-		colors = ['darkkhaki', 'indianred']
+		colors = ['#F5B323', 'dimgrey', 'black', 'gainsboro']
 		text_positions = ['inside' if y >= 100 else 'outside' for y in value_counts.values]
 
 		# Create the bar plot with Plotly
@@ -538,11 +531,11 @@ class DataPreprocessing:
 		# Update layout to match the styling of the Matplotlib plot
 		fig2.update_layout(
 			title='BME Distribution',
-			xaxis_title='Selected values',
+			xaxis_title='Anzahl',
 			yaxis_title='Summe',
 			template='plotly_white',
-			plot_bgcolor='lightcyan',
-			paper_bgcolor='lightcyan',
+			plot_bgcolor='white',
+			paper_bgcolor='white',
 			height=350,
 
 			# Set axis labels and title color to white
@@ -571,15 +564,17 @@ class DataPreprocessing:
 			x="date", 
 			y="Picks", 
 			labels={"date": "Datum", "Picks": "Picks"},
-			title="Picks Bar Chart"
+			title="Picks Balkendiagramm",
+			color_discrete_sequence=["#F5B323"]
+
 		)
 
 		# Update layout to adjust x-axis labels
 		fig3.update_layout(
 			xaxis_tickformat="%Y-%m-%d", # Format for the date display
 			xaxis_tickangle=45,           # Rotate x-axis labels by 45 degrees
-			plot_bgcolor='lightcyan',
-			paper_bgcolor='lightcyan',
+			plot_bgcolor='white',
+			paper_bgcolor='white',
 			height=350,
 		)
 
@@ -589,16 +584,17 @@ class DataPreprocessing:
 			datahalf_pallets, 
 			x="date", 
 			y="Pallets", 
-			labels={"date": "Datum", "Picks": "Pallets"},
-			title="Pallets Bar Chart"
+			labels={"date": "Datum", "Pallets": "PAL"},
+			title="Pal Balkendiagramm",
+			color_discrete_sequence=["#F5B323"]
 		)
 
 		# Update layout to adjust x-axis labels
 		fig4.update_layout(
 			xaxis_tickformat="%Y-%m-%d", # Format for the date display
 			xaxis_tickangle=45,           # Rotate x-axis labels by 45 degrees
-			plot_bgcolor='lightcyan',
-			paper_bgcolor='lightcyan',
+			plot_bgcolor='white',
+			paper_bgcolor='white',
 			height=350,
 		)
 
@@ -615,9 +611,14 @@ class DataPreprocessing:
 				datextracted, 
 				x="date", 
 				y="Picks", 
-				color="new_col", 
+				color="Gesamt", 
 				labels={"date": "Datum", "Picks": "Picks"},
-				title="Picks Bar Chart"
+				title="Picks Balkendiagramm",
+				color_discrete_map={
+				"Direkt": "#F5B323",  
+				"Dachser": "black",  
+				"TOF": "dimgrey",  
+				}
 			)
 
 			# Update layout to adjust x-axis labels
@@ -625,8 +626,8 @@ class DataPreprocessing:
 				xaxis_tickformat="%Y-%m-%d", # Format for the date display
 				xaxis_tickangle=45,           # Rotate x-axis labels by 45 degrees
 				height=350,
-				plot_bgcolor='lightcyan',
-				paper_bgcolor='lightcyan',
+				plot_bgcolor='white',
+				paper_bgcolor='white',
 			)
 
 
@@ -635,9 +636,14 @@ class DataPreprocessing:
 				datextracted, 
 				x="date", 
 				y="Pallets", 
-				color="new_col",
-				labels={"date": "Datum", "Picks": "Pallets"},
-				title="Pallets Bar Chart"
+				color="Gesamt",
+				labels={"date": "Datum", "Pallets": "PAL"},
+				title="Pal Balkendiagramm",
+				color_discrete_map={
+				"Direkt": "#F5B323",  
+				"Dachser": "black",  
+				"TOF": "dimgrey",  
+				}
 			)
 
 			# Update layout to adjust x-axis labels
@@ -645,8 +651,8 @@ class DataPreprocessing:
 				xaxis_tickformat="%Y-%m-%d", # Format for the date display
 				xaxis_tickangle=45,           # Rotate x-axis labels by 45 degrees
 				height=350,
-				plot_bgcolor='lightcyan',
-				paper_bgcolor='lightcyan',
+				plot_bgcolor='white',
+				paper_bgcolor='white',
 			)
 
 
@@ -672,7 +678,7 @@ class DataPreprocessing:
 		    texttemplate='%{text:d}',     
 		    hoverinfo='text',   
 		    name='Pallets',
-		    marker_color='darkcyan'
+		    marker_color='black'
 		))
 
 		# Add Picks bar
@@ -680,20 +686,20 @@ class DataPreprocessing:
 		    x=grouped_data['Werk'],
 		    y=grouped_data['Picks'],
 		    name='Picks',
-		    marker_color='steelblue',
+		    marker_color='#F5B323',
 		    text=grouped_data['Picks'],  
 		    texttemplate='%{text:d}',    
 		    hoverinfo='text'  
 		))
 
 		fig20.update_layout(
-		    title='Werk Based Chart for Pallets and Picks',
+		    title='PAL & Picks je Werk ',
 		    xaxis=dict(title='Werk'),
 		    yaxis=dict(title='Values'),
 		    barmode='group',  
 		    #template='plotly',
-		    plot_bgcolor='lightcyan',
-			paper_bgcolor='lightcyan',
+		    plot_bgcolor='white',
+			paper_bgcolor='white',
 		)
 
 
@@ -746,7 +752,7 @@ class DataPreprocessing:
 		    x=[str(d) for d in keys_sorted],
 		    y=values_1_sorted,
 		    name='Andere',
-		    marker_color='slateblue',
+		    marker_color='#F5B323',
 		    width=width
 		))
 
@@ -754,7 +760,7 @@ class DataPreprocessing:
 		    x=[str(d) for d in keys_sorted],
 		    y=values_2_sorted,
 		    name='Eigene',
-		    marker_color='lightseagreen',
+		    marker_color='black',
 		    width=width
 		))
 
@@ -766,8 +772,6 @@ class DataPreprocessing:
 		    xaxis_tickangle=-90,  
 		    template='plotly_white',
 		    legend_title='Type',
-		    plot_bgcolor='lightcyan',
-			paper_bgcolor='lightcyan',
 
 		)
 
@@ -801,7 +805,7 @@ class DataPreprocessing:
 		val2 = sender_dict[int(user)][1]
 
 
-		colors = ['slateblue', 'lightseagreen']
+		colors = ['#F5B323', 'dimgrey', 'black', 'gainsboro']
 		ls = ["Andere", "Eigene"]
 		ls2 = [val1, val2]
 
@@ -821,8 +825,8 @@ class DataPreprocessing:
 		fig.update_layout(
 			xaxis_tickformat="%Y-%m-%d", # Format for the date display
 			xaxis_tickangle=45,           # Rotate x-axis labels by 45 degrees
-			plot_bgcolor='lightcyan',
-			paper_bgcolor='lightcyan',
+			plot_bgcolor='white',
+			paper_bgcolor='white',
 			
 
 		)
