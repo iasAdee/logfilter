@@ -21,7 +21,7 @@ page_5_layout = html.Div(
 	#pal and picks tables
 	html.Div(id='pali',children = [
 		html.H2("Pal & PU Tabelle",style={'color': 'black','font-size': '13px'}),
-		html.Button('Save Tabelle', id='pal_buttoni', n_clicks=None,style={'backgroundColor': '#F5B323','fontSize':"12px"}),
+		html.Button('Tabelle speichern', id='pal_buttoni', n_clicks=None,style={'backgroundColor': '#F5B323','fontSize':"12px"}),
 		],
 		style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
 		),
