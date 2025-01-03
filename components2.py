@@ -6,10 +6,10 @@ from datetime import datetime, timedelta
 
 nav_content2 = html.Div([
 
-    html.Hr(style={'backgroundColor': 'orange'}),
-    html.H2('New Filter',style={'color': 'black'}),
+    html.Hr(style={'backgroundColor': '#F5B323'}),
+    html.H2('Neuer Filter',style={'color': 'black'}),
 
-    html.Hr(style={'backgroundColor': 'orange'}),
+    html.Hr(style={'backgroundColor': '#F5B323'}),
 
     dcc.Upload(
         id='upload-data-2',
@@ -25,7 +25,7 @@ nav_content2 = html.Div([
             'borderStyle': 'dashed',
             'borderRadius': '5px',
             'textAlign': 'center',
-            'borderColor': 'orange',
+            'borderColor': '#F5B323',
             'margin': '10px',
             'color':'black'
         },
@@ -34,24 +34,24 @@ nav_content2 = html.Div([
     ),
 
     html.H6(id="status2"),
-    html.Button('Save Tabelle', id='btn', n_clicks=None,style={'backgroundColor': 'orange'}),
+    html.Button('Save Tabelle', id='btn', n_clicks=None,style={'backgroundColor': '#F5B323'}),
 
     #html.Button('Start', id='update-button-2', n_clicks=None),
-    html.Hr(style={'backgroundColor': 'orange'}),
+    html.Hr(style={'backgroundColor': '#F5B323'}),
     
-    dcc.Link('Logfilter', href='/page-2',style={'color': 'orange', 'fontWeight':'bold'}),
+    dcc.Link('Logfilter', href='/page-2',style={'color': '#F5B323', 'fontWeight':'bold'}),
     html.Br(),
-    dcc.Link('M7 Kundenbestellungen', href='/page-3',style={'color': 'orange', 'fontWeight':'bold'}),
+    dcc.Link('M7 Kundenbestellungen', href='/page-3',style={'color': '#F5B323', 'fontWeight':'bold'}),
     
 ])
 
 available_layouts1 = []
 nav_content3 = html.Div([
 
-    html.Hr(style={'backgroundColor': 'orange'}),
+    html.Hr(style={'backgroundColor': '#F5B323'}),
     html.H2('M7 Kundenbestellungen',style={'color': 'Black'}),
 
-    html.Hr(style={'backgroundColor': 'orange'}),
+    html.Hr(style={'backgroundColor': '#F5B323'}),
 
     dcc.Upload(
         id='upload-data-3',
@@ -67,7 +67,7 @@ nav_content3 = html.Div([
             'borderStyle': 'dashed',
             'borderRadius': '5px',
             'textAlign': 'center',
-            'borderColor': 'orange',
+            'borderColor': '#F5B323',
             'margin': '10px',
             'color':'black'
         },
@@ -94,11 +94,11 @@ nav_content3 = html.Div([
         value='',disabled=False,style={'color': 'black','display': 'block'}),
 
     #html.Button('Start', id='update-button-2', n_clicks=None),
-    html.Hr(style={'backgroundColor': 'orange'}),
+    html.Hr(style={'backgroundColor': '#F5B323'}),
     
-    dcc.Link('Logfilter', href='/page-2',style={'color': 'orange', 'fontWeight':'bold'}),
+    dcc.Link('Logfilter', href='/page-2',style={'color': '#F5B323', 'fontWeight':'bold'}),
     html.Br(),
-    dcc.Link('New filter', href='/page1',style={'color': 'orange', 'fontWeight':'bold'}),
+    dcc.Link('New filter', href='/page1',style={'color': '#F5B323', 'fontWeight':'bold'}),
     
 ])
 
