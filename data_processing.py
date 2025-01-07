@@ -695,7 +695,7 @@ class DataPreprocessing:
 		fig20.update_layout(
 		    title='PAL & Picks je Werk ',
 		    xaxis=dict(title='Werk'),
-		    yaxis=dict(title='Values'),
+		    yaxis=dict(title='Werte'),
 		    barmode='group',  
 		    #template='plotly',
 		    plot_bgcolor='white',
