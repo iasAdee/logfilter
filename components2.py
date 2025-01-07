@@ -39,9 +39,11 @@ nav_content2 = html.Div([
     #html.Button('Start', id='update-button-2', n_clicks=None),
     html.Hr(style={'backgroundColor': '#F5B323'}),
     
-    dcc.Link('Logfilter', href='/page-2',style={'color': '#F5B323', 'fontWeight':'bold'}),
+    dcc.Link('Warenausgänge', href='/page-2',style={'color': '#F5B323', 'fontWeight':'bold'}),
     html.Br(),
     dcc.Link('M7 Kundenbestellungen', href='/page-3',style={'color': '#F5B323', 'fontWeight':'bold'}),
+    html.Br(),
+    html.A('Wareneingänge', href='/page_input',style={'color': '#F5B323', 'fontWeight':'bold'},target='_blank'),
     
 ])
 
@@ -96,9 +98,11 @@ nav_content3 = html.Div([
     #html.Button('Start', id='update-button-2', n_clicks=None),
     html.Hr(style={'backgroundColor': '#F5B323'}),
     
-    dcc.Link('Logfilter', href='/page-2',style={'color': '#F5B323', 'fontWeight':'bold'}),
+    dcc.Link('Warenausgänge', href='/page-2',style={'color': '#F5B323', 'fontWeight':'bold'}),
     html.Br(),
-    dcc.Link('New filter', href='/page1',style={'color': '#F5B323', 'fontWeight':'bold'}),
+    dcc.Link('Neuer Filter', href='/page1',style={'color': '#F5B323','fontWeight': 'bold'}),
+    html.Br(),
+    html.A('Wareneingänge', href='/page_input',style={'color': '#F5B323', 'fontWeight':'bold'},target='_blank'),
     
 ])
 
