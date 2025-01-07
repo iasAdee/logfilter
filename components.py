@@ -122,7 +122,7 @@ nav_content5 = html.Div([
     html.Br(),
     dcc.Link('M7 Kundenbestellungen', href='/page-3',style={'color': '#F5B323', 'fontWeight':'bold'}),
     html.Br(),
-    html.A('LogFilter', href='/page-2',style={'color': '#F5B323', 'fontWeight':'bold'},target='_blank'),
+    html.A('Warenausgänge', href='/page-2',style={'color': '#F5B323', 'fontWeight':'bold'},target='_blank'),
     
 ])
 
