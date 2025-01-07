@@ -496,18 +496,18 @@ def make_barchart(order_id, proccessed_data):
         y='value',
         text='value',  # Display values on the bars
         labels={'client': 'Client ID', 'value': 'Total Value'},  # Customize axis labels
-        title=f' Gesamtanzahl des Kunden xyz nach Artikel {order_id}'
+        title=f'Gesamte Bestellungen des Artikels {order_id} je Kunde ',
+        #color_discrete_sequence=["#F5B323"]
     )
 
     # Customize appearance
-    fig.update_traces(marker_color='skyblue', textposition='outside')  # Bar color and text position
+    fig.update_traces(marker_color='#F5B323', textposition='outside')  # Bar color and text position
     fig.update_layout(
         xaxis=dict(title='KundenNr.', tickmode='linear'),
         yaxis=dict(title='Gesamtwert'),
         title=dict(font=dict(size=18), x=0.5),  # Center-align title
         template='plotly_white',  # Use a clean theme
-        plot_bgcolor='lightcyan',
-		paper_bgcolor='lightcyan',
+
     )
 
     # Show the figure
@@ -530,19 +530,18 @@ def make_linechart(order_id, proccessed_data):
         x='date',
         y='value',
         labels={'date': 'Date', 'value': 'Value'},
-        title=f'wert Over Time for  ArtikelNr. {order_id}',
-        markers=True  # Add markers to indicate data points
+        title=f'Zeitachse der Bestellungen des Artikels {order_id}',
+        markers=True,  # Add markers to indicate data points
+        #color_discrete_sequence=["#F5B323"]
     )
 
     # Customize appearance
-    fig.update_traces(line_color='skyblue', marker=dict(size=8))
+    fig.update_traces(line_color='#F5B323', marker=dict(size=8))
     fig.update_layout(
         xaxis=dict(title='Datum', tickformat='%d-%m-%y'),
         yaxis=dict(title='wert'),
         title=dict(font=dict(size=18), x=0.5),  # Center-align title
         template='plotly_white',
-        plot_bgcolor='lightcyan',
-		paper_bgcolor='lightcyan',
     )
 
     # Show the figure
@@ -570,18 +569,18 @@ def make_barchart_client(client_id, proccessed_data):
         y='value',
         text='value',  # Display values on the bars
         labels={'client': 'Client ID', 'value': 'Total Value'},  # Customize axis labels
-        title=f' Gesamtanzahl des Artikels xyz nach Kunden: {client_id}'
+        title=f' Gesamte Bestellungen des Kunden {client_id} je Artike',
+        #color_discrete_sequence=["#F5B323"]
     )
 
     # Customize appearance
-    fig.update_traces(marker_color='skyblue', textposition='outside')  # Bar color and text position
+    fig.update_traces(marker_color='#F5B323', textposition='outside')  # Bar color and text position
     fig.update_layout(
         xaxis=dict(title='ArtikelNr.', tickmode='linear'),
         yaxis=dict(title='Gesamtwert'),
         title=dict(font=dict(size=18), x=0.5),  # Center-align title
         template='plotly_white',  # Use a clean theme
-        plot_bgcolor='lightcyan',
-		paper_bgcolor='lightcyan',
+
     )
 
     # Show the figure
@@ -602,20 +601,18 @@ def make_linechart_client(client_id, proccessed_data):
         x='date',
         y='value',
         labels={'date': 'Date', 'value': 'Value'},
-        title=f'Wert Over Time for KundenNr. {client_id}',
+        title=f'Gesamte Bestellungen des Kunden {client_id}',
         markers=True,  # Add markers to indicate data points,
-       
+       	#color_discrete_sequence=["#F5B323"]
     )
 
     # Customize appearance
-    fig.update_traces(line_color='skyblue', marker=dict(size=8))
+    fig.update_traces(line_color='#F5B323', marker=dict(size=8))
     fig.update_layout(
         xaxis=dict(title='Datum', tickformat='%d-%m-%y'),
         yaxis=dict(title='Wert'),
         title=dict(font=dict(size=18), x=0.5),  # Center-align title
         template='plotly_white',
-        plot_bgcolor='lightcyan',
-		paper_bgcolor='lightcyan',
     )
 
     # Show the figure
@@ -1039,7 +1036,7 @@ page_3_layout = html.Div([
 
 	html.Div(
 	    [
-	    	html.H1("Login", style={ "color":"black"}),
+	    	html.H1("LogFilter", style={ "color":"black"}),
 	        html.H6("ID", style={'font-size': '13px', "color":"black"}),
 	        dcc.Input(id='input-text1', 
 	                  type='text', 
@@ -1092,6 +1089,8 @@ app.layout = html.Div([
 	#html.Div(id='page-content'),
 	dcc.Download(id="download-dataframe-csv"),
 
+	html.Meta(name="favicon", content="data:,"),
+
 	html.Div(id='page-1-content', style={'display': 'block'}, children=[
 	    page_1_layout
 	]),
@@ -1133,7 +1132,7 @@ app.layout = html.Div([
 )
 def display_page(pathname,id_, pass_):
 
-    if(id_ == "log" and pass_ == "C3asar!"):#C3asar!
+    if(id_ == "log" and pass_ == "log"):#C3asar!
 
         if pathname == '/page-2':
             return {'display': 'block'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'none'},{'display': 'none'},""
@@ -1152,6 +1151,10 @@ def display_page(pathname,id_, pass_):
 
 
 app.title = "LogFilter"
+
+@app.server.route('/favicon.ico')
+def remove_favicon():
+    return '', 204
 
 
 app.css.append_css({
