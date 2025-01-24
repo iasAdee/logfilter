@@ -25,6 +25,7 @@ import base64
 import io
 import plotly.graph_objs as go
 from input import page_5_layout
+from filter import page_6_layout
 
 
 
@@ -44,6 +45,35 @@ def save_data(data1, n_clicks):
 		df = pd.DataFrame(data1)
 		#df.to_csv("sped_data.csv", index=False)
 		return dcc.send_data_frame(df.to_csv, "sped_data.csv", index=False)
+
+@callback(
+	Output("download-dataframe-csv6", "data"),
+	
+	Input('stored-data-6f', 'data'),
+	Input('sped_button6', 'n_clicks'),
+
+	)
+
+def save_data(data1, n_clicks):
+	if(n_clicks != None):
+		df = pd.DataFrame(data1)
+		#df.to_csv("sped_data.csv", index=False)
+		return dcc.send_data_frame(df.to_csv, "allzeros.csv", index=False)
+
+@callback(
+	Output("download-dataframe-csv7", "data"),
+	
+	Input('stored-data-7f', 'data'),
+	Input('sped_button6', 'n_clicks'),
+
+	)
+
+def save_data(data1, n_clicks):
+	if(n_clicks != None):
+		df = pd.DataFrame(data1)
+		#df.to_csv("sped_data.csv", index=False)
+		return dcc.send_data_frame(df.to_csv, "checked_zeros.csv", index=False)
+
 
 
 @callback(
@@ -393,10 +423,6 @@ def parse_contents(contents, filename, date):
 )
 def update_output(list_of_contents, list_of_names, list_of_dates):
 
-    #print(list_of_contents)
-    #print(list_of_names)
-    #print(list_of_dates)
-
     if list_of_contents is not None:
         children = []
         df_combined = pd.DataFrame()
@@ -447,6 +473,141 @@ def update_output3(list_of_contents, list_of_names, list_of_dates):
             df_combined = pd.concat([df_combined, df], ignore_index=True)
         return df_combined.to_dict('records'), "Daten erfolgreich geladen"
     return {}, ""
+
+@callback(
+    #Output('output-data-upload', 'children'),
+    Output('stored-data-6', 'data'),
+     Output('status6', 'children'),
+    [Input('upload-data6', 'contents')],
+    [State('upload-data6', 'filename'),
+     State('upload-data6', 'last_modified')]
+)
+def update_output6(list_of_contents, list_of_names, list_of_dates):
+
+    if list_of_contents is not None:
+        children = []
+        df_combined = pd.DataFrame()
+        for c, n, d in zip(list_of_contents, list_of_names, list_of_dates):
+            child, df = parse_contents(c, n, d)
+            children.append(child)
+            df_combined = pd.concat([df_combined, df], ignore_index=True)
+        return df_combined.to_dict('records'), "Daten erfolgreich geladen"
+    return {}, ""
+
+@callback(
+    #Output('output-data-upload', 'children'),
+    Output('stored-data-7', 'data'),
+     Output('status8', 'children'),
+    [Input('upload-data7', 'contents')],
+    [State('upload-data7', 'filename'),
+     State('upload-data7', 'last_modified')]
+)
+def update_output8(list_of_contents, list_of_names, list_of_dates):
+
+    if list_of_contents is not None:
+        children = []
+        df_combined = pd.DataFrame()
+        for c, n, d in zip(list_of_contents, list_of_names, list_of_dates):
+            child, df = parse_contents(c, n, d)
+            children.append(child)
+            df_combined = pd.concat([df_combined, df], ignore_index=True)
+        return df_combined.to_dict('records'), "Daten erfolgreich geladen"
+    return {}, ""
+
+
+@callback(
+    Output('status7', 'children'),
+    Output('output-data-upload6', 'children'),
+    Output('output-data-upload7', 'children'),
+    Output('stored-data-6f', 'data'),
+    Output('stored-data-7f', 'data'),
+    
+
+ 	Input('stored-data-6', 'data'),
+ 	Input('stored-data-7', 'data'),
+    )
+def update_second(input1, input2):
+	data = pd.DataFrame(input1)
+	data2 = pd.DataFrame(input2)
+
+
+	if(len(data) == 0):
+		return "Data Not recived Yet", [], [], [], []
+	else:
+		#print(data)
+		data = data.dropna(subset=['Material','Gesperrt', 'Nicht freier Bestand', 'In Qualitätsprüfung' ])
+		selected_rows = data[(data['Gesperrt'] > 0) | (data['Nicht freier Bestand'] > 0) | (data['In Qualitätsprüfung'] > 0)]
+
+		
+		ls = []
+		ls.append(html.Div([
+		dash_table.DataTable(
+		    style_table={'height': '400px','overflowY': 'auto', 'width':'98%', 'margin-left':'4px'},
+		    data=selected_rows.to_dict('records'),
+		    columns=[{"name": i, "id": i} for i in selected_rows.columns],
+		    #editable=True,
+		    #filter_action="native",
+		    sort_action="native",
+		    style_data={
+            'backgroundColor': 'white',
+            
+        	},
+		    #page_action="native",
+		    style_header={
+		        'backgroundColor': 'darkslategrey',
+		        'color': 'lightcyan',
+		        'fontWeight': 'bold',
+		        'textAlign': 'center',
+		        'border': '1px solid black'
+		    }),html.Hr()])
+		)
+
+		new_dataframe = pd.DataFrame()
+		if(len(data2) > 0):
+			data2 = data2.dropna(subset=['Material','Gesperrt', 'Nicht freier Bestand', 'In Qualitätsprüfung'])
+			data2 = data2.dropna(subset=['Material','Gesperrt', 'Nicht freier Bestand', 'In Qualitätsprüfung' ]).reset_index(drop=True)
+			
+			checked = []
+			for i in range(len(data2)):
+			    mat_id = data2["Material"][i]
+			    
+			    if(mat_id not in list(selected_rows.Material)):
+			        continue
+			        
+			    if(mat_id in checked):
+			        continue
+			    else:
+			        checked.append(mat_id)   
+			        if(data2["Gesperrt"][i] == 0 and data2["Nicht freier Bestand"][i]==0 and data2["In Qualitätsprüfung"][i]==0):
+			            new_dataframe = pd.concat([new_dataframe, data2.iloc[[i]]], ignore_index=True)
+		ls2 = []
+
+		if(len(new_dataframe)>0):
+			ls2.append(html.Div([
+			dash_table.DataTable(
+			    style_table={'height': '400px','overflowY': 'auto', 'width':'98%', 'margin-left':'4px'},
+			    data=new_dataframe.to_dict('records'),
+			    columns=[{"name": i, "id": i} for i in new_dataframe.columns],
+			    #editable=True,
+			    #filter_action="native",
+			    sort_action="native",
+			    style_data={
+	            'backgroundColor': 'white',
+	            
+	        	},
+			    #page_action="native",
+			    style_header={
+			        'backgroundColor': 'darkslategrey',
+			        'color': 'lightcyan',
+			        'fontWeight': 'bold',
+			        'textAlign': 'center',
+			        'border': '1px solid black'
+			    }),html.Hr()])
+			)
+
+
+		return "Data Recived", ls, ls2,selected_rows.to_dict('records'),new_dataframe.to_dict('records')
+
 
 
 def process_data(data):
@@ -532,7 +693,7 @@ def make_linechart(order_id, proccessed_data):
         labels={'date': 'Date', 'value': 'Value'},
         title=f'Zeitachse der Bestellungen des Artikels {order_id}',
         markers=True,  # Add markers to indicate data points
-        #color_discrete_sequence=["#F5B323"]
+        color_discrete_sequence=["#F5B323"]
     )
 
     # Customize appearance
@@ -1036,7 +1197,7 @@ page_3_layout = html.Div([
 
 	html.Div(
 	    [
-	    	html.H1("LogFilter", style={ "color":"black"}),
+	    	html.H1("Login", style={ "color":"black"}),
 	        html.H6("ID", style={'font-size': '13px', "color":"black"}),
 	        dcc.Input(id='input-text1', 
 	                  type='text', 
@@ -1089,8 +1250,6 @@ app.layout = html.Div([
 	#html.Div(id='page-content'),
 	dcc.Download(id="download-dataframe-csv"),
 
-	html.Meta(name="favicon", content="data:,"),
-
 	html.Div(id='page-1-content', style={'display': 'block'}, children=[
 	    page_1_layout
 	]),
@@ -1107,6 +1266,11 @@ app.layout = html.Div([
 	]),
 	html.Div(id='page-5-content', style={'display': 'none'}, children=[
 	    page_5_layout
+	]),
+	html.Div(id='page-6-content', style={'display': 'none'}, children=[
+		dcc.Store(id='stored-data-6'),
+		dcc.Store(id='stored-data-7'),
+	    page_6_layout
 	])
 
 	
@@ -1120,6 +1284,7 @@ app.layout = html.Div([
      Output('page-3-content', 'style'),
      Output('page-4-content', 'style'),
      Output('page-5-content', 'style'),
+     Output('page-6-content', 'style'),
 
      Output('success', 'children'),
 
@@ -1135,26 +1300,24 @@ def display_page(pathname,id_, pass_):
     if(id_ == "log" and pass_ == "C3asar!"):#C3asar!
 
         if pathname == '/page-2':
-            return {'display': 'block'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'none'},{'display': 'none'},""
+            return {'display': 'block'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'none'},{'display': 'none'},{'display': 'none'},""
         elif(pathname == "/page1"):
-            return {'display': 'none'}, {'display': 'block'} ,{'display': 'none'},{'display': 'none'},{'display': 'none'}, ""
+            return {'display': 'none'}, {'display': 'block'} ,{'display': 'none'},{'display': 'none'},{'display': 'none'}, {'display': 'none'},""
         elif(pathname == "/page-3"):
-            return {'display': 'none'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'block'},{'display': 'none'},""
+            return {'display': 'none'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'block'},{'display': 'none'},{'display': 'none'},""
         elif(pathname == "/page_input"):
-            return {'display': 'none'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'none'},{'display': 'block'},"" 
+            return {'display': 'none'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'none'},{'display': 'block'},{'display': 'none'},"" 
+        elif(pathname == "/page_filter"):
+            return {'display': 'none'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'none'},{'display': 'none'},{'display': 'block'},"" 
         else:
-            return {'display': 'none'}, {'display': 'none'}, {'display': 'block'},{'display': 'none'},{'display': 'none'}, ""
+            return {'display': 'none'}, {'display': 'none'}, {'display': 'none'},{'display': 'none'},{'display': 'none'}, {'display': 'none'},""
     elif(id_ == "" and pass_ == ""):
-        return {'display': 'none'}, {'display': 'none'}, {'display': 'block'},{'display': 'none'},{'display': 'none'},html.H6("Bitte ID und Passwort eintragen",style={"color":"black"})
+        return {'display': 'none'}, {'display': 'none'}, {'display': 'block'},{'display': 'none'},{'display': 'none'},{'display': 'none'},html.H6("Bitte ID und Passwort eintragen",style={"color":"black"})
     else:
-        return {'display': 'none'}, {'display': 'none'}, {'display': 'block'},{'display': 'none'},{'display': 'none'},""
+        return {'display': 'none'}, {'display': 'none'}, {'display': 'block'},{'display': 'none'},{'display': 'none'},{'display': 'none'},""
 
 
 app.title = "LogFilter"
-
-@app.server.route('/favicon.ico')
-def remove_favicon():
-    return '', 204
 
 
 app.css.append_css({
