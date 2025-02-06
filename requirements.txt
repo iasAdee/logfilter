@@ -1,11 +1,11 @@
 dash==2.18.0
 numpy==2.1.1
 pandas==2.2.2
+easyocr
+pymupdf
+google.generativeai
 xlrd
 openpyxl
 gunicorn
 dash-tools
-easyocr
-pymupdf
-google.generativeai
 
