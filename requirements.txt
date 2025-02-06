@@ -5,3 +5,6 @@ xlrd
 openpyxl
 gunicorn
 dash-tools
+easyocr
+google.generativeai
+pymupdf
