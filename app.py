@@ -15,7 +15,7 @@ import pandas as pd
 from collections import Counter
 import numpy as np
 from dash import dcc, html
-from dash import Dash, dcc, html, dash_table, Input, Output, State, callback
+from dash import Dash, dcc, html, dash_table, Input, Output, State, callback, ctx
 
 
 
@@ -26,6 +26,7 @@ import io
 import plotly.graph_objs as go
 from input import page_5_layout
 from filter import page_6_layout
+from image import page_7_layout
 
 
 
@@ -1241,6 +1242,193 @@ page_3_layout = html.Div([
 	#html.Div(id= "This")
 ])
 
+import fitz  # PyMuPDF
+from PIL import Image
+from io import BytesIO
+import matplotlib.pyplot as plt
+import re
+from tqdm import tqdm
+import base64
+
+import os
+import google.generativeai as genai
+
+os.environ["GEMINI_API_KEY"] = "AIzaSyByx1qgfrg6aPl8sTXyYKRX79LQEeZzPjc"
+genai.configure(api_key=os.environ["GEMINI_API_KEY"]) 
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+
+@app.callback(
+    Output("status9", "children"),
+    Output("process-btn", "disabled"),
+    Output("pdf-content", "data"),
+    Output("pdf-processed", "data"),
+    Output("pdf_results", "children"),
+    
+
+
+    Input("upload-pdf", "contents"),
+    Input("process-btn", "n_clicks"),
+    State("pdf-content", "data"),
+    State("pdf-processed", "data"),
+    prevent_initial_call=True
+)
+def handle_pdf(upload_content, n_clicks, content, processed):
+	triggered_id = ctx.triggered_id  
+
+	if triggered_id == "upload-pdf":
+		if upload_content is None:
+		    return "", True, None, False  # No file uploaded, disable button
+		return "File uploaded.", False, upload_content, False, []
+
+	if triggered_id == "process-btn":
+		if content is None:
+		    return "No file uploaded.", dash.no_update, None, False, []
+
+		if processed:
+		    return "PDF already processed.", True, content, True , []
+
+		if content is not None:
+
+			#print(contents)
+			content_type, content_string = content[0].split(',')
+			decoded = io.BytesIO(base64.b64decode(content_string))
+
+			# Extract text from the PDF
+			doc = fitz.open(stream=decoded, filetype="pdf")
+			images_list = []
+
+			print(f"Total Pages in the document : {len(doc)}")
+
+			prompt_list = []
+			for page_number in range(len(doc)):
+			    
+			    if(page_number%3 != 0):
+			        continue        
+			        
+			    page = doc[page_number]
+			    text = page.get_text()
+			    
+			    text_data = text.split("\n")
+			    
+			    #print(text_data)
+			    
+			    text = ""
+			    artikle = ""
+			    for i, tex in enumerate(text_data):
+			        if(tex.startswith("PO")):
+			            text=tex
+			            
+			        if(tex.startswith("FERT-Artikel-Nummer")):
+			            artikle = text_data[i+1]
+			            
+			    images = page.get_images(full=True) 
+			    print(f"Page Number: {page_number} and {text} and artikel = {artikle}")
+			    
+			    text_data = text.split(":")
+			    image_results = [text_data[1].strip(), artikle.strip()]
+			    
+			    if(len(images)<=1):
+			        continue
+			    
+			    for img_index, img in enumerate(images):
+			        xref = img[0]  
+			        
+			        if(img_index>=2):
+			            break
+			        base_image = doc.extract_image(xref)  
+			        image_bytes = base_image["image"]  
+			        
+			        
+			        image = Image.open(BytesIO(image_bytes))
+			        
+			        buffered = BytesIO()
+			        image.save(buffered, format="JPEG")
+			        image_base64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
+			        
+			        prompt = [
+			            {
+			                "mime_type": "image/jpeg",
+			                "data": image_base64,
+			            },
+			            "Extract the exact text from this image and highlight the product name. \
+			             If the image has text, return the extracted text; otherwise, return False. also extract the FERT-Artikel-Nummer vom PO"
+			        ]
+			        
+			        try:
+				        response = model.generate_content(prompt, stream=False)
+				        response_text =response.text
+				        textual_data =response_text.split("\n")
+			        except Exception as e:
+			        	return  "API error.", True, stored_content, False , []
+
+			        if(len(textual_data) < 5):
+			            continue
+			            
+			           
+			        
+			        image_artkl = ""
+			        flag = False
+			        for j, data in enumerate(textual_data):
+			            pattern = r"\*\*(.*?)\*\*"
+			            matches = re.findall(pattern, data)
+			            
+			            if(len(matches)>0 and flag==False):
+			                image_results.append(matches[0])
+			                flag=True
+			            
+			            if(data.startswith("Batch-No")):
+			                image_artkl = textual_data[j+1]
+			                image_results.append(image_artkl)
+			                break
+			    print(image_results)
+			          
+			    if(len(image_results) > 2):
+			        if(image_results[1] == image_results[3] and image_results[1] == image_results[5]):
+			            image_results.append("Matched")
+			        else:
+			            image_results.append("Not Mactched")
+			    else:
+			        image_results.extend(["", "Not Mactched"])
+			     
+			    
+			    images_list.append(image_results)
+			    
+			    if(page_number == 6):
+			        break
+
+			data = pd.DataFrame(images_list, columns=["PO number","FERT-Artikel", "Image 1","img1-FERT-Artikel" ,  "Image 2", "img2-FERT-Artikel","Result"])
+			print(data.head(10))
+
+			ls2 = []
+			ls2.append(html.Div([
+				dash_table.DataTable(
+				    style_table={'height': '400px','overflowY': 'auto', 'width':'98%', 'margin-left':'4px'},
+				    data=data.to_dict('records'),
+				    columns=[{"name": i, "id": i} for i in data.columns],
+				    #editable=True,
+				    #filter_action="native",
+				    sort_action="native",
+				    style_data={
+		            'backgroundColor': 'white',
+		            
+		        	},
+				    #page_action="native",
+				    style_header={
+				        'backgroundColor': 'darkslategrey',
+				        'color': 'lightcyan',
+				        'fontWeight': 'bold',
+				        'textAlign': 'center',
+				        'border': '1px solid black'
+				    }),html.Hr()])
+				)
+
+
+			# Display the extracted text
+			return  "PDF processed.", True, content, True , ls2
+	else:	
+		return html.Div("No file uploaded yet."), pd.DataFrame().to_dict('records'), [], True, True
+
 
 
 
@@ -1271,6 +1459,11 @@ app.layout = html.Div([
 		dcc.Store(id='stored-data-6'),
 		dcc.Store(id='stored-data-7'),
 	    page_6_layout
+	]),
+	html.Div(id='page-7-content', style={'display': 'none'}, children=[
+		dcc.Store(id='stored-data-8'),
+		dcc.Store(id='stored-data-9'),
+	    page_7_layout
 	])
 
 	
@@ -1285,6 +1478,7 @@ app.layout = html.Div([
      Output('page-4-content', 'style'),
      Output('page-5-content', 'style'),
      Output('page-6-content', 'style'),
+     Output('page-7-content', 'style'),
 
      Output('success', 'children'),
 
@@ -1297,24 +1491,26 @@ app.layout = html.Div([
 )
 def display_page(pathname,id_, pass_):
 
-    if(id_ == "log" and pass_ == "C3asar!"):#C3asar!
+    if(id_ == "log" and pass_ == "log"):#C3asar!
 
         if pathname == '/page-2':
-            return {'display': 'block'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'none'},{'display': 'none'},{'display': 'none'},""
+            return {'display': 'block'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'none'},""
         elif(pathname == "/page1"):
-            return {'display': 'none'}, {'display': 'block'} ,{'display': 'none'},{'display': 'none'},{'display': 'none'}, {'display': 'none'},""
+            return {'display': 'none'}, {'display': 'block'} ,{'display': 'none'},{'display': 'none'},{'display': 'none'}, {'display': 'none'},{'display': 'none'},""
         elif(pathname == "/page-3"):
-            return {'display': 'none'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'block'},{'display': 'none'},{'display': 'none'},""
+            return {'display': 'none'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'block'},{'display': 'none'},{'display': 'none'},{'display': 'none'},""
         elif(pathname == "/page_input"):
-            return {'display': 'none'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'none'},{'display': 'block'},{'display': 'none'},"" 
+            return {'display': 'none'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'none'},{'display': 'block'},{'display': 'none'},{'display': 'none'},"" 
         elif(pathname == "/page_filter"):
-            return {'display': 'none'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'none'},{'display': 'none'},{'display': 'block'},"" 
+            return {'display': 'none'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'none'},{'display': 'none'},{'display': 'block'},{'display': 'none'},"" 
+        elif(pathname == "/image"):
+            return {'display': 'none'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'block'},"" 
         else:
-            return {'display': 'none'}, {'display': 'none'}, {'display': 'none'},{'display': 'none'},{'display': 'none'}, {'display': 'none'},""
+            return {'display': 'none'}, {'display': 'none'}, {'display': 'none'},{'display': 'none'},{'display': 'none'}, {'display': 'none'},{'display': 'none'},""
     elif(id_ == "" and pass_ == ""):
-        return {'display': 'none'}, {'display': 'none'}, {'display': 'block'},{'display': 'none'},{'display': 'none'},{'display': 'none'},html.H6("Bitte ID und Passwort eintragen",style={"color":"black"})
+        return {'display': 'none'}, {'display': 'none'}, {'display': 'block'},{'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'none'},html.H6("Bitte ID und Passwort eintragen",style={"color":"black"})
     else:
-        return {'display': 'none'}, {'display': 'none'}, {'display': 'block'},{'display': 'none'},{'display': 'none'},{'display': 'none'},""
+        return {'display': 'none'}, {'display': 'none'}, {'display': 'block'},{'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'none'},""
 
 
 app.title = "LogFilter"
