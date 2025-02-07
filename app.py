@@ -1247,7 +1247,6 @@ from PIL import Image
 from io import BytesIO
 import matplotlib.pyplot as plt
 import re
-from tqdm import tqdm
 import base64
 
 import os
