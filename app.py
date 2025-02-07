@@ -1359,7 +1359,7 @@ def handle_pdf(upload_content, n_clicks, content, processed):
 				        response_text =response.text
 				        textual_data =response_text.split("\n")
 			        except Exception as e:
-			        	return  "API error.", True, stored_content, False , []
+			        	return  "API error.", True, content, False , []
 
 			        if(len(textual_data) < 5):
 			            continue
