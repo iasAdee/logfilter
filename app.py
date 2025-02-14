@@ -1242,11 +1242,12 @@ page_3_layout = html.Div([
 	#html.Div(id= "This")
 ])
 
-import fitz  # PyMuPDF
+import fitz  
 from PIL import Image
 from io import BytesIO
 import matplotlib.pyplot as plt
 import re
+from tqdm import tqdm
 import base64
 
 import os
@@ -1257,12 +1258,44 @@ genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 model = genai.GenerativeModel("gemini-1.5-flash")
 
 
+def get_punct_free(text):
+    new_text = ""
+    for char in text:
+        if char not in string.punctuation:
+            new_text += char
+            
+    return new_text
+from PIL import Image, ImageEnhance
+
+def preprocess_image(image, scale_factor=2, threshold=150, contrast_factor=2.0):
+    # Open the image
+    
+    
+    # Resize
+    width, height = image.size
+    new_size = (int(width * scale_factor), int(height * scale_factor))
+    resized_image = image.resize(new_size, Image.Resampling.LANCZOS)  # Use LANCZOS instead of ANTIALIAS
+    
+    # Grayscale
+    gray_image = resized_image.convert("L")
+    
+    # Binarize
+    binary_image = gray_image.point(lambda p: p > threshold and 255)
+    
+    # Enhance contrast
+    enhancer = ImageEnhance.Contrast(binary_image)
+    contrast_image = enhancer.enhance(contrast_factor)
+    
+    return contrast_image
+
+import pytesseract
 @app.callback(
     Output("status9", "children"),
     Output("process-btn", "disabled"),
     Output("pdf-content", "data"),
     Output("pdf-processed", "data"),
     Output("pdf_results", "children"),
+    Output("ploti12", "figure"),
     
 
 
@@ -1278,14 +1311,14 @@ def handle_pdf(upload_content, n_clicks, content, processed):
 	if triggered_id == "upload-pdf":
 		if upload_content is None:
 		    return "", True, None, False  # No file uploaded, disable button
-		return "File uploaded.", False, upload_content, False, []
+		return "File uploaded.", False, upload_content, False, [], {}
 
 	if triggered_id == "process-btn":
 		if content is None:
-		    return "No file uploaded.", dash.no_update, None, False, []
+		    return "No file uploaded.", dash.no_update, None, False, [], {}
 
 		if processed:
-		    return "PDF already processed.", True, content, True , []
+		    return "PDF already processed.", True, content, True , [], {}
 
 		if content is not None:
 
@@ -1302,9 +1335,13 @@ def handle_pdf(upload_content, n_clicks, content, processed):
 			prompt_list = []
 			for page_number in range(len(doc)):
 			    
+			    if(page_number == 40):
+			        break
+			    
 			    if(page_number%3 != 0):
 			        continue        
 			        
+			    
 			    page = doc[page_number]
 			    text = page.get_text()
 			    
@@ -1325,10 +1362,8 @@ def handle_pdf(upload_content, n_clicks, content, processed):
 			    print(f"Page Number: {page_number} and {text} and artikel = {artikle}")
 			    
 			    text_data = text.split(":")
-			    image_results = [text_data[1].strip(), artikle.strip()]
+			    image_results = [text_data[1].strip(), artikle.strip(), page_number+1]
 			    
-			    if(len(images)<=1):
-			        continue
 			    
 			    for img_index, img in enumerate(images):
 			        xref = img[0]  
@@ -1341,49 +1376,64 @@ def handle_pdf(upload_content, n_clicks, content, processed):
 			        
 			        image = Image.open(BytesIO(image_bytes))
 			        
-			        buffered = BytesIO()
-			        image.save(buffered, format="JPEG")
-			        image_base64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
+			        preprocessed_image = preprocess_image(image)
 			        
-			        prompt = [
-			            {
-			                "mime_type": "image/jpeg",
-			                "data": image_base64,
-			            },
-			            "Extract the exact text from this image and highlight the product name. \
-			             If the image has text, return the extracted text; otherwise, return False. also extract the FERT-Artikel-Nummer vom PO"
-			        ]
+			        text = pytesseract.image_to_string(preprocessed_image)
+			        print("Text: ")
+			        image_text = text.split("\n")
+			        filtered_list = [item for item in image_text if item]
 			        
-			        try:
-				        response = model.generate_content(prompt, stream=False)
-				        response_text =response.text
-				        textual_data =response_text.split("\n")
-			        except Exception as e:
-			        	return  "API error.", True, content, False , []
-
-			        if(len(textual_data) < 5):
-			            continue
-			            
-			           
+			        
 			        
 			        image_artkl = ""
+			        
+			                    
 			        flag = False
-			        for j, data in enumerate(textual_data):
-			            pattern = r"\*\*(.*?)\*\*"
-			            matches = re.findall(pattern, data)
+			        for j, data in enumerate(filtered_list):
 			            
-			            if(len(matches)>0 and flag==False):
-			                image_results.append(matches[0])
+			            if("Batch-No" in data):
+			                image_artkl = filtered_list[j+1]
+			                
+			                if(len(image_artkl.split(" ")) > 1):
+			                   
+			                    image_artkl = image_artkl.split(" ")[0]
+			                    if not image_artkl.isdigit():
+			                        image_artkl = filtered_list[j+2].strip()
+			                        
+			                        for val in image_artkl.split():
+			                            if(val.isdigit() and len(val)>4):
+			                                image_artkl= val
+			                                
+			                        
+			                        if(not image_artkl.split(" ")[0].isdigit()):
+			                            for k, dat in enumerate(filtered_list[j+2:]):
+			                                match = re.search(r"\b(\d{6})\b", dat)
+			                                if match:
+			                                    image_artkl = match.group(1)
+			                                    break
+			                                
+			                            
+			                            
+			                       
+			                if(image_artkl.isdigit()):      
+			                    image_results.append(image_artkl)
+			                else:
+			                    image_results.append("N/A")
+			                
 			                flag=True
-			            
-			            if(data.startswith("Batch-No")):
-			                image_artkl = textual_data[j+1]
-			                image_results.append(image_artkl)
 			                break
+			        
+			        if(flag== False):
+			            image_results.append("N/A")
+			        
+			        
+			         
 			    print(image_results)
-			          
+			    if(len(image_results) <= 4):
+			        continue
+
 			    if(len(image_results) > 2):
-			        if(image_results[1] == image_results[3] and image_results[1] == image_results[5]):
+			        if(image_results[1] == image_results[3] and image_results[1] == image_results[4]):
 			            image_results.append("Matched")
 			        else:
 			            image_results.append("Not Mactched")
@@ -1393,10 +1443,13 @@ def handle_pdf(upload_content, n_clicks, content, processed):
 			    
 			    images_list.append(image_results)
 			    
-			    if(page_number == 6):
-			        break
+			   
+			                
 
-			data = pd.DataFrame(images_list, columns=["PO number","FERT-Artikel", "Image 1","img1-FERT-Artikel" ,  "Image 2", "img2-FERT-Artikel","Result"])
+			print("process complete")       
+			    
+			    
+			data = pd.DataFrame(images_list, columns=["PO number","FERT-Artikel",'page_number' ,"img1-FERT-Artikel" ,  "img2-FERT-Artikel","Result"])
 			print(data.head(10))
 
 			ls2 = []
@@ -1406,7 +1459,7 @@ def handle_pdf(upload_content, n_clicks, content, processed):
 				    data=data.to_dict('records'),
 				    columns=[{"name": i, "id": i} for i in data.columns],
 				    #editable=True,
-				    #filter_action="native",
+				    filter_action="native",
 				    sort_action="native",
 				    style_data={
 		            'backgroundColor': 'white',
@@ -1422,11 +1475,22 @@ def handle_pdf(upload_content, n_clicks, content, processed):
 				    }),html.Hr()])
 				)
 
+			result_counts = data['Result'].value_counts().reset_index()
+			result_counts.columns = ['Result', 'Count']  # Rename columns for clarity
+
+			# Create the bar chart using Plotly Express
+			fig = px.bar(result_counts, x='Result', y='Count', 
+			             title='Distribution of Results',
+			             color='Result',  
+			             color_discrete_map={'Matched': '#F5B323', 'Not Mactched': 'black'}) 
+
+			fig.update_layout(xaxis_title="Result", yaxis_title="Count") 
+
 
 			# Display the extracted text
-			return  "PDF processed.", True, content, True , ls2
+			return  "PDF processed.", True, content, True , ls2, fig
 	else:	
-		return html.Div("No file uploaded yet."), pd.DataFrame().to_dict('records'), [], True, True
+		return html.Div("No file uploaded yet."), pd.DataFrame().to_dict('records'), [], True, True, {}
 
 
 
@@ -1490,7 +1554,7 @@ app.layout = html.Div([
 )
 def display_page(pathname,id_, pass_):
 
-    if(id_ == "log" and pass_ == "C3asar!"):#C3asar!
+    if(id_ == "log" and pass_ == "log"):#C3asar!
 
         if pathname == '/page-2':
             return {'display': 'block'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'none'},""
@@ -1521,7 +1585,7 @@ app.css.append_css({
 
 
 if __name__ == '__main__':
-    app.run_server(host="0.0.0.0", debug=True, port="8090")
+    app.run_server(debug=True, port="8090")
 
 
 
