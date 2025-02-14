@@ -1288,7 +1288,7 @@ def preprocess_image(image, scale_factor=2, threshold=150, contrast_factor=2.0):
     
     return contrast_image
 
-import pytesseract
+
 @app.callback(
     Output("status9", "children"),
     Output("process-btn", "disabled"),
@@ -1321,6 +1321,27 @@ def handle_pdf(upload_content, n_clicks, content, processed):
 		    return "PDF already processed.", True, content, True , [], {}
 
 		if content is not None:
+
+
+			import importlib
+
+			def try_import_pytesseract():
+			    try:
+			        pytesseract = importlib.import_module('pytesseract')
+			        return pytesseract  # Return the imported module if successful
+			    except ImportError:
+			        return "Error: pytesseract is not installed. Please install it using 'pip install pytesseract'."
+			    except Exception as e: # Catch other potential import errors
+			        return f"An error occurred during import: {e}"
+
+
+			pytesseract_module = try_import_pytesseract()
+
+			if isinstance(pytesseract_module, str):  
+				return "Tessract libaray failed", dash.no_update, None, False, [], {}
+			    #print(pytesseract_module)
+
+			import pytesseract  
 
 			#print(contents)
 			content_type, content_string = content[0].split(',')
@@ -1585,7 +1606,7 @@ app.css.append_css({
 
 
 if __name__ == '__main__':
-    app.run_server(host="0.0.0.0", port="8090", debug=True)
+    app.run_server(debug=True, port="8090")
 
 
 
