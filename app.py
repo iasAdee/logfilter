@@ -1585,7 +1585,7 @@ app.css.append_css({
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True, port="8090")
+    app.run_server(host="0.0.0.0", port="8090", debug=True)
 
 
 
