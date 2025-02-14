@@ -1341,7 +1341,8 @@ def handle_pdf(upload_content, n_clicks, content, processed):
 				return "Tessract libaray failed", dash.no_update, None, False, [], {}
 			    #print(pytesseract_module)
 
-			import pytesseract  
+			import pytesseract 
+			return "pytesseract loaded", dash.no_update, None, False, [], {}
 
 			#print(contents)
 			content_type, content_string = content[0].split(',')
