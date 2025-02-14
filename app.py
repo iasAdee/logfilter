@@ -1402,8 +1402,9 @@ def handle_pdf(upload_content, n_clicks, content, processed):
 			        preprocessed_image = preprocess_image(image)
 			        
 
-			        return "pytesseract loaded", dash.no_update, None, False, [], {}
+
 			        text = pytesseract.image_to_string(preprocessed_image)
+			        return "pytesseract loaded", dash.no_update, None, False, [], {}
 			        print("Text: ")
 			        image_text = text.split("\n")
 			        filtered_list = [item for item in image_text if item]
