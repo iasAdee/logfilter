@@ -21,6 +21,12 @@ page_7_layout = html.Div(
 		html.Div(id='pdf_results',
 		),
 		html.Button('Tabelle speichern', id='sped_button8', n_clicks=None,style={'backgroundColor': '#F5B323','fontSize':"12px"}),
+		html.Div(
+		            dcc.Graph(id='ploti12',
+		                ),
+		            
+		            style={"height": "100%", 'width': '100%', 'float': 'right','padding': '10px'}
+		        ),
 
 	],	
 	style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
