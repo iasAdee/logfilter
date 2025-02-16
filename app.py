@@ -1323,6 +1323,27 @@ def handle_pdf(upload_content, n_clicks, content, processed):
 		if content is not None:
 
 
+			import importlib
+
+			def try_import_pytesseract():
+			    try:
+			        pytesseract = importlib.import_module('pytesseract')
+			        return pytesseract  # Return the imported module if successful
+			    except ImportError:
+			        return "Error: pytesseract is not installed. Please install it using 'pip install pytesseract'."
+			    except Exception as e: # Catch other potential import errors
+			        return f"An error occurred during import: {e}"
+
+
+			pytesseract_module = try_import_pytesseract()
+
+			if isinstance(pytesseract_module, str):  
+				return "Tessract libaray failed", dash.no_update, None, False, [], {}
+			    #print(pytesseract_module)
+
+			import pytesseract  
+
+
 
 			#print(contents)
 			content_type, content_string = content[0].split(',')
@@ -1336,8 +1357,7 @@ def handle_pdf(upload_content, n_clicks, content, processed):
 
 			prompt_list = []
 			for page_number in range(len(doc)):
-			    
-	
+    
 			    if(page_number == 40):
 			        break
 			    
@@ -1378,55 +1398,97 @@ def handle_pdf(upload_content, n_clicks, content, processed):
 			        
 			        
 			        image = Image.open(BytesIO(image_bytes))
-
-			        buffered = BytesIO()
-			        image.save(buffered, format="JPEG")
-			        image_base64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
-
-			        prompt = [
-			            {
-			                "mime_type": "image/jpeg",
-			                "data": image_base64,
-			            },
-			            "Extract the exact text from this image and highlight the product name. \
-			             If the image has text, return the extracted text; otherwise, return False. also extract the FERT-Artikel-Nummer vom PO"
-			        ]
-
-			        try:
-			            response = model.generate_content(prompt, stream=False)
-			            response_text =response.text
-			            textual_data =response_text.split("\n")
-			        except Exception as e:
-			            print(e)
-			            #return  "API error.", True, content, False , []
-
-			        if(len(textual_data) < 5):
-			            continue
-
-
-
+			        
+			        preprocessed_image = preprocess_image(image)
+			        
+			        text = pytesseract.image_to_string(preprocessed_image)
+			        #print("Text: ")
+			        image_text = text.split("\n")
+			        filtered_list = [item for item in image_text if item]
+			        
+			        
+			        #print(filtered_list)
 			        image_artkl = ""
-			        flag = False
-			        for j, data in enumerate(textual_data):
-			            pattern = r"\*\*(.*?)\*\*"
-			            matches = re.findall(pattern, data)
-
-			            if(len(matches)>0 and flag==False):
-			                image_results.append(matches[0])
-			                flag=True
-
-			            if(data.startswith("Batch-No")):
-			                image_artkl = textual_data[j+1]
-			                image_results.append(image_artkl)
-			                break
-
-
-			                
+			        
 			                    
-			    print(image_results)
+			        flag = False
+			        flag2 = False
+			        flag3 = False
+			        label = ""
+			        ml = ""
+			        for j, data in enumerate(filtered_list):
+			            
+			            matches = re.search(r"(Sika®|ika®|Sikae)(.*)", data)
+			            matches2 = re.search(r"\d+(ml|mi)$", data)
+			            if(matches and flag2 == False):
+			                label = matches.group(2).strip()
+			                
+			                if(len(label) > 5):
+			                    flag2 = True
+			                    
+			            if(matches2):
+			                ml = matches2.group(0)
+			                flag3 = True
+			                
+			                
+			            if("Batch-No" in data):
+			                image_artkl = filtered_list[j+1]
+			                
+			                if(len(image_artkl.split(" ")) > 1):
+			                   
+			                    image_artkl = image_artkl.split(" ")[0]
+			                    if not image_artkl.isdigit():
+			                        image_artkl = filtered_list[j+2].strip()
+			                        
+			                        for val in image_artkl.split():
+			                            if(val.isdigit() and len(val)>4):
+			                                image_artkl= val
+			                                
+			                        
+			                        if(not image_artkl.split(" ")[0].isdigit()):
+			                            for k, dat in enumerate(filtered_list[j+2:]):
+			                                match = re.search(r"\b(\d{6})\b", dat)
+			                                if match:
+			                                    image_artkl = match.group(1)
+			                                    break
+			                                
+			                            
+			                            
+			                       
+			                if(image_artkl.isdigit()):      
+			                    image_results.append(image_artkl)
+			                else:
+			                    image_results.append("N/A")
+			                    #print(filtered_list)
+			                
+			                flag=True
+			                break
+			                
+			        """        if(page_number+1 == 28):
+			            print(filtered_list)"""
+			                
+			        if(flag== False):
+			            image_results.append("N/A")
+			        
+			        if(flag2 == False):
+			            image_results.append("No Label")
+			        else:
+			            image_results.append(label)
+			            
+			        if(flag3 == False):
+			            image_results.append("No ML")
+			        else:
+			            image_results.append(ml)
+			            
+			        
+
+			    if(len(image_results) <= 4):
+			        continue
 
 			    if(len(image_results) > 2):
-			        if(image_results[1] == image_results[3] and image_results[1] == image_results[4]):
+			        if(image_results[1] == image_results[3] and image_results[1] == image_results[6]):
+			            image_results.append("Matched")
+			        elif(image_results[4] != "No Label" and  image_results[4] == image_results[7]):
 			            image_results.append("Matched")
 			        else:
 			            image_results.append("Not Mactched")
@@ -1436,12 +1498,15 @@ def handle_pdf(upload_content, n_clicks, content, processed):
 			    
 			    images_list.append(image_results)
 			    
-				   
-				                
+			   
+			                
 
-			print("process complete")     			    
+			print("process complete") 
 			    
-			data = pd.DataFrame(images_list, columns=["PO number","FERT-Artikel",'page_number' ,"image1","img1-FERT-Artikel" , "image2", "img2-FERT-Artikel","Result"])
+			    
+			data = pd.DataFrame(images_list, columns=["PO number","FERT-Artikel",'page_number',
+			"img1-FERT-Artikel","Image1", "image 1 ML", 
+			"img2-FERT-Artikel","Image2", "image 2 ML" , "Result"])
 			print(data.head(10))
 
 			ls2 = []
