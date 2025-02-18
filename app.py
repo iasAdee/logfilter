@@ -1401,8 +1401,15 @@ def handle_pdf(upload_content, n_clicks, content, processed):
 			        
 			        preprocessed_image = preprocess_image(image)
 			        
-			        text = pytesseract.image_to_string(preprocessed_image)
-			        #print("Text: ")
+			        #text = pytesseract.image_to_string(preprocessed_image)
+			        text = ""
+			        try:
+			            text = pytesseract.image_to_string(preprocessed_image) 
+			        except Exception as e:  # Catch any other potential errors
+			            print(f"An unexpected error occurred: {e}")
+			            return "Engine not found", dash.no_update, None, False, [], {}
+
+
 			        image_text = text.split("\n")
 			        filtered_list = [item for item in image_text if item]
 			        
