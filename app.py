@@ -1476,28 +1476,28 @@ def handle_pdf(upload_content, n_clicks, content, processed):
 			            image_list = []
 			        
 			    
-			data = pd.DataFrame(page_features, columns=["Image1_number", "Image1","Image1 ML", "Artikel NO Imge1",
-				"Image2_number" ,"Image2", "Image2 ML","Artikel NO Imge2"])
+			data = pd.DataFrame(page_features, columns=["Bild1_nummer", "Bild1","Bild1 ML", "Artikel NO Bild1",
+				"Bild2_nummer" ,"Bild2", "Bild2 ML","Artikel NO Bild2"])
 			print(data)
 
 			rows = []
 			for key, values in ref.items():
 			    rows.append([key] + values)
 
-			df = pd.DataFrame(rows, columns=['Image1_number', 'Po number', 'Artkel', 'Page Number'])
+			df = pd.DataFrame(rows, columns=['Bild1_nummer', 'PO Nummer', 'Artkel', 'Seitenzahl'])
 
-			final = data.merge(df, on= "Image1_number")
+			final = data.merge(df, on= "Bild1_nummer")
 
 			def create_match_column(df):
 
-			    df['Match'] = 'Not Matched'  
+			    df['Match'] = 'nicht übereinstimmend'  
 
 			    df.loc[
-			        (df['Image1'] == df['Image2']) &
-			        (df['Image1 ML'] == df['Image2 ML']) &
-			        (df['Artikel NO Imge1'] == df['Artikel NO Imge2']),
+			        (df['Bild1'] == df['Bild2']) &
+			        (df['Bild1 ML'] == df['Bild2 ML']) &
+			        (df['Artikel NO Bild1'] == df['Artikel NO Bild2']),
 			        'Match'
-			    ] = 'Matched'
+			    ] = 'übereinstimmend'
 
 			    return df
 
@@ -1527,19 +1527,19 @@ def handle_pdf(upload_content, n_clicks, content, processed):
 				)
 
 			result_counts = data['Match'].value_counts().reset_index()
-			#result_counts.columns = ['Match', 'count']  # Rename columns for clarity
+			#result_counts.columns = ['Ergebnis', 'Anzahl']  # Rename columns for clarity
 
 			# Create the bar chart using Plotly Express
 			fig = px.bar(result_counts, x='Match', y='count', 
-			             title='Distribution of Results',
+			             title='Summe der Ergebnisse',
 			             color='Match',  
-			             color_discrete_map={'Matched': '#F5B323', 'Not Mactched': 'black'}) 
+			             color_discrete_map={'übereinstimmend': '#F5B323', 'nicht übereinstimmend': 'black'}) 
 
-			fig.update_layout(xaxis_title="Match", yaxis_title="count") 
+			fig.update_layout(xaxis_title="Ergebnis", yaxis_title="Anzahl") 
 
 
 			# Display the extracted text
-			return  "PDF processed.", True, content, True , ls2, fig,  data.to_dict('records')
+			return  "PDF verarbeitet", True, content, True , ls2, fig,  data.to_dict('records')
 	else:	
 		return html.Div("No file uploaded yet."), pd.DataFrame().to_dict('records'), [], True, True, {},pd.DataFrame().to_dict('records')
 
