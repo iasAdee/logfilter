@@ -20,6 +20,10 @@ page_7_layout = html.Div(
 		),
 		html.Div(id='pdf_results',
 		),
+
+		
+		dcc.Store(id='stored_results'),
+		dcc.Download(id="download-dataframe-pdf"),
 		html.Button('Tabelle speichern', id='sped_button8', n_clicks=None,style={'backgroundColor': '#F5B323','fontSize':"12px"}),
 		html.Div(
 		            dcc.Graph(id='ploti12',
