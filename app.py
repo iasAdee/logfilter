@@ -1250,12 +1250,12 @@ import re
 from tqdm import tqdm
 import base64
 
-import os
+"""import os
 import google.generativeai as genai
 
 os.environ["GEMINI_API_KEY"] = "AIzaSyByx1qgfrg6aPl8sTXyYKRX79LQEeZzPjc"
 genai.configure(api_key=os.environ["GEMINI_API_KEY"]) 
-model = genai.GenerativeModel("gemini-1.5-flash")
+model = genai.GenerativeModel("gemini-1.5-flash")"""
 
 
 def get_punct_free(text):
@@ -1287,6 +1287,52 @@ def preprocess_image(image, scale_factor=2, threshold=150, contrast_factor=2.0):
     contrast_image = enhancer.enhance(contrast_factor)
     
     return contrast_image
+
+
+import google.generativeai as genai
+from PIL import Image
+from io import BytesIO
+import base64
+import os
+import google.generativeai as genai
+
+
+os.environ["GEMINI_API_KEY"] = "AIzaSyByx1qgfrg6aPl8sTXyYKRX79LQEeZzPjc"
+
+
+genai.configure(api_key=os.environ["GEMINI_API_KEY"]) 
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+def process_200_images(image_bytes_list):
+    if len(image_bytes_list) > 80:
+        return {"error": "The image_bytes_list must contain less than 110 images."}
+
+    prompt_parts = []
+    for index, image_bytes in enumerate(image_bytes_list):  # Enumerate to get index
+        try:
+            image = Image.open(BytesIO(image_bytes[0]))
+            buffered = BytesIO()
+            image.save(buffered, format="JPEG")
+            image_base64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
+            
+            prompt_parts.append(f"Image {image_bytes[1]}:")
+            prompt_parts.append({
+                "mime_type": "image/jpeg",
+                "data": image_base64,
+            })
+            
+            
+        except Exception as e:
+            return {"error": f"Error processing image {index + 1}: {e}"}
+
+    prompt_parts.append("""The list of images is provided to you with there image index; 
+    1) use the same index to return the image result wrtie only image index in digits;
+    2) i want you to get each image title label with bigger font e.g "Sika® Primer-206" write only name in new line;
+    3) i want you to extract any number that is after image label ends with "ml" in new line;
+    4) find artikel number which is individual number of either 4 or 6 digit long write that number only;
+    ensure and must keep the output format same for all next prompt responses make sure to include all the details above""")
+
+    return prompt_parts
 
 
 @app.callback(
@@ -1322,29 +1368,6 @@ def handle_pdf(upload_content, n_clicks, content, processed):
 
 		if content is not None:
 
-
-			import importlib
-
-			def try_import_pytesseract():
-			    try:
-			        pytesseract = importlib.import_module('pytesseract')
-			        return pytesseract  # Return the imported module if successful
-			    except ImportError:
-			        return "Error: pytesseract is not installed. Please install it using 'pip install pytesseract'."
-			    except Exception as e: # Catch other potential import errors
-			        return f"An error occurred during import: {e}"
-
-
-			pytesseract_module = try_import_pytesseract()
-
-			if isinstance(pytesseract_module, str):  
-				return "Tessract libaray failed", dash.no_update, None, False, [], {}
-			    #print(pytesseract_module)
-
-			import pytesseract  
-
-
-
 			#print(contents)
 			content_type, content_string = content[0].split(',')
 			decoded = io.BytesIO(base64.b64decode(content_string))
@@ -1355,18 +1378,22 @@ def handle_pdf(upload_content, n_clicks, content, processed):
 
 			print(f"Total Pages in the document : {len(doc)}")
 
-			prompt_list = []
+			ref = {}
+			multi_images = []
+			images_list = []
 			for page_number in range(len(doc)):
-    
-			    if(page_number == 40):
-			        break
+			    
+			    if(page_number % 20 == 0 or page_number == len(doc)-1):
+			        multi_images.append(images_list)
+			        images_list = []
+			        
 			    
 			    if(page_number%3 != 0):
 			        continue        
 			        
-			    
 			    page = doc[page_number]
 			    text = page.get_text()
+			    
 			    
 			    text_data = text.split("\n")
 			    
@@ -1382,139 +1409,88 @@ def handle_pdf(upload_content, n_clicks, content, processed):
 			            artikle = text_data[i+1]
 			            
 			    images = page.get_images(full=True) 
-			    print(f"Page Number: {page_number} and {text} and artikel = {artikle}")
-			    
+
 			    text_data = text.split(":")
-			    image_results = [text_data[1].strip(), artikle.strip(), page_number+1]
 			    
 			    
+			    
+			    images = page.get_images(full=True) 
 			    for img_index, img in enumerate(images):
 			        xref = img[0]  
 			        
 			        if(img_index>=2):
 			            break
+			            
 			        base_image = doc.extract_image(xref)  
 			        image_bytes = base_image["image"]  
-			        
-			        
-			        image = Image.open(BytesIO(image_bytes))
-			        
-			        preprocessed_image = preprocess_image(image)
-			        
-			        #text = pytesseract.image_to_string(preprocessed_image)
-			        text = ""
-			        try:
-			            text = pytesseract.image_to_string(preprocessed_image) 
-			        except Exception as e:  # Catch any other potential errors
-			            print(f"An unexpected error occurred: {e}")
-			            return "Engine not found", dash.no_update, None, False, [], {}
+			 
+			        images_list.append((image_bytes, str(page_number)+str(img_index) ))
+			        p=str(page_number)+str(img_index)
+			        ref[p] = [text_data[1].strip(), artikle.strip(), page_number+1]
 
 
-			        image_text = text.split("\n")
-			        filtered_list = [item for item in image_text if item]
-			        
-			        
-			        #print(filtered_list)
-			        image_artkl = ""
-			        
-			                    
-			        flag = False
-			        flag2 = False
-			        flag3 = False
-			        label = ""
-			        ml = ""
-			        for j, data in enumerate(filtered_list):
-			            
-			            matches = re.search(r"(Sika®|ika®|Sikae)(.*)", data)
-			            matches2 = re.search(r"\d+(ml|mi)$", data)
-			            if(matches and flag2 == False):
-			                label = matches.group(2).strip()
-			                
-			                if(len(label) > 5):
-			                    flag2 = True
-			                    
-			            if(matches2):
-			                ml = matches2.group(0)
-			                flag3 = True
-			                
-			                
-			            if("Batch-No" in data):
-			                image_artkl = filtered_list[j+1]
-			                
-			                if(len(image_artkl.split(" ")) > 1):
-			                   
-			                    image_artkl = image_artkl.split(" ")[0]
-			                    if not image_artkl.isdigit():
-			                        image_artkl = filtered_list[j+2].strip()
-			                        
-			                        for val in image_artkl.split():
-			                            if(val.isdigit() and len(val)>4):
-			                                image_artkl= val
-			                                
-			                        
-			                        if(not image_artkl.split(" ")[0].isdigit()):
-			                            for k, dat in enumerate(filtered_list[j+2:]):
-			                                match = re.search(r"\b(\d{6})\b", dat)
-			                                if match:
-			                                    image_artkl = match.group(1)
-			                                    break
-			                                
-			                            
-			                            
-			                       
-			                if(image_artkl.isdigit()):      
-			                    image_results.append(image_artkl)
-			                else:
-			                    image_results.append("N/A")
-			                    #print(filtered_list)
-			                
-			                flag=True
-			                break
-			                
-			        """        if(page_number+1 == 28):
-			            print(filtered_list)"""
-			                
-			        if(flag== False):
-			            image_results.append("N/A")
-			        
-			        if(flag2 == False):
-			            image_results.append("No Label")
-			        else:
-			            image_results.append(label)
-			            
-			        if(flag3 == False):
-			            image_results.append("No ML")
-			        else:
-			            image_results.append(ml)
-			            
-			        
-
-			    if(len(image_results) <= 4):
+			responses = []
+			for i, imaglists in enumerate(multi_images):
+			    if(len(imaglists)<=2):
 			        continue
-
-			    if(len(image_results) > 2):
-			        if(image_results[1] == image_results[3] and image_results[1] == image_results[6]):
-			            image_results.append("Matched")
-			        elif(image_results[4] != "No Label" and  image_results[4] == image_results[7]):
-			            image_results.append("Matched")
-			        else:
-			            image_results.append("Not Mactched")
 			    else:
-			        image_results.extend(["", "Not Mactched"])
-			     
-			    
-			    images_list.append(image_results)
-			    
-			   
-			                
+			        print("Finding results for")
+			        for img in imaglists:
+			            print(img[1], end=" ")
+			        prompt_parts = process_200_images(imaglists)
+			        print()
+			        
+			        try:
+			            response = model.generate_content(prompt_parts)
+			            responses.append(response)
+			            print(f"response: {i} completed") # or response.parts, depending on how you want the data.
+			        except Exception as e:
+			            print(e)
 
-			print("process complete") 
+            
+			page_features = []
+			for response in responses:
+			    splitted_Response = response.text.split("\n")
+			    image_list = []
 			    
+			    for i, line in enumerate(splitted_Response):
+			        if(line == ""):
+			            continue
+			            
+			        
+			        image_list.append(line)
+			        
+			        if(len(image_list) == 8):
+			            page_features.append(image_list)
+			            image_list = []
+			        
 			    
-			data = pd.DataFrame(images_list, columns=["PO number","FERT-Artikel",'page_number',
-			"img1-FERT-Artikel","Image1", "image 1 ML", 
-			"img2-FERT-Artikel","Image2", "image 2 ML" , "Result"])
-			print(data.head(10))
+			data = pd.DataFrame(page_features, columns=["Image1_number", "Image1","Image1 ML", "Artikel NO Imge1",
+				"Image2_number" ,"Image2", "Image2 ML","Artikel NO Imge2"])
+			print(data)
+
+			rows = []
+			for key, values in ref.items():
+			    rows.append([key] + values)
+
+			df = pd.DataFrame(rows, columns=['Image1_number', 'Po number', 'Artkel', 'Page Number'])
+
+			final = data.merge(df, on= "Image1_number")
+
+			def create_match_column(df):
+
+			    df['Match'] = 'Not Matched'  
+
+			    df.loc[
+			        (df['Image1'] == df['Image2']) &
+			        (df['Image1 ML'] == df['Image2 ML']) &
+			        (df['Artikel NO Imge1'] == df['Artikel NO Imge2']),
+			        'Match'
+			    ] = 'Matched'
+
+			    return df
+
+			data =create_match_column(final)
 
 			ls2 = []
 			ls2.append(html.Div([
@@ -1539,16 +1515,16 @@ def handle_pdf(upload_content, n_clicks, content, processed):
 				    }),html.Hr()])
 				)
 
-			result_counts = data['Result'].value_counts().reset_index()
-			result_counts.columns = ['Result', 'Count']  # Rename columns for clarity
+			result_counts = data['Match'].value_counts().reset_index()
+			#result_counts.columns = ['Match', 'count']  # Rename columns for clarity
 
 			# Create the bar chart using Plotly Express
-			fig = px.bar(result_counts, x='Result', y='Count', 
+			fig = px.bar(result_counts, x='Match', y='count', 
 			             title='Distribution of Results',
-			             color='Result',  
+			             color='Match',  
 			             color_discrete_map={'Matched': '#F5B323', 'Not Mactched': 'black'}) 
 
-			fig.update_layout(xaxis_title="Result", yaxis_title="Count") 
+			fig.update_layout(xaxis_title="Match", yaxis_title="count") 
 
 
 			# Display the extracted text
@@ -1649,7 +1625,7 @@ app.css.append_css({
 
 
 if __name__ == '__main__':
-    app.run_server(host="0.0.0.0", debug=True, port="8090")
+    app.run_server(debug=True, port="8090")
 
 
 
