@@ -48,6 +48,20 @@ def save_data(data1, n_clicks):
 		return dcc.send_data_frame(df.to_csv, "sped_data.csv", index=False)
 
 @callback(
+	Output("download-dataframe-pdf", "data"),
+	Input('stored_results', 'data'),
+	Input('sped_button8', 'n_clicks'),
+
+	)
+
+def save_data(data1, n_clicks):
+	if(n_clicks != None):
+		df = pd.DataFrame(data1)
+		#df.to_csv("sped_data.csv", index=False)
+		return dcc.send_data_frame(df.to_csv, "pdf_details.csv", index=False)
+
+
+@callback(
 	Output("download-dataframe-csv6", "data"),
 	
 	Input('stored-data-6f', 'data'),
@@ -1250,12 +1264,6 @@ import re
 from tqdm import tqdm
 import base64
 
-"""import os
-import google.generativeai as genai
-
-os.environ["GEMINI_API_KEY"] = "AIzaSyByx1qgfrg6aPl8sTXyYKRX79LQEeZzPjc"
-genai.configure(api_key=os.environ["GEMINI_API_KEY"]) 
-model = genai.GenerativeModel("gemini-1.5-flash")"""
 
 
 def get_punct_free(text):
@@ -1303,6 +1311,8 @@ os.environ["GEMINI_API_KEY"] = "AIzaSyByx1qgfrg6aPl8sTXyYKRX79LQEeZzPjc"
 genai.configure(api_key=os.environ["GEMINI_API_KEY"]) 
 model = genai.GenerativeModel("gemini-1.5-flash")
 
+
+
 def process_200_images(image_bytes_list):
     if len(image_bytes_list) > 80:
         return {"error": "The image_bytes_list must contain less than 110 images."}
@@ -1330,7 +1340,7 @@ def process_200_images(image_bytes_list):
     2) i want you to get each image title label with bigger font e.g "Sika® Primer-206" write only name in new line;
     3) i want you to extract any number that is after image label ends with "ml" in new line;
     4) find artikel number which is individual number of either 4 or 6 digit long write that number only;
-    ensure and must keep the output format same for all next prompt responses make sure to include all the details above""")
+    ensure the sequence of output and must keep the output format same for all next prompt responses make sure to include all 1, 2, 3, 4 points above""")
 
     return prompt_parts
 
@@ -1342,6 +1352,7 @@ def process_200_images(image_bytes_list):
     Output("pdf-processed", "data"),
     Output("pdf_results", "children"),
     Output("ploti12", "figure"),
+    Output("stored_results", "data"),
     
 
 
@@ -1357,14 +1368,14 @@ def handle_pdf(upload_content, n_clicks, content, processed):
 	if triggered_id == "upload-pdf":
 		if upload_content is None:
 		    return "", True, None, False  # No file uploaded, disable button
-		return "File uploaded.", False, upload_content, False, [], {}
+		return "File uploaded.", False, upload_content, False, [], {}, pd.DataFrame().to_dict('records')
 
 	if triggered_id == "process-btn":
 		if content is None:
-		    return "No file uploaded.", dash.no_update, None, False, [], {}
+		    return "No file uploaded.", dash.no_update, None, False, [], {},pd.DataFrame().to_dict('records')
 
 		if processed:
-		    return "PDF already processed.", True, content, True , [], {}
+		    return "PDF already processed.", True, content, True , [], {},data.DataFrame().to_dict('records')
 
 		if content is not None:
 
@@ -1528,9 +1539,9 @@ def handle_pdf(upload_content, n_clicks, content, processed):
 
 
 			# Display the extracted text
-			return  "PDF processed.", True, content, True , ls2, fig
+			return  "PDF processed.", True, content, True , ls2, fig,  data.to_dict('records')
 	else:	
-		return html.Div("No file uploaded yet."), pd.DataFrame().to_dict('records'), [], True, True, {}
+		return html.Div("No file uploaded yet."), pd.DataFrame().to_dict('records'), [], True, True, {},pd.DataFrame().to_dict('records')
 
 
 
