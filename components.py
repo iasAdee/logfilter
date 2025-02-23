@@ -81,6 +81,7 @@ nav_content = html.Div([
     dcc.Link('Bestandsüberprüfung', href='/page_filter',style={'color': '#F5B323', 'fontWeight':'bold'}),
     html.Br(),
     dcc.Link('Bilderkennung', href='/image',style={'color': '#F5B323', 'fontWeight':'bold'}),
+    
 ])
 
 
@@ -117,6 +118,9 @@ nav_content5 = html.Div([
 
     html.Button('Start', id='update-button2', n_clicks=None,style={'backgroundColor': '#F5B323'}),
     html.Hr(style={'backgroundColor': '#F5B323'}),
+
+
+
 
     dcc.Link('Neuer Filter', href='/page1',style={'color': '#F5B323','fontWeight': 'bold'}),
     html.Br(),
@@ -209,7 +213,7 @@ nav_content7 = html.Div([
         id='upload-pdf',
         children=html.Div([
             'Drag & Drop or ',
-            html.A('PDF file')
+            html.A('PDF hochladen')
         ]),
         style={
             'width': '100%',
@@ -226,7 +230,7 @@ nav_content7 = html.Div([
         multiple=True
     ),
 
-    html.Button('Process PDF', id='process-btn', n_clicks=0, disabled=True),
+    html.Button('PDF verarbeiten', id='process-btn', n_clicks=0, disabled=True),
     dcc.Store(id='pdf-content'),
     dcc.Store(id="pdf-processed", data=False),
 
