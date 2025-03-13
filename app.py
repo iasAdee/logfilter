@@ -550,7 +550,10 @@ def update_second(input1, input2):
 		return "Data Not recived Yet", [], [], [], []
 	else:
 		#print(data)
-		data = data.dropna(subset=['Material','Gesperrt', 'Nicht freier Bestand', 'In Qualitätsprüfung' ])
+		data = data.dropna(subset=['Material','Charge','Gesperrt', 'Nicht freier Bestand', 'In Qualitätsprüfung' ])
+		data = data.drop_duplicates(subset=['Charge'])
+
+
 		selected_rows = data[(data['Gesperrt'] > 0) | (data['Nicht freier Bestand'] > 0) | (data['In Qualitätsprüfung'] > 0)]
 
 		
@@ -579,14 +582,13 @@ def update_second(input1, input2):
 
 		new_dataframe = pd.DataFrame()
 		if(len(data2) > 0):
-			data2 = data2.dropna(subset=['Material','Gesperrt', 'Nicht freier Bestand', 'In Qualitätsprüfung'])
-			data2 = data2.dropna(subset=['Material','Gesperrt', 'Nicht freier Bestand', 'In Qualitätsprüfung' ]).reset_index(drop=True)
+			data2 = data2.dropna(subset=['Material','Charge','Gesperrt', 'Nicht freier Bestand', 'In Qualitätsprüfung' ]).reset_index(drop=True)
 			
 			checked = []
 			for i in range(len(data2)):
-			    mat_id = data2["Material"][i]
+			    mat_id = data2["Charge"][i]
 			    
-			    if(mat_id not in list(selected_rows.Material)):
+			    if(mat_id not in list(selected_rows.Charge)):
 			        continue
 			        
 			    if(mat_id in checked):
@@ -1305,12 +1307,6 @@ import os
 import google.generativeai as genai
 
 
-os.environ["GEMINI_API_KEY"] = "AIzaSyByx1qgfrg6aPl8sTXyYKRX79LQEeZzPjc"
-
-
-genai.configure(api_key=os.environ["GEMINI_API_KEY"]) 
-model = genai.GenerativeModel("gemini-1.5-flash")
-
 
 
 def process_200_images(image_bytes_list):
@@ -1360,9 +1356,10 @@ def process_200_images(image_bytes_list):
     Input("process-btn", "n_clicks"),
     State("pdf-content", "data"),
     State("pdf-processed", "data"),
+    Input("api_input", "value"),
     prevent_initial_call=True
 )
-def handle_pdf(upload_content, n_clicks, content, processed):
+def handle_pdf(upload_content, n_clicks, content, processed, api_input):
 	triggered_id = ctx.triggered_id  
 
 	if triggered_id == "upload-pdf":
@@ -1380,6 +1377,13 @@ def handle_pdf(upload_content, n_clicks, content, processed):
 		if content is not None:
 
 			#print(contents)
+			print(api_input)
+
+			os.environ["GEMINI_API_KEY"] = api_input #"AIzaSyByx1qgfrg6aPl8sTXyYKRX79LQEeZzPjc"
+			genai.configure(api_key=os.environ["GEMINI_API_KEY"]) 
+			model = genai.GenerativeModel("gemini-1.5-flash")
+
+			
 			content_type, content_string = content[0].split(',')
 			decoded = io.BytesIO(base64.b64decode(content_string))
 
@@ -1540,8 +1544,12 @@ def handle_pdf(upload_content, n_clicks, content, processed):
 
 			# Display the extracted text
 			return  "PDF verarbeitet", True, content, True , ls2, fig,  data.to_dict('records')
-	else:	
-		return html.Div("No file uploaded yet."), pd.DataFrame().to_dict('records'), [], True, True, {},pd.DataFrame().to_dict('records')
+	else:
+		if upload_content is None:
+		    return "No file uploaded yet.", True, None, False ,[], {}, pd.DataFrame().to_dict('records') # No file uploaded, disable button
+		return "File uploaded.", False, upload_content, False, [], {}, pd.DataFrame().to_dict('records')
+
+		#return html.Div(""), True, [], True, True, {},pd.DataFrame().to_dict('records')
 
 
 
