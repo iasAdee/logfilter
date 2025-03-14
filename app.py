@@ -1379,7 +1379,7 @@ def handle_pdf(upload_content, n_clicks, content, processed, api_input):
 			#print(contents)
 			print(api_input)
 
-			os.environ["GEMINI_API_KEY"] = api_input #"AIzaSyByx1qgfrg6aPl8sTXyYKRX79LQEeZzPjc"
+			os.environ["GEMINI_API_KEY"] = api_input 
 			genai.configure(api_key=os.environ["GEMINI_API_KEY"]) 
 			model = genai.GenerativeModel("gemini-1.5-flash")
 
