@@ -230,6 +230,8 @@ nav_content7 = html.Div([
         multiple=True
     ),
 
+    dcc.Input(id='api_input', type='text', placeholder='Enter API Key...'),
+    html.Br(),
     html.Button('PDF verarbeiten', id='process-btn', n_clicks=0, disabled=True),
     dcc.Store(id='pdf-content'),
     dcc.Store(id="pdf-processed", data=False),
