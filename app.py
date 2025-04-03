@@ -27,6 +27,9 @@ import plotly.graph_objs as go
 from input import page_5_layout
 from filter import page_6_layout
 from image import page_7_layout
+from excel_to_word import page_10_layout
+from docx import Document
+
 
 
 
@@ -528,6 +531,170 @@ def update_output8(list_of_contents, list_of_names, list_of_dates):
             df_combined = pd.concat([df_combined, df], ignore_index=True)
         return df_combined.to_dict('records'), "Daten erfolgreich geladen"
     return {}, ""
+
+
+
+container_types = {
+    1: "Drums/Pails",
+    2: "Barrels",
+    3: "Jerricans",
+    4: "Boxes",
+    5: "Bags",
+    6: "Composite Packaging",
+    7: "Pressure Receptical"
+}
+
+container_materials = {
+    'A': "Steel",
+    'B': "Aluminum",
+    'C': "Natural Wood",
+    'D': "Plywood",
+    'F': "Reconstituted Wood",
+    'G': "Fiberboard",
+    'H': "Plastic",
+    'L': "Textile",
+    'M': "Paper",
+    'N': "Metal other than Steel or Aluminum",
+    'P': "Glass, Porcelain or Stoneware"
+}
+
+
+# Modified document processing function
+def load_docx_and_print_tables(file_content, full_string, kgs, kgs2):
+    try:
+        # Create a file-like object from the uploaded content
+        doc_file = io.BytesIO(file_content)
+        document = Document(doc_file)
+
+        # Process tables
+        for table in document.tables:
+            check = False
+            count = 0
+            for row in table.rows:
+                for cell in row.cells:
+                    if cell.text.startswith("14"):
+                        check = True
+                    if check and cell.text.strip() == "":
+                        count += 1
+                        if count == 1 or count == 5:
+                            continue
+                        elif count == 2:
+                            cell.text = full_string
+                        elif count == 3:
+                            cell.text = kgs
+                        elif count == 4:
+                            cell.text = kgs2
+
+        # Save modified document to a BytesIO object
+        modified_file = io.BytesIO()
+        document.save(modified_file)
+        modified_file.seek(0)
+        return modified_file.getvalue()
+    
+    except Exception as e:
+        print(f"Error processing document: {e}")
+        return None
+
+# Callback for Excel upload
+@callback(
+    Output('stored-data-72', 'data'),
+    Output('status10', 'children'),
+    Output('process-excel', 'disabled'),
+    Input('upload-data72', 'contents'),
+    State('upload-data72', 'filename'),
+    State('upload-data72', 'last_modified')
+)
+def update_output8(contents, filename, date):
+    if contents is not None:
+        _, df = parse_contents(contents, filename, date)
+        if not df.empty:
+            return df.to_dict('records'), "Excel data successfully loaded", False
+    return {}, "Excel hochladen", True
+
+# Callback for Word template upload
+@callback(
+    Output('stored-data-input_8', 'data'),
+    Output('output-upload', 'children'),
+    Input('upload-doc', 'contents'),
+    State('upload-doc', 'filename')
+)
+def store_word_template(contents, filename):
+    if contents is not None:
+        return contents, html.Div([f"IMO geladen: {filename}"])
+    return None, html.Div()
+
+# Main processing callback
+@callback(
+    Output('status11', 'children'),
+    Output("download-docx", "data"),
+    Input('stored-data-72', 'data'),
+    Input('stored-data-input_8', 'data'),
+    Input('process-excel', 'n_clicks'),
+    prevent_initial_call=True
+)
+def make_pdf_from_excel(data, word_template, n_clicks):
+    if n_clicks is None or not data:
+        return "Bitte erst Daten hochladen ", None
+    
+    # Convert data to DataFrame
+    excel_data = pd.DataFrame(data)
+    
+    if len(excel_data) == 0:
+        return "Keine validen Daten gefunden  ", None
+    
+    # Process Excel data
+    full_string = ""
+    kgs = ""
+    kgs2 = ""
+    
+    for i in range(len(excel_data)):
+        first_kg = str(excel_data["Brutto"][i])
+        first_kg_char = str(excel_data["Gewichtseinheit"][i])
+        second_kg = str(excel_data["Netto"][i])
+        second_kg_char = str(excel_data["Gewichtseinheit"][i])
+        third = excel_data["Benennung"][i]
+        fourth = excel_data["UN-Nr."][i]
+        get_data = excel_data["UN-Homologation"][i]
+        zero_word = excel_data["Menge"][i]
+        tech = excel_data["Tech.Benennung 1"][i]
+        Flammpunkt = excel_data["Flammpunkt"][i]
+
+        if pd.isna(get_data) or pd.isna(Flammpunkt):
+            continue
+        else:
+            first_word = container_materials.get(str(get_data)[1], "Unknown Material")
+            second_word = container_types.get(int(str(get_data)[0]), "Unknown Type")
+            data_to_add = (f"{zero_word} {first_word} {second_word} ({get_data})\n"
+                          f"{fourth} {third} {tech}\n{Flammpunkt}\n\n")
+            full_string += data_to_add
+
+        kgs += f"{first_kg}{first_kg_char}\n\n\n"
+        kgs2 += f"{second_kg}{second_kg_char}\n\n\n"
+
+    # Process Word document
+    if word_template is None:
+        # Use default template if none uploaded
+        try:
+            with open("IMO Manuell.docx", "rb") as f:
+                word_content = f.read()
+        except FileNotFoundError:
+            return "Kein Word Dokument verfügbar ", None
+    else:
+        # Use uploaded template
+        content_type, content_string = word_template.split(',')
+        word_content = base64.b64decode(content_string)
+
+    modified_docx_bytes = load_docx_and_print_tables(word_content, full_string, kgs, kgs2)
+    
+    if modified_docx_bytes:
+        return "Dokument erfolgreich geladen", dcc.send_bytes(
+            modified_docx_bytes,
+            "Processed_Document.docx"
+        )
+    return "Error processing document", None
+
+
+
 
 
 @callback(
@@ -1379,7 +1546,7 @@ def handle_pdf(upload_content, n_clicks, content, processed, api_input):
 			#print(contents)
 			print(api_input)
 
-			os.environ["GEMINI_API_KEY"] = api_input 
+			os.environ["GEMINI_API_KEY"] = api_input #"AIzaSyByx1qgfrg6aPl8sTXyYKRX79LQEeZzPjc"
 			genai.configure(api_key=os.environ["GEMINI_API_KEY"]) 
 			model = genai.GenerativeModel("gemini-1.5-flash")
 
@@ -1560,6 +1727,7 @@ app.layout = html.Div([
 	#html.Div(id='page-content'),
 	dcc.Download(id="download-dataframe-csv"),
 
+
 	html.Div(id='page-1-content', style={'display': 'block'}, children=[
 	    page_1_layout
 	]),
@@ -1586,6 +1754,9 @@ app.layout = html.Div([
 		dcc.Store(id='stored-data-8'),
 		dcc.Store(id='stored-data-9'),
 	    page_7_layout
+	]),
+	html.Div(id='page-10-content', style={'display': 'none'}, children=[
+	    page_10_layout
 	])
 
 	
@@ -1601,6 +1772,7 @@ app.layout = html.Div([
      Output('page-5-content', 'style'),
      Output('page-6-content', 'style'),
      Output('page-7-content', 'style'),
+     Output('page-10-content', 'style'),
 
      Output('success', 'children'),
 
@@ -1616,23 +1788,25 @@ def display_page(pathname,id_, pass_):
     if(id_ == "log" and pass_ == "log"):#C3asar!
 
         if pathname == '/page-2':
-            return {'display': 'block'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'none'},""
+            return {'display': 'block'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'none'},""
         elif(pathname == "/page1"):
-            return {'display': 'none'}, {'display': 'block'} ,{'display': 'none'},{'display': 'none'},{'display': 'none'}, {'display': 'none'},{'display': 'none'},""
+            return {'display': 'none'}, {'display': 'block'} ,{'display': 'none'},{'display': 'none'},{'display': 'none'}, {'display': 'none'},{'display': 'none'},{'display': 'none'},""
         elif(pathname == "/page-3"):
-            return {'display': 'none'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'block'},{'display': 'none'},{'display': 'none'},{'display': 'none'},""
+            return {'display': 'none'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'block'},{'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'none'},""
         elif(pathname == "/page_input"):
-            return {'display': 'none'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'none'},{'display': 'block'},{'display': 'none'},{'display': 'none'},"" 
+            return {'display': 'none'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'none'},{'display': 'block'},{'display': 'none'},{'display': 'none'},{'display': 'none'},"" 
         elif(pathname == "/page_filter"):
-            return {'display': 'none'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'none'},{'display': 'none'},{'display': 'block'},{'display': 'none'},"" 
+            return {'display': 'none'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'none'},{'display': 'none'},{'display': 'block'},{'display': 'none'},{'display': 'none'},"" 
         elif(pathname == "/image"):
-            return {'display': 'none'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'block'},"" 
+            return {'display': 'none'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'block'},{'display': 'none'},"" 
+        elif(pathname == "/excel"):
+            return {'display': 'none'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'block'},"" 
         else:
-            return {'display': 'none'}, {'display': 'none'}, {'display': 'none'},{'display': 'none'},{'display': 'none'}, {'display': 'none'},{'display': 'none'},""
+            return {'display': 'none'}, {'display': 'none'}, {'display': 'none'},{'display': 'none'},{'display': 'none'}, {'display': 'none'},{'display': 'none'},{'display': 'none'},""
     elif(id_ == "" and pass_ == ""):
-        return {'display': 'none'}, {'display': 'none'}, {'display': 'block'},{'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'none'},html.H6("Bitte ID und Passwort eintragen",style={"color":"black"})
+        return {'display': 'none'}, {'display': 'none'}, {'display': 'block'},{'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'none'},html.H6("Bitte ID und Passwort eintragen",style={"color":"black"})
     else:
-        return {'display': 'none'}, {'display': 'none'}, {'display': 'block'},{'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'none'},""
+        return {'display': 'none'}, {'display': 'none'}, {'display': 'block'},{'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'none'},""
 
 
 app.title = "LogFilter"
