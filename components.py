@@ -78,6 +78,8 @@ nav_content = html.Div([
     html.Br(),
     html.A('Wareneingänge', href='/page_input',style={'color': '#F5B323', 'fontWeight':'bold'},target='_blank'),
     html.Br(),
+    dcc.Link('Dangerous Goods Declaration', href='/excel',style={'color': '#F5B323', 'fontWeight':'bold'}),
+    html.Br(),
     dcc.Link('Bestandsüberprüfung', href='/page_filter',style={'color': '#F5B323', 'fontWeight':'bold'}),
     html.Br(),
     dcc.Link('Bilderkennung', href='/image',style={'color': '#F5B323', 'fontWeight':'bold'}),
@@ -127,6 +129,8 @@ nav_content5 = html.Div([
     dcc.Link('M7 Kundenbestellungen', href='/page-3',style={'color': '#F5B323', 'fontWeight':'bold'}),
     html.Br(),
     html.A('Warenausgänge', href='/page-2',style={'color': '#F5B323', 'fontWeight':'bold'},target='_blank'),
+    html.Br(),
+    dcc.Link('Dangerous Goods Declaration', href='/excel',style={'color': '#F5B323', 'fontWeight':'bold'}),
     html.Br(),
     dcc.Link('Bestandsüberprüfung', href='/page_filter',style={'color': '#F5B323', 'fontWeight':'bold'}),
     html.Br(),
@@ -194,6 +198,8 @@ nav_content6 = html.Div([
     html.Br(),
     dcc.Link('M7 Kundenbestellungen', href='/page-3',style={'color': '#F5B323', 'fontWeight':'bold'}),
     html.Br(),
+    dcc.Link('Dangerous Goods Declaration', href='/excel',style={'color': '#F5B323', 'fontWeight':'bold'}),
+    html.Br(),
     html.A('Warenausgänge', href='/page-2',style={'color': '#F5B323', 'fontWeight':'bold'},target='_blank'),
     html.Br(),
     dcc.Link('Bilderkennung', href='/image',style={'color': '#F5B323', 'fontWeight':'bold'}),
@@ -240,9 +246,30 @@ nav_content7 = html.Div([
 
     dcc.Link('Neuer Filter', href='/page1',style={'color': '#F5B323','fontWeight': 'bold'}),
     html.Br(),
+    dcc.Link('Dangerous Goods Declaration', href='/page-3',style={'color': '#F5B323', 'fontWeight':'bold'}),
+    html.Br(),
     dcc.Link('M7 Kundenbestellungen', href='/page-3',style={'color': '#F5B323', 'fontWeight':'bold'}),
     html.Br(),
     html.A('Warenausgänge', href='/page-2',style={'color': '#F5B323', 'fontWeight':'bold'},target='_blank'),
+    
+])
+
+
+nav_content8 = html.Div([
+
+    html.Hr(style={'backgroundColor': '#F5B323'}),
+    
+
+    dcc.Link('Neuer Filter', href='/page1',style={'color': '#F5B323','fontWeight': 'bold'}),
+    html.Br(),
+    dcc.Link('M7 Kundenbestellungen', href='/page-3',style={'color': '#F5B323', 'fontWeight':'bold'}),
+    html.Br(),
+    html.A('Wareneingänge', href='/page_input',style={'color': '#F5B323', 'fontWeight':'bold'},target='_blank'),
+    html.Br(),
+    dcc.Link('Bestandsüberprüfung', href='/page_filter',style={'color': '#F5B323', 'fontWeight':'bold'}),
+    html.Br(),
+    dcc.Link('Bilderkennung', href='/image',style={'color': '#F5B323', 'fontWeight':'bold'}),
+    html.Hr(style={'backgroundColor': '#F5B323'}),
     
 ])
 
