@@ -55,7 +55,7 @@ page_10_layout = html.Div(
 	                id='upload-doc',
 	                children=html.Div([
 	                    'Drag and Drop or ',
-	                    html.A('Word Datei auswählen ')
+	                    html.A('Word Datei auswählen optional')
 	                ]),
 	                style={
 	                    'width': '100%',
