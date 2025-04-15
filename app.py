@@ -751,8 +751,8 @@ def make_pdf_from_excel(data, word_template, n_clicks):
 	        
 	            
 	    
-	    kgs += first_kg+" "+first_kg_char+"\n\n\n\n\n"
-	    kgs2 += second_kg+" "+second_kg_char+"\n\n\n\n\n"
+	    kgs += first_kg+" "+first_kg_char+"\n\n\n\n\n\n"
+	    kgs2 += second_kg+" "+second_kg_char+"\n\n\n\n\n\n"
 	    
 	    
 	    count += 1
