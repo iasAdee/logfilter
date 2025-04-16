@@ -540,7 +540,7 @@ def update_output8(list_of_contents, list_of_names, list_of_dates):
 
 
 container_types = {
-    1: "Drums/Pails",
+    1: "Drums",
     2: "Barrels",
     3: "Jerricans",
     4: "Boxes",
@@ -729,7 +729,11 @@ def make_pdf_from_excel(data, word_template, n_clicks):
 	    get_data = excel_data["UN-Homologation"][i]
 	    zero_word = excel_data["Menge"][i]
 	    tech = excel_data["Tech.Benennung 1"][i]
-	    Flammpunkt = excel_data["Flammpunkt"][i]
+
+	    Flammpunkt = None
+	    if("Flammpunkt" in excel_data.columns):
+	        Flammpunkt = excel_data["Flammpunkt"][i]
+	    
 	    
 	    
 	    if(pd.isna(get_data) or pd.isna(Flammpunkt)):
@@ -738,6 +742,7 @@ def make_pdf_from_excel(data, word_template, n_clicks):
 	        data_to_add = str(zero_word)+" "+str(first_word)+" "+\
 	                        str(second_word)+""+\
 	                        str(fourth)+" "+str(third)+" "+str(tech) +"\n\n"
+	        full_string += data_to_add
 	    else:
 	        first_word = container_materials[get_data[1]]
 	        second_word = container_types[int(get_data[0])]
@@ -751,8 +756,8 @@ def make_pdf_from_excel(data, word_template, n_clicks):
 	        
 	            
 	    
-	    kgs += first_kg+" "+first_kg_char+"\n\n\n\n\n\n"
-	    kgs2 += second_kg+" "+second_kg_char+"\n\n\n\n\n\n"
+	    kgs += first_kg+" "+first_kg_char+"\n\n\n\n\n"
+	    kgs2 += second_kg+" "+second_kg_char+"\n\n\n\n\n"
 	    
 	    
 	    count += 1
