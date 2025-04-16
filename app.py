@@ -667,7 +667,7 @@ def update_output8(contents, filename, date):
     if contents is not None:
         _, df = parse_contents(contents, filename, date)
         if not df.empty:
-            return df.to_dict('records'), "Excel data successfully loaded", False
+            return df.to_dict('records'), "Daten erfolgreich geladen", False
     return {}, "Excel hochladen", True
 
 # Callback for Word template upload
@@ -739,15 +739,15 @@ def make_pdf_from_excel(data, word_template, n_clicks):
 	    if(pd.isna(get_data) or pd.isna(Flammpunkt)):
 	        first_word = container_materials[get_data[1]]
 	        second_word = container_types[int(get_data[0])]
-	        data_to_add = str(zero_word)+" "+str(first_word)+" "+\
-	                        str(second_word)+""+\
+	        data_to_add = str(zero_word)+" "+str(first_word)\
+	                        +" "+str(second_word)+" "+\
 	                        str(fourth)+" "+str(third)+" "+str(tech) +"\n\n"
 	        full_string += data_to_add
 	    else:
 	        first_word = container_materials[get_data[1]]
 	        second_word = container_types[int(get_data[0])]
-	        data_to_add = str(zero_word)+" "+str(first_word)+" "+\
-	                        str(second_word)+" ("+str(get_data)+")\n"+\
+	        data_to_add = str(zero_word)+" "+str(first_word)\
+	                        +" "+str(second_word)+" ("+str(get_data)+")\n"+\
 	                        str(fourth)+" "+str(third)+" "+str(tech) +"\n"+str(Flammpunkt)+"\n\n"
 	        
 	        
@@ -809,7 +809,7 @@ def make_pdf_from_excel(data, word_template, n_clicks):
 	if modified_docx_bytes:
 	    return "Dokument erfolgreich geladen", dcc.send_bytes(
 	        modified_docx_bytes,
-	        "Processed_Document.docx"
+	        "IMO_Formular.docx"
 	    )
 	return "Error processing document", None
 
