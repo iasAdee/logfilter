@@ -617,6 +617,7 @@ def load_docx_and_print_tables(file_content,full_string, kgs, kgs2, target_row_n
         
         #print(document.tables)
         print("Tables:")
+        check_2 = False
         table_count = 0
         for i, table in enumerate(document.tables):
             print(f"\nTable {i + 1}:")  # Add 1 to i for user-friendly indexing
@@ -628,8 +629,16 @@ def load_docx_and_print_tables(file_content,full_string, kgs, kgs2, target_row_n
                     if(cell.text.startswith("3")):
                         cell.text = ""#f"3. Page {table_count+1} of {table_count+1} pages"
                         paragraph = cell.paragraphs[0]
-                        run = paragraph.add_run(f"3. Page {table_count+1} of {table_count+1} pages")
+                        run = paragraph.add_run(f"3. Page {table_count+1} of {len(full_string)} pages")
                         run.font.size = Pt(8)  
+
+                    if(cell.text.startswith("9") and check_2 == False):
+                        paragraph = cell.paragraphs[3]
+                        run = paragraph.add_run(f"\nBEFÖRDERUNG NACH ABSATZ 1.1.4.2.1")
+                        run.font.size = Pt(10)
+                        run.bold = True 
+                        check_2 = True
+
 
                     #print(cell.text)
                     if(cell.text.startswith("14")):
@@ -746,7 +755,7 @@ def make_pdf_from_excel(data, word_template, n_clicks):
 	    if(pd.isna(get_data) or pd.isna(Flammpunkt)):
 	        first_word = container_materials[get_data[1]]
 	        second_word = container_types[int(get_data[0])]
-	        data_to_add = str(zero_word)+" "+str(first_word)\
+	        data_to_add = str(zero_word)+" "+str(first_word)+" "+get_data[1]+str(get_data[0])\
 	                        +" "+str(second_word)+" "+\
 	                        str(fourth)+" "+str(third)+" "+str(tech) +"\n\n"
 	        full_string += data_to_add
@@ -884,12 +893,13 @@ def update_second(input1, input2):
 			    
 			    if(mat_id not in list(selected_rows.Charge)):
 			        continue
-			        
+			     
+			    #print(mat_id)   
 			    if(mat_id in checked):
 			        continue
 			    else:
 			        checked.append(mat_id)   
-			        if(data2["Gesperrt"][i] == 0 and data2["Nicht freier Bestand"][i]==0 and data2["In Qualitätsprüfung"][i]==0):
+			        if(data2["Gesperrt"][i] == 0 and data2["Nicht freier Bestand"][i]== 0 and data2["In Qualitätsprüfung"][i]== 0):
 			            new_dataframe = pd.concat([new_dataframe, data2.iloc[[i]]], ignore_index=True)
 		ls2 = []
 
