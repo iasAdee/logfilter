@@ -600,6 +600,7 @@ def load_docx_and_print_tables(file_content, full_string, kgs, kgs2):
         print(f"Error processing document: {e}")
         return None"""
 
+from docx.shared import Pt
 def load_docx_and_print_tables(file_content,full_string, kgs, kgs2, target_row_number=None):
     try:
         # Load the document
@@ -624,6 +625,12 @@ def load_docx_and_print_tables(file_content,full_string, kgs, kgs2, target_row_n
             for row in table.rows:
                 for cell in row.cells:
                     
+                    if(cell.text.startswith("3")):
+                        cell.text = ""#f"3. Page {table_count+1} of {table_count+1} pages"
+                        paragraph = cell.paragraphs[0]
+                        run = paragraph.add_run(f"3. Page {table_count+1} of {table_count+1} pages")
+                        run.font.size = Pt(8)  
+
                     #print(cell.text)
                     if(cell.text.startswith("14")):
                         
