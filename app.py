@@ -755,8 +755,8 @@ def make_pdf_from_excel(data, word_template, n_clicks):
 	    if(pd.isna(get_data) or pd.isna(Flammpunkt)):
 	        first_word = container_materials[get_data[1]]
 	        second_word = container_types[int(get_data[0])]
-	        data_to_add = str(zero_word)+" "+str(first_word)+" "+get_data[1]+str(get_data[0])\
-	                        +" "+str(second_word)+" "+\
+	        data_to_add = str(zero_word)+" "+str(first_word)\
+	                        +" "+str(second_word)+" "+get_data+" "+\
 	                        str(fourth)+" "+str(third)+" "+str(tech) +"\n\n"
 	        full_string += data_to_add
 	    else:
