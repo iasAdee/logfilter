@@ -560,7 +560,8 @@ container_materials = {
     'L': "Textile",
     'M': "Paper",
     'N': "Metal other than Steel or Aluminum",
-    'P': "Glass, Porcelain or Stoneware"
+    'P': "Glass, Porcelain or Stoneware",
+    'LQ': "Limited Quantity"
 }
 
 
@@ -616,12 +617,13 @@ def load_docx_and_print_tables(file_content,full_string, kgs, kgs2, target_row_n
         # Iterate through each table in the document
         
         #print(document.tables)
-        print("Tables:")
-        check_2 = False
+        #print("Tables:")
+        
         table_count = 0
         for i, table in enumerate(document.tables):
-            print(f"\nTable {i + 1}:")  # Add 1 to i for user-friendly indexing
+            #print(f"\nTable {i + 1}:")  # Add 1 to i for user-friendly indexing
             check = False
+            check_2 = False
             count = 0
             for row in table.rows:
                 for cell in row.cells:
@@ -659,7 +661,7 @@ def load_docx_and_print_tables(file_content,full_string, kgs, kgs2, target_row_n
                             cell.text = kgs2[table_count-1]
                             
 
-            print("-" * 20)  # Separator for readability
+            #print("-" * 20)  # Separator for readability
             
         modified_file = io.BytesIO()
         document.save(modified_file)
@@ -728,63 +730,83 @@ def make_pdf_from_excel(data, word_template, n_clicks):
 
 
 	for i in range(len(excel_data)):
-	    
-	    first_kg = str(excel_data["Brutto"][i])
-	    first_kg_char = str(excel_data["Gewichtseinheit"][i])
-	    
-	    
-	    second_kg = str(excel_data["Netto"][i])
-	    second_kg_char = str(excel_data["Gewichtseinheit"][i])
-	    
-	    third = excel_data["Benennung"][i]
-	    fourth = excel_data["UN-Nr."][i]
-	    
-	    if(pd.isna(fourth)):
-	        continue
-	    
-	    get_data = excel_data["UN-Homologation"][i]
-	    zero_word = excel_data["Menge"][i]
-	    tech = excel_data["Tech.Benennung 1"][i]
 
-	    Flammpunkt = None
-	    if("Flammpunkt" in excel_data.columns):
-	        Flammpunkt = excel_data["Flammpunkt"][i]
-	    
-	    
-	    
-	    if(pd.isna(get_data) or pd.isna(Flammpunkt)):
-	        first_word = container_materials[get_data[1]]
-	        second_word = container_types[int(get_data[0])]
-	        data_to_add = str(zero_word)+" "+str(first_word)\
-	                        +" "+str(second_word)+" "+get_data+" "+\
-	                        str(fourth)+" "+str(third)+" "+str(tech) +"\n\n"
-	        full_string += data_to_add
-	    else:
-	        first_word = container_materials[get_data[1]]
-	        second_word = container_types[int(get_data[0])]
-	        data_to_add = str(zero_word)+" "+str(first_word)\
-	                        +" "+str(second_word)+" ("+str(get_data)+")\n"+\
-	                        str(fourth)+" "+str(third)+" "+str(tech) +"\n"+str(Flammpunkt)+"\n\n"
-	        
-	        
-	        
-	        full_string += data_to_add
-	        
-	            
-	    
-	    kgs += first_kg+" "+first_kg_char+"\n\n\n\n\n"
-	    kgs2 += second_kg+" "+second_kg_char+"\n\n\n\n\n"
-	    
-	    
-	    count += 1
-	    if(count == 3 or i == len(excel_data)-1):
-	        list_of_strings.append(full_string)
-	        full_string = ""
-	        list_of_kgs.append(kgs)
-	        kgs = ""
-	        list_of_kgs2.append(kgs2)
-	        kgs2 = ""
-	        count=0
+		first_kg = str(excel_data["Brutto"][i])
+		first_kg_char = str(excel_data["Gewichtseinheit"][i])
+
+
+		second_kg = str(excel_data["Netto"][i])
+		second_kg_char = str(excel_data["Gewichtseinheit"][i])
+
+		third = excel_data["Benennung"][i]
+		fourth = excel_data["UN-Nr."][i]
+
+		if(pd.isna(fourth)):
+		    continue
+
+		get_data = excel_data["UN-Homologation"][i]
+		zero_word = excel_data["Menge"][i]
+		tech = excel_data["Tech.Benennung 1"][i]
+
+		Flammpunkt = None
+		if("Flammpunkt" in excel_data.columns):
+		    Flammpunkt = excel_data["Flammpunkt"][i]
+
+
+		if(pd.isna(get_data)):
+			if(pd.isna(Flammpunkt)):
+				data_to_add = str(zero_word)+" "+\
+				                str(fourth)+" "+str(third)+" "+str(tech) +"\n\n"
+			else:
+				data_to_add = str(zero_word)+" "+\
+				                str(fourth)+" "+str(third)+" "+str(tech) +"\n"+str(Flammpunkt)+"\n\n"
+		else:
+			has_digit = any(char.isdigit() for char in get_data)
+			if(has_digit):
+				if(get_data[1] in container_materials.keys()):
+					first_word = container_materials[get_data[1]]
+				
+				if(int(get_data[0]) in container_types.keys()):
+
+					second_word = container_types[int(get_data[0])]
+			else:
+				if(get_data in container_materials.keys()):
+					first_word = container_materials[get_data]
+
+					second_word= ""
+				else:
+					first_word=""
+					second_word= ""
+
+			if(pd.isna(Flammpunkt)):
+				data_to_add = str(zero_word)+" "+str(first_word)\
+				                +" "+str(second_word)+" "+get_data+" "+\
+				                str(fourth)+" "+str(third)+" "+str(tech) +"\n\n"
+			else:
+				data_to_add = str(zero_word)+" "+str(first_word)\
+				                +" "+str(second_word)+" ("+str(get_data)+")\n"+\
+				                str(fourth)+" "+str(third)+" "+str(tech) +"\n"+str(Flammpunkt)+"\n\n"
+
+		full_string += data_to_add
+
+		print("Length of full string",len(data_to_add))			    
+		if(len(data_to_add)>100):
+			kgs += first_kg+" "+first_kg_char+"\n\n\n\n\n\n"
+			kgs2 += second_kg+" "+second_kg_char+"\n\n\n\n\n"
+		else:
+			kgs += first_kg+" "+first_kg_char+"\n\n\n\n"
+			kgs2 += second_kg+" "+second_kg_char+"\n\n\n\n"
+
+
+		count += 1
+		if(count == 3 or i == len(excel_data)-1):
+		    list_of_strings.append(full_string)
+		    full_string = ""
+		    list_of_kgs.append(kgs)
+		    kgs = ""
+		    list_of_kgs2.append(kgs2)
+		    kgs2 = ""
+		    count=0
 
 
 	docx_file_path1 = 'layouts/IMO_Layout_new.docx'
