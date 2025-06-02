@@ -187,39 +187,18 @@ def save_data(data1, n_clicks):
     
 )
 
-
 def update_graph(data, n_clicks):
 	
+	df = pd.DataFrame(data)
 	if(n_clicks == None):
 		return {}, html.Div(),{},{},{},{},{},{},{},{},{}, html.Div(),html.Div(),None,{}, {}, {}, []
-	else:
-
-		df = pd.DataFrame(data)
-
+	elif(len(df) > 0):
 		if("Bestellmengeneinheit" in df.columns):
-			#print(df)
-
-			return {}, html.Div(),{},{},{},{},{},{},{},{},{}, html.Div(),html.Div(),None,{}, {}, {}, []
-
-
-			"""Sales Order = bestellmenge 
-												MatBez = kurztext 
-												Werk = Werk
-												MatNr = Material
-												AME = Bestellmengeneinheit
-												BME = Bestellpreis-ME
-												BereitStellDat = Lieferdatum
-												Auftragsmenge_Offen = Bestellmenge"""
-
-
-
-
+			return {}, html.Div(),{},{},{},{},{},{},{},{},{}, html.Div(),html.Div(),None,{}, {}, {}, 
 
 		names_update_lower = {key.lower(): value for key, value in names_update.items()}
 		#print(names_update_lower)
 		df.columns = [names_update_lower.get(col.lower().strip(), col) for col in df.columns]
-
-		
 
 
 		ls = []
@@ -227,6 +206,8 @@ def update_graph(data, n_clicks):
 		    ls.append(float(str(val).strip().replace(",", ".").replace(".","")))
 
 		df["Summe von BrGew_Offen"] = ls
+
+		print(df.columns)
 
 
 		df = df[df["Fakturasperre"].isna()].reset_index(drop=True)
@@ -238,8 +219,9 @@ def update_graph(data, n_clicks):
 		fig8 = data_preprocessor2.get_absenders()
 
 
-
 		return fig, ls ,fig2, fig3,fig4, fig5,fig6,fig7,fig8, fig10,fig20 ,ls2 ,ls3, n_clicks, data_req, data1, data2,data
+	else:
+		return {}, html.Div(),{},{},{},{},{},{},{},{},{}, html.Div(),html.Div(),None,{}, {}, {}, []
 
 
 
@@ -312,6 +294,7 @@ names_update = {
 	"Bestä.Mg": "Auftragsmenge_Bestätigt",
 	"Offene Mng": "Auftragsmenge_Offen",
 	"gelMenge": "Auftragsmenge_bereits_geliefert",
+	"KMenge": "Auftragsmenge_bereits_geliefert",
 	"ME": "AME",
 	"BME": "BME",
 	"KumAuMenge": "Auftragsmenge_Gesamt",
@@ -319,6 +302,7 @@ names_update = {
 	"Kundenreferenz": "BestellNr_Kunde",
 	"Versandbed": "Versandbedingung",
 	"Zähler": "Zähler",
+	"ZŠhler": "Zähler",
 	"SKU_Nenner": "SKU_Nenner",
 	"Bereit.Dat": "BereitStellDat",
 	"Name/Warenempfänger": "WE-Name",
@@ -413,24 +397,45 @@ def update_second(input1, input2):
 	return html.Div([html.H2("Tabelle",style={'color': 'black','font-size': '13px'})]), {}, "data not uploaded"
 
 
+def load_csv_with_best_encoding(file_bytes, encodings=None):
+    if encodings is None:
+        encodings = ['cp1252', 'ISO-8859-1', 'latin1', 'utf-8' ,'utf-8-sig', 'utf-16']
+    
+    for enc in encodings:
+        try:
+            df = pd.read_csv(io.BytesIO(file_bytes), encoding=enc)
+            
+            # Optional: simple check for "garbled" characters in column names
+            garbled = any('\ufffd' in col or '�' in col or any(ord(c) > 127 for c in col) for col in df.columns)
+            if not garbled:
+                print(f" Successfully loaded with encoding: {enc}")
+                return df
+            
+            print(f"⚠ Loaded with encoding '{enc}', but column names may be garbled.")
+            return df  # Return even if slightly garbled
+        except Exception as e:
+            print(f" Failed with encoding '{enc}': {e}")
+    
+    return pd.DataFrame()
 
 def parse_contents(contents, filename, date):
     content_type, content_string = contents.split(',')
 
     decoded = base64.b64decode(content_string)
+    print(filename)
     try:
         if 'csv' in filename:
             # Assume that the user uploaded a CSV file
-            df = pd.read_csv(
-                io.StringIO(decoded.decode('utf-16')), delimiter='\t')
-        elif 'xls' in filename:
-            # Assume that the user uploaded an excel file
-            df = pd.read_excel(io.BytesIO(decoded))
+            df = load_csv_with_best_encoding(decoded, encodings=None)
+            print(df)
+            if df.empty:
+            	print("I am getting inside here")
+            	df = pd.read_csv(io.StringIO(decoded.decode('utf-16')), delimiter='\t')
 
-        elif 'xlsx' in filename.lower():
-            # Assume that the user uploaded an excel file
-            #print("I am here")
-            df = pd.read_excel(io.BytesIO(decoded))
+        if 'xls' in filename and not filename.endswith('xlsx'):
+            df = pd.read_excel(io.BytesIO(decoded), engine='xlrd')
+        elif filename.endswith('xlsx'):
+            df = pd.read_excel(io.BytesIO(decoded), engine='openpyxl')
     except Exception as e:
         print(e)
         return html.Div([
