@@ -18,8 +18,11 @@ page_6_layout = html.Div(
 			children=[
 				dcc.Download(id="download-dataframe-csv6"),
 				dcc.Download(id="download-dataframe-csv7"),
+				dcc.Download(id="download-dataframe-csv7f"),
 				dcc.Store(id="stored-data-6f"),
 				dcc.Store(id="stored-data-7f"),
+				dcc.Store(id="stored-data-8f"),
+
 				html.Div(
 					html.H6("All zero Materials"),
 				),
@@ -31,6 +34,12 @@ page_6_layout = html.Div(
 				),
 				html.Div(id='output-data-upload7',),
 				html.Button('Tabelle speichern', id='sped_button7', n_clicks=None,style={'backgroundColor': '#F5B323','fontSize':"12px"}),
+
+				html.Div(
+					html.H6("Non updated Materials"),
+				),
+				html.Div(id='output-data-nonupdated',),
+				html.Button('Tabelle speichern', id='sped_button7f', n_clicks=None,style={'backgroundColor': '#F5B323','fontSize':"12px"}),
 			],
 			style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
 		),	
