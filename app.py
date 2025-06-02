@@ -82,7 +82,21 @@ def save_data(data1, n_clicks):
 	Output("download-dataframe-csv7", "data"),
 	
 	Input('stored-data-7f', 'data'),
-	Input('sped_button6', 'n_clicks'),
+	Input('sped_button7', 'n_clicks'),
+
+	)
+
+def save_data(data1, n_clicks):
+	if(n_clicks != None):
+		df = pd.DataFrame(data1)
+		#df.to_csv("sped_data.csv", index=False)
+		return dcc.send_data_frame(df.to_csv, "checked_zeros.csv", index=False)
+
+@callback(
+	Output("download-dataframe-csv7f", "data"),
+	
+	Input('stored-data-8f', 'data'),
+	Input('sped_button7f', 'n_clicks'),
 
 	)
 
@@ -859,8 +873,10 @@ def make_pdf_from_excel(data, word_template, n_clicks):
     Output('status7', 'children'),
     Output('output-data-upload6', 'children'),
     Output('output-data-upload7', 'children'),
+    Output('output-data-nonupdated', 'children'),
     Output('stored-data-6f', 'data'),
     Output('stored-data-7f', 'data'),
+    Output('stored-data-8f', 'data'),
     
 
  	Input('stored-data-6', 'data'),
@@ -872,7 +888,7 @@ def update_second(input1, input2):
 
 
 	if(len(data) == 0):
-		return "Data Not recived Yet", [], [], [], []
+		return "Data Not recived Yet", [], [], [], [],[],[]
 	else:
 		#print(data)
 		data = data.dropna(subset=['Material','Charge','Gesperrt', 'Nicht freier Bestand', 'In Qualitätsprüfung' ])
@@ -906,6 +922,8 @@ def update_second(input1, input2):
 		)
 
 		new_dataframe = pd.DataFrame()
+		new_dataframe2 = pd.DataFrame()
+
 		if(len(data2) > 0):
 			data2 = data2.dropna(subset=['Material','Charge','Gesperrt', 'Nicht freier Bestand', 'In Qualitätsprüfung' ]).reset_index(drop=True)
 			
@@ -923,6 +941,9 @@ def update_second(input1, input2):
 			        checked.append(mat_id)   
 			        if(data2["Gesperrt"][i] == 0 and data2["Nicht freier Bestand"][i]== 0 and data2["In Qualitätsprüfung"][i]== 0):
 			            new_dataframe = pd.concat([new_dataframe, data2.iloc[[i]]], ignore_index=True)
+			        else:
+			        	new_dataframe2 = pd.concat([new_dataframe2, data2.iloc[[i]]], ignore_index=True)
+
 		ls2 = []
 
 		if(len(new_dataframe)>0):
@@ -947,9 +968,32 @@ def update_second(input1, input2):
 			        'border': '1px solid black'
 			    }),html.Hr()])
 			)
+		ls3 = []
+		if(len(new_dataframe2) > 0):
+			ls3.append(html.Div([
+			dash_table.DataTable(
+			    style_table={'height': '400px','overflowY': 'auto', 'width':'98%', 'margin-left':'4px'},
+			    data=new_dataframe2.to_dict('records'),
+			    columns=[{"name": i, "id": i} for i in new_dataframe2.columns],
+			    #editable=True,
+			    #filter_action="native",
+			    sort_action="native",
+			    style_data={
+	            'backgroundColor': 'white',
+	            
+	        	},
+			    #page_action="native",
+			    style_header={
+			        'backgroundColor': 'darkslategrey',
+			        'color': 'lightcyan',
+			        'fontWeight': 'bold',
+			        'textAlign': 'center',
+			        'border': '1px solid black'
+			    }),html.Hr()])
+			)
 
 
-		return "Data Recived", ls, ls2,selected_rows.to_dict('records'),new_dataframe.to_dict('records')
+		return "Data Recived", ls, ls2,ls3, selected_rows.to_dict('records'),new_dataframe.to_dict('records'),new_dataframe2.to_dict('records')
 
 
 
@@ -1614,7 +1658,6 @@ def preprocess_image(image, scale_factor=2, threshold=150, contrast_factor=2.0):
     new_size = (int(width * scale_factor), int(height * scale_factor))
     resized_image = image.resize(new_size, Image.Resampling.LANCZOS)  # Use LANCZOS instead of ANTIALIAS
     
-    # Grayscale
     gray_image = resized_image.convert("L")
     
     # Binarize
@@ -1636,7 +1679,7 @@ import google.generativeai as genai
 
 
 
-
+"""
 def process_200_images(image_bytes_list):
     if len(image_bytes_list) > 80:
         return {"error": "The image_bytes_list must contain less than 110 images."}
@@ -1659,14 +1702,76 @@ def process_200_images(image_bytes_list):
         except Exception as e:
             return {"error": f"Error processing image {index + 1}: {e}"}
 
-    prompt_parts.append("""The list of images is provided to you with there image index; 
+    prompt_parts.append(The list of images is provided to you with there image index; 
     1) use the same index to return the image result wrtie only image index in digits;
     2) i want you to get each image title label with bigger font e.g "Sika® Primer-206" write only name in new line;
     3) i want you to extract any number that is after image label ends with "ml" in new line;
     4) find artikel number which is individual number of either 4 or 6 digit long write that number only;
-    ensure the sequence of output and must keep the output format same for all next prompt responses make sure to include all 1, 2, 3, 4 points above""")
+    ensure the sequence of output and must keep the output format same for all next prompt responses make sure to include all 1, 2, 3, 4 points above)
 
+    return prompt_parts"""
+
+def process_200_images(image_bytes_list):
+    if len(image_bytes_list) > 80:
+        return {"error": "The image_bytes_list must contain less than 110 images."}
+
+    prompt_parts = []
+    for index, image_bytes in enumerate(image_bytes_list):  # Enumerate to get index
+        #print(image_bytes[0])
+        try:
+            image = Image.open(BytesIO(image_bytes[0]))
+            buffered = BytesIO()
+            image.save(buffered, format="JPEG")
+            image_base64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
+            
+            prompt_parts.append(f"Image {image_bytes[1]}:")
+            prompt_parts.append({
+                "mime_type": "image/jpeg",
+                "data": image_base64,
+            })
+            
+            
+        except Exception as e:
+            return {"error": f"Error processing image {index + 1}: {e}"}
+
+    prompt_parts.append("""
+    for given images with index end with "00" and "01" extract
+    1) get image label
+    2) get ml value in digit after label 
+    3) get artikel number a solo numeric number without any symbol or special character of length between 4 and 6
+    
+    for given image with index end with "02" extract written text
+    for given image with index end with "03" extract written text
+
+    example output:
+    **Image PO: 18714618: 00**
+    1) Sika® Primer-3 N
+    2) 1000ml
+    3) 122239
+
+    **Image PO: 18714618: 01**
+    1) Sika® Primer-3 N
+    2) 1000ml
+    3) 122239
+
+    **Image PO: 18714618: 02**
+    MAT 123489
+    3009963434
+    1039
+
+    **Image PO: 18714618: 03**
+    Sika® Primer-3 N
+    1000ml
+    MAT 123489
+    3009963434
+    719
+    
+    Return results for all the given images. 
+
+    """)
+    
     return prompt_parts
+
 
 
 @app.callback(
@@ -1707,7 +1812,7 @@ def handle_pdf(upload_content, n_clicks, content, processed, api_input):
 			#print(contents)
 			print(api_input)
 
-			os.environ["GEMINI_API_KEY"] = api_input #"AIzaSyByx1qgfrg6aPl8sTXyYKRX79LQEeZzPjc"
+			os.environ["GEMINI_API_KEY"] = api_input 
 			genai.configure(api_key=os.environ["GEMINI_API_KEY"]) 
 			model = genai.GenerativeModel("gemini-1.5-flash")
 
@@ -1717,123 +1822,110 @@ def handle_pdf(upload_content, n_clicks, content, processed, api_input):
 
 			# Extract text from the PDF
 			doc = fitz.open(stream=decoded, filetype="pdf")
-			images_list = []
-
-			print(f"Total Pages in the document : {len(doc)}")
 
 			ref = {}
 			multi_images = []
 			images_list = []
 			for page_number in range(len(doc)):
-			    
-			    if(page_number % 20 == 0 or page_number == len(doc)-1):
-			        multi_images.append(images_list)
-			        images_list = []
-			        
-			    
-			    if(page_number%3 != 0):
-			        continue        
-			        
+			     
 			    page = doc[page_number]
 			    text = page.get_text()
 			    
-			    
 			    text_data = text.split("\n")
-			    
-			    #print(text_data)
-			    
+			        
 			    text = ""
 			    artikle = ""
+			    
 			    for i, tex in enumerate(text_data):
 			        if(tex.startswith("PO")):
 			            text=tex
 			            
 			        if(tex.startswith("FERT-Artikel-Nummer")):
 			            artikle = text_data[i+1]
+			        
 			            
 			    images = page.get_images(full=True) 
-
 			    text_data = text.split(":")
 			    
-			    
-			    
+			    text = text.split('  ')[0].strip()
+			    print(text)
 			    images = page.get_images(full=True) 
 			    for img_index, img in enumerate(images):
 			        xref = img[0]  
 			        
-			        if(img_index>=2):
+			        if(img_index>3):
 			            break
 			            
 			        base_image = doc.extract_image(xref)  
 			        image_bytes = base_image["image"]  
 			 
-			        images_list.append((image_bytes, str(page_number)+str(img_index) ))
-			        p=str(page_number)+str(img_index)
-			        ref[p] = [text_data[1].strip(), artikle.strip(), page_number+1]
-
-
-			responses = []
-			for i, imaglists in enumerate(multi_images):
-			    if(len(imaglists)<=2):
-			        continue
-			    else:
-			        print("Finding results for")
-			        for img in imaglists:
-			            print(img[1], end=" ")
-			        prompt_parts = process_200_images(imaglists)
-			        print()
+			        images_list.append((image_bytes, str(text+": "+str(page_number)+str(img_index))))
+			        p = text+":"+str(page_number)+str(img_index)                 
+			        ref[p] = [text[1].strip(), artikle.strip(), page_number+1]
+			    
 			        
-			        try:
-			            response = model.generate_content(prompt_parts)
-			            responses.append(response)
-			            print(f"response: {i} completed") # or response.parts, depending on how you want the data.
-			        except Exception as e:
-			            print(e)
+			    if(page_number == 10 or page_number == len(doc)-1):
+			        multi_images.append(images_list)
+			        images_list = []
 
-            
-			page_features = []
+
+			prompt_list =[]
+			for bulk in multi_images:
+			    prompt_parts = process_200_images(bulk)
+			    prompt_list.append(prompt_parts)
+
+			responses= []
+			for prompt_parts in prompt_list:
+			    try:
+			        response = model.generate_content(prompt_parts)
+			        responses.append(response)
+			        print(f"response: {i} completed") 
+			    except Exception as e:
+			        print(e)
+
+			page_results = {}
 			for response in responses:
-			    splitted_Response = response.text.split("\n")
-			    image_list = []
-			    
-			    for i, line in enumerate(splitted_Response):
-			        if(line == ""):
+			    splited_respones = response.text.split("\n")
+			    artikel_number = ""
+			    for lines in splited_respones:
+			        if(len(lines)>30):
 			            continue
-			            
-			        
-			        image_list.append(line)
-			        
-			        if(len(image_list) == 8):
-			            page_features.append(image_list)
-			            image_list = []
-			        
-			    
-			data = pd.DataFrame(page_features, columns=["Bild1_nummer", "Bild1","Bild1 ML", "Artikel NO Bild1",
-				"Bild2_nummer" ,"Bild2", "Bild2 ML","Artikel NO Bild2"])
-			print(data)
+			        else:
+			            if(lines.startswith("**")):
+			                artikel_number = lines.split(" ")[2][:-1]
+			                if(artikel_number in page_results.keys()):
+			                    continue
+			                else:
+			                    page_results[artikel_number] = [artikel_number]
+			                    continue
+			                
+			            if(artikel_number in page_results.keys()):
+			                splited_lines =lines.split(")")
+			                if(len(splited_lines) > 1):
+			                    page_results[artikel_number].append(splited_lines[1])
+			                else:
+			                    if(splited_lines[0] != ""):
+			                        page_results[artikel_number].append(splited_lines[0])
 
-			rows = []
-			for key, values in ref.items():
-			    rows.append([key] + values)
 
-			df = pd.DataFrame(rows, columns=['Bild1_nummer', 'PO Nummer', 'Artkel', 'Seitenzahl'])
-
-			final = data.merge(df, on= "Bild1_nummer")
-
+			data = pd.DataFrame(list(page_results.values()), columns=["Bild1_nummer", "Bild1_label","Bild1 ML", "Artikel NO Bild1",
+    "Bild2_label" ,"Bild ML", "Artikel NO Bild2","BottleInfo1","BottleInfo2","BottleInfo3",
+                                            "packLable", "pack ML", "pack MAT", "pack MAT2", "pack 3"
+                                           ])
+            
 			def create_match_column(df):
 
 			    df['Match'] = 'nicht übereinstimmend'  
-
 			    df.loc[
-			        (df['Bild1'] == df['Bild2']) &
-			        (df['Bild1 ML'] == df['Bild2 ML']) &
+			        (df['Bild1_label'] == df['Bild2_label']) &
+			        (df['Bild1 ML'] == df['Bild ML']) &
 			        (df['Artikel NO Bild1'] == df['Artikel NO Bild2']),
 			        'Match'
 			    ] = 'übereinstimmend'
 
 			    return df
 
-			data =create_match_column(final)
+			data =create_match_column(data)
 
 			ls2 = []
 			ls2.append(html.Div([
