@@ -160,6 +160,14 @@ def save_data(data1, n_clicks):
 		return dcc.send_data_frame(df.to_csv, "filter_data.csv", index=False)
 
 
+def german_to_float(val):
+    if isinstance(val, str):
+        val = val.strip()
+        val = val.replace('.', '') 
+        val = val[::-1].replace(',', '.', 1)[::-1]  # Replace last comma with dot
+        return float(val)
+    return val
+
 @callback(
     Output('inflation-plot', 'figure'),
     Output('output-data-upload2', 'children'),
@@ -188,41 +196,58 @@ def save_data(data1, n_clicks):
 )
 
 def update_graph(data, n_clicks):
-	
-	df = pd.DataFrame(data)
-	if(n_clicks == None):
-		return {}, html.Div(),{},{},{},{},{},{},{},{},{}, html.Div(),html.Div(),None,{}, {}, {}, []
-	elif(len(df) > 0):
-		if("Bestellmengeneinheit" in df.columns):
-			return {}, html.Div(),{},{},{},{},{},{},{},{},{}, html.Div(),html.Div(),None,{}, {}, {}, 
 
-		names_update_lower = {key.lower(): value for key, value in names_update.items()}
-		#print(names_update_lower)
-		df.columns = [names_update_lower.get(col.lower().strip(), col) for col in df.columns]
+    default_return = ({}, html.Div(), {}, {}, {}, {}, {}, {}, {}, {}, {}, html.Div(), html.Div(), None, {}, {}, {}, [])
 
+    if n_clicks is None:
+        return default_return
 
-		ls = []
-		for i, val in enumerate(df["Summe von BrGew_Offen"]):
-		    ls.append(float(str(val).strip().replace(",", ".").replace(".","")))
+    df = pd.DataFrame(data)
 
-		df["Summe von BrGew_Offen"] = ls
+    if df.empty:
+        return default_return
 
-		print(df.columns)
+    if "Bestellmengeneinheit" in df.columns:
+        return default_return
 
+    names_update_lower = {key.lower(): value for key, value in names_update.items()}
+    df.columns = [names_update_lower.get(col.lower().strip(), col) for col in df.columns]
 
-		df = df[df["Fakturasperre"].isna()].reset_index(drop=True)
-
-		#print(df.columns)
-		data_preprocessor2 = DataPreprocessing(df)
-		data_req, ls, fig = data_preprocessor2.clac_2()
-		ls2, ls3, data1, data2, fig2, fig3, fig4, fig5, fig6, fig7, fig10, fig20 = data_preprocessor2.get_calculated_results(input=False)
-		fig8 = data_preprocessor2.get_absenders()
+    df['Auftragsmenge_Offen'] = df['Auftragsmenge_Offen'].apply(german_to_float)
+    df['Auftragsmenge_bereits_geliefert'] = df['Auftragsmenge_bereits_geliefert'].apply(german_to_float)
+    df['Summe von BrGew_Offen'] = df['Summe von BrGew_Offen'].apply(german_to_float)
 
 
-		return fig, ls ,fig2, fig3,fig4, fig5,fig6,fig7,fig8, fig10,fig20 ,ls2 ,ls3, n_clicks, data_req, data1, data2,data
-	else:
-		return {}, html.Div(),{},{},{},{},{},{},{},{},{}, html.Div(),html.Div(),None,{}, {}, {}, []
+    print(df["Summe von BrGew_Offen"].max())
 
+    if "Summe von BrGew_Offen" not in df.columns:
+        return default_return
+
+
+    """cleaned_values = []
+                to_keep = []
+            
+                for val in df["Summe von BrGew_Offen"]:
+                    try:
+                        val_str = str(val).strip()
+                        val_str = val_str.replace(".", "", val_str.count(".") - 1).replace(",", ".")
+                        cleaned_values.append(round(float(val_str),2))
+                        to_keep.append(True)
+                    except:
+                        to_keep.append(False)
+            
+                df = df[to_keep].reset_index(drop=True)
+                df["Summe von BrGew_Offen"] = cleaned_values"""
+
+    if "Fakturasperre" in df.columns:
+        df = df[df["Fakturasperre"].isna()].reset_index(drop=True)
+
+    data_preprocessor2 = DataPreprocessing(df)
+    data_req, ls, fig = data_preprocessor2.clac_2()
+    ls2, ls3, data1, data2, fig2, fig3, fig4, fig5, fig6, fig7, fig10, fig20 = data_preprocessor2.get_calculated_results(input=False)
+    fig8 = data_preprocessor2.get_absenders()
+
+    return fig, ls, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig10, fig20, ls2, ls3, n_clicks, data_req, data1, data2, data
 
 
 @callback(
@@ -248,15 +273,15 @@ def update_graph2(data, n_clicks):
 		df = pd.DataFrame(data)
 
 
-		col_updates={
-		"kurztext":"MatBez", 
-		"Werk":"Werk",
-		"Material":"MatNr",
-		"Bestellmengeneinheit":"AME",
-		"Bestellpreis-ME":"BME",
-		"Lieferdatum":"BereitStellDat",
-		"Bestellmenge":"Auftragsmenge_Offen",
-		"noch zu liefern (Menge)":"Auftragsmenge_bereits_geliefert"}
+		"""col_updates={
+								"kurztext":"MatBez", 
+								"Werk":"Werk",
+								"Material":"MatNr",
+								"Bestellmengeneinheit":"AME",
+								"Bestellpreis-ME":"BME",
+								"Lieferdatum":"BereitStellDat",
+								"Bestellmenge":"Auftragsmenge_Offen",
+								"noch zu liefern (Menge)":"Auftragsmenge_bereits_geliefert"}"""
 
 
 		col_updates = {key.lower(): value for key, value in col_updates.items()}
@@ -293,6 +318,7 @@ names_update = {
 	"AuftrMenge": "Auftragsmenge",
 	"Bestä.Mg": "Auftragsmenge_Bestätigt",
 	"Offene Mng": "Auftragsmenge_Offen",
+	#"AuftrMenge": "Auftragsmenge_Offen",
 	"gelMenge": "Auftragsmenge_bereits_geliefert",
 	"KMenge": "Auftragsmenge_bereits_geliefert",
 	"ME": "AME",
@@ -303,6 +329,7 @@ names_update = {
 	"Versandbed": "Versandbedingung",
 	"Zähler": "Zähler",
 	"ZŠhler": "Zähler",
+	"ZÃ¤hler": "Zähler",
 	"SKU_Nenner": "SKU_Nenner",
 	"Bereit.Dat": "BereitStellDat",
 	"Name/Warenempfänger": "WE-Name",
@@ -422,14 +449,14 @@ def parse_contents(contents, filename, date):
     content_type, content_string = contents.split(',')
 
     decoded = base64.b64decode(content_string)
-    print(filename)
+    #print(filename)
     try:
         if 'csv' in filename:
             # Assume that the user uploaded a CSV file
             df = load_csv_with_best_encoding(decoded, encodings=None)
-            print(df)
+            #print(df)
             if df.empty:
-            	print("I am getting inside here")
+            	#print("I am getting inside here")
             	df = pd.read_csv(io.StringIO(decoded.decode('utf-16')), delimiter='\t')
 
         if 'xls' in filename and not filename.endswith('xlsx'):
@@ -1636,12 +1663,9 @@ page_3_layout = html.Div([
 ])
 
 import fitz  
-from PIL import Image
-from io import BytesIO
 import matplotlib.pyplot as plt
 import re
 from tqdm import tqdm
-import base64
 
 
 
@@ -1652,27 +1676,6 @@ def get_punct_free(text):
             new_text += char
             
     return new_text
-from PIL import Image, ImageEnhance
-
-def preprocess_image(image, scale_factor=2, threshold=150, contrast_factor=2.0):
-    # Open the image
-    
-    
-    # Resize
-    width, height = image.size
-    new_size = (int(width * scale_factor), int(height * scale_factor))
-    resized_image = image.resize(new_size, Image.Resampling.LANCZOS)  # Use LANCZOS instead of ANTIALIAS
-    
-    gray_image = resized_image.convert("L")
-    
-    # Binarize
-    binary_image = gray_image.point(lambda p: p > threshold and 255)
-    
-    # Enhance contrast
-    enhancer = ImageEnhance.Contrast(binary_image)
-    contrast_image = enhancer.enhance(contrast_factor)
-    
-    return contrast_image
 
 
 import google.generativeai as genai
@@ -1680,41 +1683,8 @@ from PIL import Image
 from io import BytesIO
 import base64
 import os
-import google.generativeai as genai
 
 
-
-"""
-def process_200_images(image_bytes_list):
-    if len(image_bytes_list) > 80:
-        return {"error": "The image_bytes_list must contain less than 110 images."}
-
-    prompt_parts = []
-    for index, image_bytes in enumerate(image_bytes_list):  # Enumerate to get index
-        try:
-            image = Image.open(BytesIO(image_bytes[0]))
-            buffered = BytesIO()
-            image.save(buffered, format="JPEG")
-            image_base64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
-            
-            prompt_parts.append(f"Image {image_bytes[1]}:")
-            prompt_parts.append({
-                "mime_type": "image/jpeg",
-                "data": image_base64,
-            })
-            
-            
-        except Exception as e:
-            return {"error": f"Error processing image {index + 1}: {e}"}
-
-    prompt_parts.append(The list of images is provided to you with there image index; 
-    1) use the same index to return the image result wrtie only image index in digits;
-    2) i want you to get each image title label with bigger font e.g "Sika® Primer-206" write only name in new line;
-    3) i want you to extract any number that is after image label ends with "ml" in new line;
-    4) find artikel number which is individual number of either 4 or 6 digit long write that number only;
-    ensure the sequence of output and must keep the output format same for all next prompt responses make sure to include all 1, 2, 3, 4 points above)
-
-    return prompt_parts"""
 
 def process_200_images(image_bytes_list):
     if len(image_bytes_list) > 80:
@@ -1788,16 +1758,14 @@ def process_200_images(image_bytes_list):
     Output("ploti12", "figure"),
     Output("stored_results", "data"),
     
-
-
-    Input("upload-pdf", "contents"),
     Input("process-btn", "n_clicks"),
+    Input("upload-pdf", "contents"),
     State("pdf-content", "data"),
     State("pdf-processed", "data"),
-    Input("api_input", "value"),
+    State("api_input", "value"),
     prevent_initial_call=True
 )
-def handle_pdf(upload_content, n_clicks, content, processed, api_input):
+def handle_pdf(n_clicks,upload_content, content, processed, api_input):
 	triggered_id = ctx.triggered_id  
 
 	if triggered_id == "upload-pdf":
@@ -1815,7 +1783,7 @@ def handle_pdf(upload_content, n_clicks, content, processed, api_input):
 		if content is not None:
 
 			#print(contents)
-			print(api_input)
+			#print(api_input)
 
 			os.environ["GEMINI_API_KEY"] = api_input 
 			genai.configure(api_key=os.environ["GEMINI_API_KEY"]) 
@@ -1837,6 +1805,22 @@ def handle_pdf(upload_content, n_clicks, content, processed, api_input):
 			    text = page.get_text()
 			    
 			    text_data = text.split("\n")
+			    
+			    charge =[val.strip().lower() for val in text_data if len(val) > 1]
+			    
+			    second_val = ""
+			    first_val = ""
+			    if("flaschennummer" in charge[-1]):
+			        second_val = charge[-1].split(" ")
+			        if(len(second_val) >=1):
+			            second_val = second_val[1]
+			        else:
+			            second_val = charge[charge.index("flaschennummer")+1]
+			            
+			    if("halb-charge" in charge):
+			        first_val = charge[charge.index("halb-charge")+1]
+			    
+
 			        
 			    text = ""
 			    artikle = ""
@@ -1853,7 +1837,11 @@ def handle_pdf(upload_content, n_clicks, content, processed, api_input):
 			    text_data = text.split(":")
 			    
 			    text = text.split('  ')[0].strip()
-			    print(text)
+			    #print(len(text))
+			    if(len(text) == 0):
+			        #print(len(text))
+			        continue
+			        
 			    images = page.get_images(full=True) 
 			    for img_index, img in enumerate(images):
 			        xref = img[0]  
@@ -1865,15 +1853,20 @@ def handle_pdf(upload_content, n_clicks, content, processed, api_input):
 			        image_bytes = base_image["image"]  
 			 
 			        images_list.append((image_bytes, str(text+": "+str(page_number)+str(img_index))))
-			        p = text+":"+str(page_number)+str(img_index)                 
-			        ref[p] = [text[1].strip(), artikle.strip(), page_number+1]
+			        #p = text+":"+str(page_number)+str(img_index)  
+			        
+			    ref[text.split(":")[1].strip()] = [first_val, second_val]
 			    
 			        
-			    if(page_number == 10 or page_number == len(doc)-1):
+			    if((page_number != 0 and page_number%10 == 0) or page_number == len(doc)-1):
 			        multi_images.append(images_list)
 			        images_list = []
 
 
+			df_dict = pd.DataFrame.from_dict(ref, orient='index', columns=['Charge', 'flaschennummer'])
+			df_dict.index.name = 'Bild1_nummer'
+			df_dict.reset_index(inplace=True)
+  
 			prompt_list =[]
 			for bulk in multi_images:
 			    prompt_parts = process_200_images(bulk)
@@ -1907,16 +1900,22 @@ def handle_pdf(upload_content, n_clicks, content, processed, api_input):
 			            if(artikel_number in page_results.keys()):
 			                splited_lines =lines.split(")")
 			                if(len(splited_lines) > 1):
+			                    #print(splited_lines[1])
 			                    page_results[artikel_number].append(splited_lines[1])
 			                else:
 			                    if(splited_lines[0] != ""):
 			                        page_results[artikel_number].append(splited_lines[0])
 
-
+			for val in page_results:
+			    val_ = page_results[val]
+			    val_  = val_[:11]
+			    page_results[val] = val_
 			data = pd.DataFrame(list(page_results.values()), columns=["Bild1_nummer", "Bild1_label","Bild1 ML", "Artikel NO Bild1",
     "Bild2_label" ,"Bild ML", "Artikel NO Bild2","BottleInfo1","BottleInfo2","BottleInfo3",
-                                            "packLable", "pack ML", "pack MAT", "pack MAT2", "pack 3"
+                                            "packLable"#, "pack ML", "pack MAT", "pack MAT2", "pack 3"
                                            ])
+
+			df_merged = data.merge(df_dict, on='Bild1_nummer', how='inner')
             
 			def create_match_column(df):
 
@@ -1930,7 +1929,7 @@ def handle_pdf(upload_content, n_clicks, content, processed, api_input):
 
 			    return df
 
-			data =create_match_column(data)
+			data =create_match_column(df_merged)
 
 			ls2 = []
 			ls2.append(html.Div([
@@ -1966,8 +1965,6 @@ def handle_pdf(upload_content, n_clicks, content, processed, api_input):
 
 			fig.update_layout(xaxis_title="Ergebnis", yaxis_title="Anzahl") 
 
-
-			# Display the extracted text
 			return  "PDF verarbeitet", True, content, True , ls2, fig,  data.to_dict('records')
 	else:
 		if upload_content is None:
