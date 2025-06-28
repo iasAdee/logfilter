@@ -9,6 +9,9 @@ import re
 import numpy as np
 import json
 
+
+
+
 class DataPreprocessing:
 	def __init__(self, data):
 		self.data = data
@@ -148,6 +151,7 @@ class DataPreprocessing:
 		        return 0, 0
 
 
+		#print(self.data.columns())
 		if(input  == False):
 			data_required = self.data[["Auftragsmenge_Offen", "AME", "BME", "BereitStellDat", "Zähler",
 			                      "MatBez", "MatNr", "Auftragsmenge_bereits_geliefert",
@@ -156,14 +160,7 @@ class DataPreprocessing:
 			data_required = self.data[["Auftragsmenge_Offen", "AME", "BME", "BereitStellDat",
 			                      "MatBez", "MatNr", "Auftragsmenge_bereits_geliefert",
 			                      "Werk"]]
-
-
-
-		ls = []
-		for i, val in enumerate(data_required["Auftragsmenge_Offen"]):
-		    ls.append(float(str(val).strip().replace(",", ".").replace(".","")))
-
-		data_required["Auftragsmenge_Offen"] = ls
+	
 
 		for i in range(len(data_required)):
 			data_required["SKU_Zähler"] = 1
@@ -182,11 +179,17 @@ class DataPreprocessing:
 		data_collection2 = []
 		ls2 = []
 
+		keys_to_check=list(loaded_data2.keys())#+list(loaded_data.keys())
 
+
+		data_required["MatNr"] = data_required["MatNr"].astype(str)
+		print("Length of data before:", len(data_required))
+		data_required = data_required[data_required["MatNr"].isin(keys_to_check)].reset_index(drop=True)
+		print("Length of data after:", len(data_required))
 
 		for i in range(len(data_required)):
-		    ame = data_required["AME"][i]
-		    bme = data_required["BME"][i]
+		    ame = data_required["AME"][i].strip()
+		    bme = data_required["BME"][i].strip()
 		    order = data_required["Auftragsmenge_Offen"][i]
 
 		    pallet = data_required["Zähler"][i]
@@ -203,19 +206,23 @@ class DataPreprocessing:
 		    	MatNr = str(int(float(MatNr)))
 		    
 		    if(MatNr not in loaded_data.keys()):
+		    	#pallet = data_required["Zähler"][i]
 		    	continue
 
 		    if(MatNr in loaded_data2.keys() and MatNr in loaded_data.keys()):
-		    	pallet = loaded_data[MatNr] / loaded_data2[MatNr]
+		    	pallet = loaded_data[MatNr] #/ loaded_data2[MatNr]
 		    	if(ame == "ST" and bme == "ST"):
-
 		    		order = data_required["Auftragsmenge_Offen"][i]
-		    		order = order/loaded_data2[MatNr]
-		    		pallet = loaded_data[MatNr] / loaded_data2[MatNr]
+		    		#order = order/loaded_data2[MatNr]
+		    		pallet = loaded_data[MatNr]# / loaded_data2[MatNr]
+		    	if(ame == "KG" and bme == "KG"):
+		    		pallet = loaded_data[MatNr]
+
 		    elif(MatNr in loaded_data.keys()):
 		    	pallet = loaded_data[MatNr]
 		    else:
 		    	continue
+		    	#pallet = data_required["Zähler"][i]
 
 		    ls = []
 		    nodata = False
@@ -231,7 +238,7 @@ class DataPreprocessing:
 		            pallet_ = int(order / pallet)
 		            pieces = abs(int(order / pallet) * pallet - order)
 
-		            ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, pieces, pallet_,wr])
+		            ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, int(pieces), pallet_,wr])
 		        data_collection2.append(ls[0].copy())
 		        nodata = True
 		    if(ame == "KAR" and bme == "ST"):
@@ -250,14 +257,15 @@ class DataPreprocessing:
 		            pallet_ = int(order / comparison)
 		            pieces = abs(int(order / comparison) * comparison - order)
 
-		            ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, pieces, pallet_,wr])
+		            ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, int(pieces), pallet_,wr])
 		        data_collection2.append(ls[0].copy())
 		        nodata = True
 		    if(ame == "KG" and bme == "KG"):
 		        order = data_required["Auftragsmenge_Offen"][i]
-		        
+
 		        com = data_required['Auftragsmenge_bereits_geliefert'][i]
 		        if(pd.isna(order) or pd.isna(pallet)):
+		            print("Getting continued: ",order, pallet)
 		            continue
 
 		        text = data_required["MatBez"][i]
@@ -265,18 +273,21 @@ class DataPreprocessing:
 		        if(kg == 0):
 		            continue
 		        else:
-		            order_actual = order / kg
-		            pallet_actual = pallet / kg
+		            order_actual = order / kg #300000/15 = 20000
+		            pallet_actual = pallet / kg #450/15 = 30 
 
 		            if(order_actual < pallet_actual):
 		                ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, order_actual, 0,wr])
 		            else:
+		                #print(MatNr, pallet_actual)
 		                pallet_ = int(order_actual / pallet_actual)
+		                #print(pallet_)
 		                pieces = abs(int(order_actual / pallet_actual) * pallet_actual - order_actual)
 
-		                ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, pieces, pallet_,wr])
+		                ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, int(pieces), pallet_,wr])
 		        data_collection2.append(ls[0].copy())
 		        nodata = True
+
 		    if(ame == "KG" and bme == "ST"):
 		        order = data_required["Auftragsmenge_Offen"][i]
 		        
@@ -296,7 +307,7 @@ class DataPreprocessing:
 		                pallet_ = int(order / req_num)
 		                pieces = abs(int(order / req_num) * req_num - order)
 
-		                ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, pieces, pallet_,wr])
+		                ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, int(pieces), pallet_,wr])
 
 		        data_collection2.append(ls[0].copy())
 		        nodata = True
@@ -317,7 +328,7 @@ class DataPreprocessing:
 		                pallet_ = int(num / pallet)
 		                pieces = abs(int(num / pallet) * pallet - num)
 
-		                ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, pieces, pallet_,wr])
+		                ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, int(pieces), pallet_,wr])
 		            data_collection2.append(ls[0])
 
 		        elif(n1 != 0 and n2 != 0):
@@ -330,7 +341,7 @@ class DataPreprocessing:
 		                pallet_ = int(num / pallet)
 		                pieces = abs(int(num / pallet) * pallet - num)
 
-		                ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, pieces, pallet_,wr])
+		                ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, int(pieces), pallet_,wr])
 		            data_collection2.append(ls[0].copy())
 		            nodata = True
 
