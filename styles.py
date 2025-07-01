@@ -24,5 +24,3 @@ nav_style = {
     'overflow': 'auto',
     'background-color': 'dimgray'
 }
-
-
