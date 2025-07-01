@@ -168,6 +168,10 @@ def german_to_float(val):
         return float(val)
     return val
 
+
+########################################################
+############# Log filter callback.  ####################
+########################################################
 @callback(
     Output('inflation-plot', 'figure'),
     Output('output-data-upload2', 'children'),
@@ -188,6 +192,7 @@ def german_to_float(val):
     Output('stored-data2', 'data'),
     Output('stored-data3', 'data'),
     Output('stored-data4', 'data'),
+    Output('status', 'children'),
     
 
     Input('stored-data', 'data'),
@@ -197,25 +202,46 @@ def german_to_float(val):
 
 def update_graph(data, n_clicks):
 
-    default_return = ({}, html.Div(), {}, {}, {}, {}, {}, {}, {}, {}, {}, html.Div(), html.Div(), None, {}, {}, {}, [])
-
-    if n_clicks is None:
-        return default_return
+    default_return = ({}, html.Div(), {}, {}, {}, {}, {}, {}, {}, {}, {}, html.Div(), html.Div(), None, {}, {}, {}, [], "")
 
     df = pd.DataFrame(data)
+    if n_clicks is None:
+        if not df.empty:
+        	default_return = ({}, html.Div(), {}, {}, {}, {}, {}, {}, {}, {}, {}, html.Div(), html.Div(), None, {}, {}, {}, [], "Daten erfolgreich geladen")
+        return default_return
+
 
     if df.empty:
+        default_return = ({}, html.Div(), {}, {}, {}, {}, {}, {}, {}, {}, {}, html.Div(), html.Div(), None, {}, {}, {}, [], "Data Not loaded yet")
         return default_return
 
     if "Bestellmengeneinheit" in df.columns:
+        default_return = ({}, html.Div(), {}, {}, {}, {}, {}, {}, {}, {}, {}, html.Div(), html.Div(), None, {}, {}, {}, [], "Incorrect data")
         return default_return
+
+
+
 
     names_update_lower = {key.lower(): value for key, value in names_update.items()}
     df.columns = [names_update_lower.get(col.lower().strip(), col) for col in df.columns]
 
+    #print(df.columns)
+    expected_columns = ["Auftragsmenge_Offen", "Auftragsmenge_bereits_geliefert", 
+    "Summe von BrGew_Offen", "Fakturasperre","KomplettLF_KZ", "SalesOrder", "WE_PLZ", "Werk",
+    "MatNr","BereitStellDat", "AME", "BME", "Zähler","MatBez"]
+    missing_columns = [col for col in expected_columns if col not in df.columns]
+
+    if(len(missing_columns) > 0):
+        message = "Missing columns: " + ", ".join(missing_columns)
+        default_return = ({}, html.Div(), {}, {}, {}, {}, {}, {}, {}, {}, {}, html.Div(), html.Div(), None, {}, {}, {}, [], message)
+        return default_return
+
     df['Auftragsmenge_Offen'] = df['Auftragsmenge_Offen'].apply(german_to_float)
     df['Auftragsmenge_bereits_geliefert'] = df['Auftragsmenge_bereits_geliefert'].apply(german_to_float)
     df['Summe von BrGew_Offen'] = df['Summe von BrGew_Offen'].apply(german_to_float)
+
+
+
 
 
     print(df["Summe von BrGew_Offen"].max())
@@ -247,8 +273,14 @@ def update_graph(data, n_clicks):
     ls2, ls3, data1, data2, fig2, fig3, fig4, fig5, fig6, fig7, fig10, fig20 = data_preprocessor2.get_calculated_results(input=False)
     fig8 = data_preprocessor2.get_absenders()
 
-    return fig, ls, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig10, fig20, ls2, ls3, n_clicks, data_req, data1, data2, data
+    return fig, ls, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig10, fig20, ls2, ls3, n_clicks, data_req, data1, data2, data, "Data Processed Successfully"
 
+
+
+
+########################################################
+############# Wareneingänge callback.  ####################
+########################################################
 
 @callback(
     Output('ploti1', 'figure'),
@@ -259,6 +291,7 @@ def update_graph(data, n_clicks):
     Output('inflation-plot-11i', 'figure'),
     Output('output-data-upload3i', 'children'),
     Output('stored-data2i', 'data'),
+    Output('status20', 'children'),
     
     Input('stored-data-input', 'data'),
     Input('update-button2', 'n_clicks'),
@@ -267,32 +300,44 @@ def update_graph(data, n_clicks):
 
 
 def update_graph2(data, n_clicks):
+	df = pd.DataFrame(data)
 	if(n_clicks == None):
-		return {},{},{},{}, {}, {}, [], {}
+		if(df.empty):
+			return {},{},{},{}, {}, {}, [], {}, "Daten erfolgreich not geladen"
+		else:
+			return {},{},{},{}, {}, {}, [], {}, "Daten erfolgreich geladen"
 	else:
-		df = pd.DataFrame(data)
 
+		if(df.empty):
+			return {},{},{},{}, {}, {}, [], {}, "Daten erfolgreich not geladen"
 
-		"""col_updates={
-								"kurztext":"MatBez", 
-								"Werk":"Werk",
-								"Material":"MatNr",
-								"Bestellmengeneinheit":"AME",
-								"Bestellpreis-ME":"BME",
-								"Lieferdatum":"BereitStellDat",
-								"Bestellmenge":"Auftragsmenge_Offen",
-								"noch zu liefern (Menge)":"Auftragsmenge_bereits_geliefert"}"""
-
-
-		col_updates = {key.lower(): value for key, value in col_updates.items()}
+		col_updates = {key.lower(): value for key, value in names_update.items()}
 		df.columns = [col_updates.get(col.lower().strip(), col) for col in df.columns]
+
+
+		#print(df.columns)
+		expected_columns = ["Auftragsmenge_Offen", "Auftragsmenge_bereits_geliefert", 
+		"Summe von BrGew_Offen", "Fakturasperre","KomplettLF_KZ", "SalesOrder", "WE_PLZ", "Werk",
+		"MatNr","BereitStellDat", "AME", "BME", "Zähler","MatBez"]
+		missing_columns = [col for col in expected_columns if col not in df.columns]
+
+		if(len(missing_columns) > 0):
+		    message = "Missing columns: " + ", ".join(missing_columns)
+		    default_return = ({},{},{},{}, {}, {}, [], {},  message)
+		    return default_return
+
+		df['Auftragsmenge_Offen'] = df['Auftragsmenge_Offen'].apply(german_to_float)
+		df['Auftragsmenge_bereits_geliefert'] = df['Auftragsmenge_bereits_geliefert'].apply(german_to_float)
+		df['Summe von BrGew_Offen'] = df['Summe von BrGew_Offen'].apply(german_to_float)
+
+
 
 		df = df[df["Fakturasperre"].isna()].reset_index(drop=True)
 
 		data_preprocessor2 = DataPreprocessing(df)
 		ls2, ls3, data1, data2, fig2, fig3, fig4, fig5, fig6, fig7, fig10, fig20 = data_preprocessor2.get_calculated_results(input=True)
 
-		return fig2,fig3,fig4,fig5, fig10, fig20, ls2, data1
+		return fig2,fig3,fig4,fig5, fig10, fig20, ls2, data1,"Data Processed"
 
 
 def format_to_int(value):
@@ -448,20 +493,19 @@ def load_csv_with_best_encoding(file_bytes, encodings=None):
 def parse_contents(contents, filename, date):
     content_type, content_string = contents.split(',')
 
+    print(filename)
     decoded = base64.b64decode(content_string)
     #print(filename)
     try:
         if 'csv' in filename:
             # Assume that the user uploaded a CSV file
             df = load_csv_with_best_encoding(decoded, encodings=None)
-            #print(df)
             if df.empty:
-            	#print("I am getting inside here")
             	df = pd.read_csv(io.StringIO(decoded.decode('utf-16')), delimiter='\t')
 
         if 'xls' in filename and not filename.endswith('xlsx'):
             df = pd.read_excel(io.BytesIO(decoded), engine='xlrd')
-        elif filename.endswith('xlsx'):
+        elif filename.endswith('xlsx') or filename.endswith('XLSX'):
             df = pd.read_excel(io.BytesIO(decoded), engine='openpyxl')
     except Exception as e:
         print(e)
@@ -485,7 +529,7 @@ def parse_contents(contents, filename, date):
 @callback(
     #Output('output-data-upload', 'children'),
     Output('stored-data', 'data'),
-     Output('status', 'children'),
+     #Output('status', 'children'),
     [Input('upload-data', 'contents')],
     [State('upload-data', 'filename'),
      State('upload-data', 'last_modified')]
@@ -499,13 +543,13 @@ def update_output(list_of_contents, list_of_names, list_of_dates):
             child, df = parse_contents(c, n, d)
             children.append(child)
             df_combined = pd.concat([df_combined, df], ignore_index=True)
-        return df_combined.to_dict('records'), "Daten erfolgreich geladen"
-    return {}, ""
+        return df_combined.to_dict('records')#, #"Daten erfolgreich geladen"
+    return {}#, ""
 
 @callback(
     #Output('output-data-upload', 'children'),
     Output('stored-data-input', 'data'),
-     Output('status20', 'children'),
+     
     [Input('upload-data2', 'contents')],
     [State('upload-data2', 'filename'),
      State('upload-data2', 'last_modified')]
@@ -519,14 +563,48 @@ def update_output20(list_of_contents, list_of_names, list_of_dates):
             child, df = parse_contents(c, n, d)
             children.append(child)
             df_combined = pd.concat([df_combined, df], ignore_index=True)
-        return df_combined.to_dict('records'), "Daten erfolgreich geladen"
-    return {}, ""
+        return df_combined.to_dict('records')#, "Daten erfolgreich geladen"
+    return {}#, ""
+
+@callback(
+    #Output('output-data-upload', 'children'),
+    Output('stored-data-new', 'data'),
+    Output('stored-data-old', 'data'),
+    Output('statuson', 'children'),
+    [Input('upload-newextracted', 'contents')],
+    [Input('upload-existing', 'contents'),
+    State('upload-newextracted', 'filename'),
+     State('upload-newextracted', 'last_modified'), State('upload-existing', 'filename'),
+     State('upload-existing', 'last_modified')]
+)
+def update_processedfiles(list_of_contents_new,list_of_contents_old, list_of_names_new, list_of_dates_new,list_of_names_old, list_of_dates_old):
+
+    if list_of_contents_new is not None and list_of_contents_old is not None:
+        children = []
+        df_combined = pd.DataFrame()
+        for c, n, d in zip(list_of_contents_new, list_of_names_new, list_of_dates_new):
+            child, df = parse_contents(c, n, d)
+            children.append(child)
+            df_combined_new = pd.concat([df_combined, df], ignore_index=True)
+
+        for c, n, d in zip(list_of_contents_old, list_of_names_old, list_of_dates_old):
+            child, df = parse_contents(c, n, d)
+            children.append(child)
+            df_combined_old = pd.concat([df_combined, df], ignore_index=True)
+
+
+        return df_combined_new.to_dict('records'), df_combined_old.to_dict('records'),"Daten erfolgreich geladen"
+
+    elif(list_of_contents_old is not None and list_of_contents_new is None):
+        return {},{},"Please upload new file as well"
+    else:
+        return {},{},""
+
 
 
 @callback(
     #Output('output-data-upload', 'children'),
     Output('stored-data-5', 'data'),
-     Output('status3', 'children'),
     [Input('upload-data-3', 'contents')],
     [State('upload-data-3', 'filename'),
      State('upload-data-3', 'last_modified')]
@@ -540,8 +618,8 @@ def update_output3(list_of_contents, list_of_names, list_of_dates):
             child, df = parse_contents(c, n, d)
             children.append(child)
             df_combined = pd.concat([df_combined, df], ignore_index=True)
-        return df_combined.to_dict('records'), "Daten erfolgreich geladen"
-    return {}, ""
+        return df_combined.to_dict('records')#, "Daten erfolgreich geladen"
+    return {}#, ""
 
 @callback(
     #Output('output-data-upload', 'children'),
@@ -1207,6 +1285,7 @@ def make_linechart_client(client_id, proccessed_data):
    	Output('plot41', 'figure'),
    	Output('search-input9', 'options'),
    	Output('search-input10', 'options'),
+   	#Output('status3', 'children'),
     Input('stored-data-5', 'data'),
     Input('search-input9', 'value'),
     Input('search-input10', 'value'),
@@ -1216,8 +1295,27 @@ def get_new_Data(data,order_id, client_id):
 
 	data = pd.DataFrame(data)
 
+	if(data.empty):
+		return (f"data not recived", {}, {},{},{}, [],[])
+
 	if(len(data) > 0):
-		#print(data)
+
+		print(data)
+
+
+		row_1_values = data.iloc[1].astype(str).tolist()  
+
+		expected_columns = ["Menge in ErfassME", "Kunde", "Buch.dat.","LOrt"]
+
+		#expected_columns = ["order_id", "date", "value", "client"]
+		missing_columns = [col for col in expected_columns if col not in row_1_values]
+
+		if(len(missing_columns) > 0):
+		    message = "Missing columns: " + ", ".join(missing_columns)
+		    default_return = (f"data recived {message}", {}, {},{},{}, [],[])
+		    return default_return
+
+
 		proccessed_data = process_data(data)
 		lss = set(proccessed_data.order_id)
 		lss2 = set(proccessed_data.client)
@@ -1231,9 +1329,9 @@ def get_new_Data(data,order_id, client_id):
 			fig2 = make_linechart(order_id, proccessed_data)
 			fig3 = make_barchart_client(client_id, proccessed_data)
 			fig4 = make_linechart_client(client_id, proccessed_data)
-			return "Erhaltene Daten zum verarbeiten", fig1, fig2, fig3, fig4, options,options2
+			return "Erhaltene Daten zum verarbeiten", fig1, fig2, fig3, fig4, options,options2#,""
 	else:
-		return "data not recived yet for processing", {}, {},{},{}, [],[]
+		return "data not recived yet for processing", {}, {},{},{}, [],[]#, ""
 
 
 
@@ -1973,7 +2071,53 @@ def handle_pdf(n_clicks,upload_content, content, processed, api_input):
 
 		#return html.Div(""), True, [], True, True, {},pd.DataFrame().to_dict('records')
 
+# Callback for Excel upload
+@callback(
+    Output('pdf_results_after_check', 'children'),
+    Input('stored-data-new', 'data'),
+    State('stored-data-old', 'data'),
+)
+def update_tables(data_new, data_old):
 
+	df_new =pd.DataFrame(data_new)
+	df_old =pd.DataFrame(data_old)
+
+	if(len(df_new)>0 and len(df_old)>0):
+
+		df_new['Charge'] = df_new['Charge'].astype(str)
+		df_new['flaschennummer'] = df_new['flaschennummer'].astype(float)
+
+		df_old['Charge'] = df_old['Charge'].astype(str)
+		df_old['flaschennummer'] = df_old['flaschennummer'].astype(float)
+
+		matched = df_new.merge(df_old[['Charge', 'flaschennummer']], on=['Charge', 'flaschennummer'], how='inner')
+
+		ls2 = []
+		ls2.append(html.Div([
+			dash_table.DataTable(
+			    style_table={'height': '400px','overflowY': 'auto', 'width':'98%', 'margin-left':'4px'},
+			    data=matched.to_dict('records'),
+			    columns=[{"name": i, "id": i} for i in matched.columns],
+			    #editable=True,
+			    filter_action="native",
+			    sort_action="native",
+			    style_data={
+			    'backgroundColor': 'white',
+			    },
+			    #page_action="native",
+			    style_header={
+			        'backgroundColor': 'darkslategrey',
+			        'color': 'lightcyan',
+			        'fontWeight': 'bold',
+			        'textAlign': 'center',
+			        'border': '1px solid black'
+			    }),html.Hr()])
+			)
+
+		return ls2
+
+	else:
+		return []
 
 
 # App layout
@@ -2008,6 +2152,8 @@ app.layout = html.Div([
 	html.Div(id='page-7-content', style={'display': 'none'}, children=[
 		dcc.Store(id='stored-data-8'),
 		dcc.Store(id='stored-data-9'),
+		dcc.Store(id='stored-data-new'),
+		dcc.Store(id='stored-data-old'),
 	    page_7_layout
 	]),
 	html.Div(id='page-10-content', style={'display': 'none'}, children=[
