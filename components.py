@@ -244,6 +244,52 @@ nav_content7 = html.Div([
 
     html.H6(id="status9"),
 
+    #upload previous extracted file
+    html.H4("Upload Old file"),
+    dcc.Upload(
+        id='upload-existing',
+        children=html.Div([
+            'Drag & Drop or ',
+            html.A('PDF upload-existing')
+        ]),
+        style={
+            'width': '100%',
+            'height': '60px',
+            'lineHeight': '60px',
+            'borderWidth': '1px',
+            'borderStyle': 'dashed',
+            'borderRadius': '5px',
+            'borderColor': '#F5B323',
+            'textAlign': 'center',
+            'margin': '10px',
+            'color':'black'
+        },
+        multiple=True
+    ),
+    html.H4("Upload New calculated file"),
+    dcc.Upload(
+        id='upload-newextracted',
+        children=html.Div([
+            'Drag & Drop or ',
+            html.A('PDF upload-new')
+        ]),
+        style={
+            'width': '100%',
+            'height': '60px',
+            'lineHeight': '60px',
+            'borderWidth': '1px',
+            'borderStyle': 'dashed',
+            'borderRadius': '5px',
+            'borderColor': '#F5B323',
+            'textAlign': 'center',
+            'margin': '10px',
+            'color':'black'
+        },
+        multiple=True
+    ),
+
+    html.H6(id="statuson"),
+
     dcc.Link('Neuer Filter', href='/page1',style={'color': '#F5B323','fontWeight': 'bold'}),
     html.Br(),
     dcc.Link('Dangerous Goods Declaration', href='/page-3',style={'color': '#F5B323', 'fontWeight':'bold'}),
