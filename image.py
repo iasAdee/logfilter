@@ -18,8 +18,7 @@ page_7_layout = html.Div(
 	html.Div(
 			html.H6("Results"),
 		),
-		html.Div(id='pdf_results',
-		),
+		html.Div(id='pdf_results',),
 
 		
 		dcc.Store(id='stored_results'),
@@ -31,6 +30,8 @@ page_7_layout = html.Div(
 		            
 		            style={"height": "100%", 'width': '100%', 'float': 'right','padding': '10px'}
 		        ),
+
+		html.Div(id='pdf_results_after_check',),
 
 	],	
 	style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
