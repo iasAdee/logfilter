@@ -468,14 +468,22 @@ def update_second(input1, input2):
 
 	return html.Div([html.H2("Tabelle",style={'color': 'black','font-size': '13px'})]), {}, "data not uploaded"
 
-
+import csv
 def load_csv_with_best_encoding(file_bytes, encodings=None):
     if encodings is None:
         encodings = ['cp1252', 'ISO-8859-1', 'latin1', 'utf-8' ,'utf-8-sig', 'utf-16']
-    
+    delimiters = [';', ',']
     for enc in encodings:
         try:
-            df = pd.read_csv(io.BytesIO(file_bytes), encoding=enc)
+            for sep in delimiters:
+            	try:
+            		df = pd.read_csv(io.BytesIO(file_bytes), encoding=enc, sep=sep)
+            		if df.shape[1] > 1:
+            			print(f"Successfully read with encoding='{enc}' and sep='{sep}'")
+            			return df
+            	except Exception:
+            		continue
+
             
             # Optional: simple check for "garbled" characters in column names
             garbled = any('\ufffd' in col or '�' in col or any(ord(c) > 127 for c in col) for col in df.columns)
@@ -498,6 +506,8 @@ def parse_contents(contents, filename, date):
     #print(filename)
     try:
         if 'csv' in filename:
+
+            print(filename)
             # Assume that the user uploaded a CSV file
             df = load_csv_with_best_encoding(decoded, encodings=None)
             if df.empty:
@@ -770,7 +780,7 @@ def load_docx_and_print_tables(file_content,full_string, kgs, kgs2, target_row_n
                     if(cell.text.startswith("14")):
                         
                         table_count +=1 
-                        print(table_count)
+                        #print(table_count)
                         check = True
                     if(check == True and cell.text.strip() == ""):
                         #print(cell.text)
@@ -809,7 +819,7 @@ def update_output8(contents, filename, date):
     if contents is not None:
         _, df = parse_contents(contents, filename, date)
         if not df.empty:
-            return df.to_dict('records'), "Daten erfolgreich geladen", False
+            return df.to_dict('records'), "Daten erfolgreich geladen: excel", False
     return {}, "Excel hochladen", True
 
 # Callback for Word template upload
@@ -865,8 +875,18 @@ def make_pdf_from_excel(data, word_template, n_clicks):
 		third = excel_data["Benennung"][i]
 		fourth = excel_data["UN-Nr."][i]
 
+		#print(i, fourth)
+
 		if(pd.isna(fourth)):
-		    continue
+			if(len(excel_data)-1):
+			    list_of_strings.append(full_string)
+			    full_string = ""
+			    list_of_kgs.append(kgs)
+			    kgs = ""
+			    list_of_kgs2.append(kgs2)
+			    kgs2 = ""
+			    count=0
+			continue
 
 		get_data = excel_data["UN-Homologation"][i]
 		zero_word = excel_data["Menge"][i]
@@ -913,7 +933,7 @@ def make_pdf_from_excel(data, word_template, n_clicks):
 
 		full_string += data_to_add
 
-		print("Length of full string",len(data_to_add))			    
+		#print("Length of full string",len(data_to_add), len(excel_data), i)			    
 		if(len(data_to_add)>100):
 			kgs += first_kg+" "+first_kg_char+"\n\n\n\n\n\n"
 			kgs2 += second_kg+" "+second_kg_char+"\n\n\n\n\n"
@@ -937,10 +957,16 @@ def make_pdf_from_excel(data, word_template, n_clicks):
 	docx_file_path2 = 'layouts/IMO_Layout_2.docx'
 	docx_file_path3 = 'layouts/IMO_Layout_3.docx'  
 	docx_file_path4 = 'layouts/IMO_Layout_4.docx'  
-	docx_file_path5 = 'layouts/IMO_Layout_5.docx'  
+	docx_file_path5 = 'layouts/IMO_Layout_5.docx'
+
 	# Process Word document
+
+	print("Length of list: ", len(list_of_strings))
+	#print(list_of_strings)
+
+	list_of_strings=[val for val in list_of_strings if val !=""]
+	
 	if word_template is None:
-	    # Use default template if none uploaded
 	    try:
 	    	if(len(list_of_strings) == 1):
 		        with open(docx_file_path1, "rb") as f:
