@@ -218,7 +218,7 @@ nav_content7 = html.Div([
     dcc.Upload(
         id='upload-pdf',
         children=html.Div([
-            'Drag & Drop or ',
+            'Drag & Drop | ',
             html.A('PDF hochladen')
         ]),
         style={
@@ -245,12 +245,12 @@ nav_content7 = html.Div([
     html.H6(id="status9"),
 
     #upload previous extracted file
-    html.H4("Upload Old file"),
+    html.H4("Upload alt"),
     dcc.Upload(
         id='upload-existing',
         children=html.Div([
-            'Drag & Drop or ',
-            html.A('PDF upload-existing')
+            'Drag & Drop | ',
+            html.A('PDF upload hochladen')
         ]),
         style={
             'width': '100%',
@@ -266,12 +266,12 @@ nav_content7 = html.Div([
         },
         multiple=True
     ),
-    html.H4("Upload New calculated file"),
+    html.H4("Upload neu"),
     dcc.Upload(
         id='upload-newextracted',
         children=html.Div([
-            'Drag & Drop or ',
-            html.A('PDF upload-new')
+            'Drag & Drop | ',
+            html.A('PDF upload hochladen')
         ]),
         style={
             'width': '100%',
