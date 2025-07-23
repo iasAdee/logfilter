@@ -1865,14 +1865,14 @@ def handle_pdf(n_clicks,upload_content, content, processed, api_input):
 	if triggered_id == "upload-pdf":
 		if upload_content is None:
 		    return "", True, None, False  # No file uploaded, disable button
-		return "File uploaded.", False, upload_content, False, [], {}, pd.DataFrame().to_dict('records')
+		return "Datei geladen", False, upload_content, False, [], {}, pd.DataFrame().to_dict('records')
 
 	if triggered_id == "process-btn":
 		if content is None:
-		    return "No file uploaded.", dash.no_update, None, False, [], {},pd.DataFrame().to_dict('records')
+		    return "Keine Datei geladen", dash.no_update, None, False, [], {},pd.DataFrame().to_dict('records')
 
 		if processed:
-		    return "PDF already processed.", True, content, True , [], {},data.DataFrame().to_dict('records')
+		    return "PDF bereits verarbeitet ", True, content, True , [], {},data.DataFrame().to_dict('records')
 
 		if content is not None:
 
@@ -2062,8 +2062,8 @@ def handle_pdf(n_clicks,upload_content, content, processed, api_input):
 			return  "PDF verarbeitet", True, content, True , ls2, fig,  data.to_dict('records')
 	else:
 		if upload_content is None:
-		    return "No file uploaded yet.", True, None, False ,[], {}, pd.DataFrame().to_dict('records') # No file uploaded, disable button
-		return "File uploaded.", False, upload_content, False, [], {}, pd.DataFrame().to_dict('records')
+		    return "Keine Datei geladen", True, None, False ,[], {}, pd.DataFrame().to_dict('records') # No file uploaded, disable button
+		return "Datei geladen", False, upload_content, False, [], {}, pd.DataFrame().to_dict('records')
 
 		#return html.Div(""), True, [], True, True, {},pd.DataFrame().to_dict('records')
 
@@ -2216,4 +2216,7 @@ app.css.append_css({
 
 if __name__ == '__main__':
     app.run_server(debug=True, port="8090")
+
+
+
 
