@@ -184,7 +184,6 @@ def german_to_float(val):
     Output('inflation-plot-6', 'figure'),
     Output('inflation-plot-10', 'figure'),
     Output('inflation-plot-11', 'figure'),
-    Output('inflation-plot-12', 'figure'),
 
     Output('output-data-upload3', 'children'),
 	Output('output-data-upload4', 'children'),
@@ -203,21 +202,21 @@ def german_to_float(val):
 
 def update_graph(data, n_clicks):
 
-    default_return = ({}, html.Div(), {}, {}, {}, {}, {}, {}, {},{}, {}, {}, html.Div(), html.Div(), None, {}, {}, {}, [], "")
+    default_return = ({}, html.Div(), {}, {}, {}, {}, {}, {}, {}, {}, {}, html.Div(), html.Div(), None, {}, {}, {}, [], "")
 
     df = pd.DataFrame(data)
     if n_clicks is None:
         if not df.empty:
-        	default_return = ({}, html.Div(), {}, {}, {}, {}, {},{}, {}, {}, {}, {}, html.Div(), html.Div(), None, {}, {}, {}, [], "Daten erfolgreich geladen")
+        	default_return = ({}, html.Div(), {}, {}, {}, {}, {}, {}, {}, {}, {}, html.Div(), html.Div(), None, {}, {}, {}, [], "Daten erfolgreich geladen")
         return default_return
 
 
     if df.empty:
-        default_return = ({}, html.Div(), {}, {}, {}, {}, {}, {},{}, {}, {}, {}, html.Div(), html.Div(), None, {}, {}, {}, [], "Data Not loaded yet")
+        default_return = ({}, html.Div(), {}, {}, {}, {}, {},{}, {}, {}, {}, html.Div(), html.Div(), None, {}, {}, {}, [], "Data Not loaded yet")
         return default_return
 
     if "Bestellmengeneinheit" in df.columns:
-        default_return = ({}, html.Div(), {}, {}, {}, {}, {}, {},{}, {}, {}, {}, html.Div(), html.Div(), None, {}, {}, {}, [], "Incorrect data")
+        default_return = ({}, html.Div(), {}, {}, {}, {}, {},{}, {}, {}, {}, html.Div(), html.Div(), None, {}, {}, {}, [], "Incorrect data")
         return default_return
 
 
@@ -234,7 +233,7 @@ def update_graph(data, n_clicks):
 
     if(len(missing_columns) > 0):
         message = "Missing columns: " + ", ".join(missing_columns)
-        default_return = ({}, html.Div(), {}, {}, {}, {}, {}, {},{}, {}, {}, {}, html.Div(), html.Div(), None, {}, {}, {}, [], message)
+        default_return = ({}, html.Div(), {}, {}, {}, {}, {},{}, {}, {}, {}, html.Div(), html.Div(), None, {}, {}, {}, [], message)
         return default_return
 
     df['Auftragsmenge_Offen'] = df['Auftragsmenge_Offen'].apply(german_to_float)
@@ -271,10 +270,10 @@ def update_graph(data, n_clicks):
 
     data_preprocessor2 = DataPreprocessing(df)
     data_req, ls, fig = data_preprocessor2.clac_2()
-    ls2, ls3, data1, data2, fig2, fig3, fig4, fig5, fig6, fig7, fig10, fig20,fig21 = data_preprocessor2.get_calculated_results(input=False)
+    ls2, ls3, data1, data2, fig2, fig3, fig4, fig5, fig6, fig7, fig10, fig20 = data_preprocessor2.get_calculated_results(input=False)
     fig8 = data_preprocessor2.get_absenders()
 
-    return fig, ls, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig10, fig20, fig21,ls2, ls3, n_clicks, data_req, data1, data2, data, "Data Processed Successfully"
+    return fig, ls, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig10, fig20,ls2, ls3, n_clicks, data_req, data1, data2, data, "Data Processed Successfully"
 
 
 
@@ -1616,12 +1615,6 @@ page_1_layout = html.Div(
 
     ),
 
-    html.Div(
-        dcc.Graph(id='inflation-plot-12',
-        style={"height": "50%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
-        ),
-
-    ),
 	
 
 
