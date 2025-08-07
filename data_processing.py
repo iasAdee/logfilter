@@ -676,10 +676,50 @@ class DataPreprocessing:
 		datahalf["Pallets"] = datahalf["Pallets"].astype(int)
 
 		grouped_data = pd.DataFrame(datahalf.groupby('Werk')[["Pallets", "Picks"]].sum()).reset_index()
-		#print(grouped_data)
-
 		grouped_data["Picks"] = grouped_data["Picks"].astype(int)
 		grouped_data["Pallets"] = grouped_data["Pallets"].astype(int)
+
+
+
+		## Komi pal logic
+		datextracted["Auftragsmenge_Bestätigt_float"] = (
+		    datextracted["Auftragsmenge_Bestätigt"]
+		    .str.replace(",", "", regex=False)  # Remove commas
+		    .astype(float)                      # Convert to float
+		)
+		datextracted["Picks_per_Unit"] = datextracted["Picks"] / datextracted["Auftragsmenge_Bestätigt_float"]
+		filtted_rows =datextracted[["WE-Name", "WE-Stadt", "Picks", "Pallets", "Auftragsmenge_Bestätigt_float", "Picks_per_Unit","kzu","Werk"]]
+
+
+		grouped = filtted_rows.groupby(["WE-Name", "WE-Stadt"])
+		Names_list = []
+		komi_Pal =[]
+		for (name, city), group in grouped:
+			filtered_data = filtted_rows[(filtted_rows["WE-Name"] == name) & (filtted_rows["WE-Stadt"] == city)]
+			
+			#print(set(filtered_data["Werk"]))
+
+			group_with_x = filtered_data[filtered_data["kzu"] == "X"]
+			total_picks_per_unit = group_with_x["Picks_per_Unit"].sum()
+
+			komi_pal = np.ceil(total_picks_per_unit).astype(int)
+
+			group_with_none = group[group["kzu"].isna()]
+			for idx, row in group_with_none.iterrows():
+			    nan_sum =np.ceil(row["Picks_per_Unit"]).astype(int)
+			    komi_pal+=nan_sum
+
+			#Names_list.append(f"{name} \n {city}")
+			Names_list.append(list(set(filtered_data["Werk"]))[0])
+			komi_Pal.append(komi_pal)
+
+
+		komipal_df = pd.DataFrame()
+		komipal_df["Names"] = Names_list
+		komipal_df["komi"] = komi_Pal
+		grouped_final = pd.DataFrame(komipal_df.groupby("Names")["komi"].sum()).reset_index()
+		print(grouped_final)
+		grouped_final["komi"] = grouped_final["komi"].astype(int)
 
 
 
@@ -707,6 +747,16 @@ class DataPreprocessing:
 		    hoverinfo='text'  
 		))
 
+		fig20.add_trace(go.Bar(
+		    x=grouped_final['Names'],
+		    y=grouped_final['komi'],
+		    name='KomiPAL',
+		    marker_color='#F50323',
+		    text=grouped_final['komi'],  
+		    texttemplate='%{text:d}',    
+		    hoverinfo='text'  
+		))
+
 		fig20.update_layout(
 		    title='PAL & Picks je Werk ',
 		    xaxis=dict(title='Werk'),
@@ -718,86 +768,13 @@ class DataPreprocessing:
 		)
 
 
-		datextracted["Auftragsmenge_Bestätigt_float"] = (
-		    datextracted["Auftragsmenge_Bestätigt"]
-		    .str.replace(",", "", regex=False)  # Remove commas
-		    .astype(float)                      # Convert to float
-		)
 
-		datextracted["Picks_per_Unit"] = datextracted["Picks"] / datextracted["Auftragsmenge_Bestätigt_float"]
-
-		filtted_rows =datextracted[["WE-Name", "WE-Stadt", "Picks", "Pallets", "Auftragsmenge_Bestätigt_float", "Picks_per_Unit","kzu"]]
-
-
-
-		grouped = filtted_rows.groupby(["WE-Name", "WE-Stadt"])
-
-		Names_list = []
-		komi_Pal =[]
-		for (name, city), group in grouped:
-			filtered_data = filtted_rows[(filtted_rows["WE-Name"] == name) & (filtted_rows["WE-Stadt"] == city)]
-			#print(filtered_data)
-
-			group_with_x = filtered_data[filtered_data["kzu"] == "X"]
-			total_picks_per_unit = group_with_x["Picks_per_Unit"].sum()
-
-			komi_pal = np.ceil(total_picks_per_unit).astype(int)
-
-			group_with_none = group[group["kzu"].isna()]
-			for idx, row in group_with_none.iterrows():
-			    nan_sum =np.ceil(row["Picks_per_Unit"]).astype(int)
-			    komi_pal+=nan_sum
-
-			Names_list.append(f"{name} \n {city}")
-			komi_Pal.append(komi_pal)
-
-
-		komipal_df = pd.DataFrame()
-		komipal_df["Names"] = Names_list
-		komipal_df["komi"] = komi_Pal
-
-		def wrap_label(label, width=15):
-			return '<br>'.join([label[i:i+width] for i in range(0, len(label), width)])
-
-		komipal_df['Names_wrapped'] = komipal_df['Names'].apply(wrap_label)
-
-		fig60 = go.Figure()
-		# Add Picks bar
-		fig60.add_trace(go.Bar(
-		    x=komipal_df['Names_wrapped'],
-		    y=komipal_df['komi'],
-		    text=komipal_df['komi'],
-		    marker_color='#F5B323',
-		    hoverinfo='text'  
-		))
-
-		"""fig60 =px.bar(
-									komipal_df, 
-									x="Names", 
-									y="komi", 
-									labels={"Names": "Names", "komi": "KomiPAL"},
-									title="KomiPAL Balkendiagramm",
-									marker_color='#F5B323'
-								)"""
-
-		# Update layout to adjust x-axis labels
-		fig60.update_layout(
-			xaxis_tickangle=45,           # Rotate x-axis labels by 45 degrees
-			height=450,
-			title='Komi PAL',
-		    xaxis=dict(title=''),
-		    yaxis=dict(title='KomiPal'),
-			plot_bgcolor='white',
-			paper_bgcolor='white',
-		)
-
-		#fig60.show()
        
 
 		if(input == False):
-			return ls, ls2, datahalf.to_dict('records'), datextracted.to_dict('records') , fig, fig2, fig3, fig4, fig5, fig6, fig10, fig20, fig60
+			return ls, ls2, datahalf.to_dict('records'), datextracted.to_dict('records') , fig, fig2, fig3, fig4, fig5, fig6, fig10, fig20
 		else:
-			return ls, [], datahalf.to_dict('records'), pd.DataFrame().to_dict('records') , fig, fig2, fig3, fig4, {}, {}, fig10, fig20,fig60
+			return ls, [], datahalf.to_dict('records'), pd.DataFrame().to_dict('records') , fig, fig2, fig3, fig4, {}, {}, fig10, fig20
 
 
 
