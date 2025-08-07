@@ -184,6 +184,7 @@ def german_to_float(val):
     Output('inflation-plot-6', 'figure'),
     Output('inflation-plot-10', 'figure'),
     Output('inflation-plot-11', 'figure'),
+    Output('inflation-plot-12', 'figure'),
 
     Output('output-data-upload3', 'children'),
 	Output('output-data-upload4', 'children'),
@@ -202,21 +203,21 @@ def german_to_float(val):
 
 def update_graph(data, n_clicks):
 
-    default_return = ({}, html.Div(), {}, {}, {}, {}, {}, {}, {}, {}, {}, html.Div(), html.Div(), None, {}, {}, {}, [], "")
+    default_return = ({}, html.Div(), {}, {}, {}, {}, {}, {}, {},{}, {}, {}, html.Div(), html.Div(), None, {}, {}, {}, [], "")
 
     df = pd.DataFrame(data)
     if n_clicks is None:
         if not df.empty:
-        	default_return = ({}, html.Div(), {}, {}, {}, {}, {}, {}, {}, {}, {}, html.Div(), html.Div(), None, {}, {}, {}, [], "Daten erfolgreich geladen")
+        	default_return = ({}, html.Div(), {}, {}, {}, {}, {},{}, {}, {}, {}, {}, html.Div(), html.Div(), None, {}, {}, {}, [], "Daten erfolgreich geladen")
         return default_return
 
 
     if df.empty:
-        default_return = ({}, html.Div(), {}, {}, {}, {}, {}, {}, {}, {}, {}, html.Div(), html.Div(), None, {}, {}, {}, [], "Data Not loaded yet")
+        default_return = ({}, html.Div(), {}, {}, {}, {}, {}, {},{}, {}, {}, {}, html.Div(), html.Div(), None, {}, {}, {}, [], "Data Not loaded yet")
         return default_return
 
     if "Bestellmengeneinheit" in df.columns:
-        default_return = ({}, html.Div(), {}, {}, {}, {}, {}, {}, {}, {}, {}, html.Div(), html.Div(), None, {}, {}, {}, [], "Incorrect data")
+        default_return = ({}, html.Div(), {}, {}, {}, {}, {}, {},{}, {}, {}, {}, html.Div(), html.Div(), None, {}, {}, {}, [], "Incorrect data")
         return default_return
 
 
@@ -225,15 +226,15 @@ def update_graph(data, n_clicks):
     names_update_lower = {key.lower(): value for key, value in names_update.items()}
     df.columns = [names_update_lower.get(col.lower().strip(), col) for col in df.columns]
 
-    #print(df.columns)
+    print(df.columns)
     expected_columns = ["Auftragsmenge_Offen", "Auftragsmenge_bereits_geliefert", 
     "Summe von BrGew_Offen", "Fakturasperre","KomplettLF_KZ", "SalesOrder", "WE_PLZ", "Werk",
-    "MatNr","BereitStellDat", "AME", "BME", "Zähler","MatBez"]
+    "MatNr","BereitStellDat", "AME", "BME", "Zähler","MatBez","Auftragsmenge_Bestätigt","WE-Name","WE-Stadt","KzAZu"]
     missing_columns = [col for col in expected_columns if col not in df.columns]
 
     if(len(missing_columns) > 0):
         message = "Missing columns: " + ", ".join(missing_columns)
-        default_return = ({}, html.Div(), {}, {}, {}, {}, {}, {}, {}, {}, {}, html.Div(), html.Div(), None, {}, {}, {}, [], message)
+        default_return = ({}, html.Div(), {}, {}, {}, {}, {}, {},{}, {}, {}, {}, html.Div(), html.Div(), None, {}, {}, {}, [], message)
         return default_return
 
     df['Auftragsmenge_Offen'] = df['Auftragsmenge_Offen'].apply(german_to_float)
@@ -270,10 +271,10 @@ def update_graph(data, n_clicks):
 
     data_preprocessor2 = DataPreprocessing(df)
     data_req, ls, fig = data_preprocessor2.clac_2()
-    ls2, ls3, data1, data2, fig2, fig3, fig4, fig5, fig6, fig7, fig10, fig20 = data_preprocessor2.get_calculated_results(input=False)
+    ls2, ls3, data1, data2, fig2, fig3, fig4, fig5, fig6, fig7, fig10, fig20,fig21 = data_preprocessor2.get_calculated_results(input=False)
     fig8 = data_preprocessor2.get_absenders()
 
-    return fig, ls, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig10, fig20, ls2, ls3, n_clicks, data_req, data1, data2, data, "Data Processed Successfully"
+    return fig, ls, fig2, fig3, fig4, fig5, fig6, fig7, fig8, fig10, fig20, fig21,ls2, ls3, n_clicks, data_req, data1, data2, data, "Data Processed Successfully"
 
 
 
@@ -318,7 +319,7 @@ def update_graph2(data, n_clicks):
 		#print(df.columns)
 		expected_columns = ["Auftragsmenge_Offen", "Auftragsmenge_bereits_geliefert", 
 		"Summe von BrGew_Offen", "Fakturasperre","KomplettLF_KZ", "SalesOrder", "WE_PLZ", "Werk",
-		"MatNr","BereitStellDat", "AME", "BME", "Zähler","MatBez"]
+		"MatNr","BereitStellDat", "AME", "BME", "Zähler","MatBez","Auftragsmenge_Bestätigt","WE-Name","WE-Stadt","KzAZu"]
 		missing_columns = [col for col in expected_columns if col not in df.columns]
 
 		if(len(missing_columns) > 0):
@@ -361,7 +362,7 @@ names_update = {
 	"Verursach.": "SalesOrder",
 	"Eint": "SO_ATP_Einteilung",
 	"AuftrMenge": "Auftragsmenge",
-	"Bestä.Mg": "Auftragsmenge_Bestätigt",
+	"BestaMg": "Auftragsmenge_Bestätigt",
 	"Offene Mng": "Auftragsmenge_Offen",
 	#"AuftrMenge": "Auftragsmenge_Offen",
 	"gelMenge": "Auftragsmenge_bereits_geliefert",
@@ -377,8 +378,8 @@ names_update = {
 	"ZÃ¤hler": "Zähler",
 	"SKU_Nenner": "SKU_Nenner",
 	"Bereit.Dat": "BereitStellDat",
-	"Name/Warenempfänger": "WE-Name",
-	"Ort/Warenempfänger": "WE-Stadt",
+	"Name": "WE-Name",
+	"Ort": "WE-Stadt",
 	"LS": "Liefersperre",
 	"Brutto": "Summe von BrGew_Offen",
 	"KLF": "KomplettLF_KZ",
@@ -1614,6 +1615,13 @@ page_1_layout = html.Div(
         ),
 
     ),
+
+    html.Div(
+        dcc.Graph(id='inflation-plot-12',
+        style={"height": "50%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
+        ),
+
+    ),
 	
 
 
@@ -1806,8 +1814,9 @@ def process_200_images(image_bytes_list):
     prompt_parts.append("""
     for given images with index end with "00" and "01" extract
     1) get image label
-    2) get ml value in digit after label 
-    3) get artikel number a solo numeric number without any symbol or special character of length between 4 and 6
+    2) Best before date:
+    3) get ml value in digit after label 
+    4) get artikel number a solo numeric number without any symbol or special character of length between 4 and 6
     
     for given image with index end with "02" extract written text
     for given image with index end with "03" extract written text
@@ -1815,13 +1824,15 @@ def process_200_images(image_bytes_list):
     example output:
     **Image PO: 18714618: 00**
     1) Sika® Primer-3 N
-    2) 1000ml
-    3) 122239
+    2) 04/26
+    3) 1000ml
+    4) 122239
 
     **Image PO: 18714618: 01**
     1) Sika® Primer-3 N
-    2) 1000ml
-    3) 122239
+    2) 04/26
+    3) 1000ml
+    4) 122239
 
     **Image PO: 18714618: 02**
     MAT 123489
@@ -1842,6 +1853,11 @@ def process_200_images(image_bytes_list):
     return prompt_parts
 
 
+def check_apha(text):
+    if re.search(r'[A-Za-z]', text):
+        return True
+    else:
+        return False
 
 @app.callback(
     Output("status9", "children"),
@@ -1979,11 +1995,15 @@ def handle_pdf(n_clicks,upload_content, content, processed, api_input):
 			for response in responses:
 			    splited_respones = response.text.split("\n")
 			    artikel_number = ""
+			    img1_id = ""
+
 			    for lines in splited_respones:
 			        if(len(lines)>30):
 			            continue
 			        else:
 			            if(lines.startswith("**")):
+			                img1_id = lines.split(" ")[3][:-2]
+			                img1_id = img1_id[-1]
 			                artikel_number = lines.split(" ")[2][:-1]
 			                if(artikel_number in page_results.keys()):
 			                    continue
@@ -1992,21 +2012,39 @@ def handle_pdf(n_clicks,upload_content, content, processed, api_input):
 			                    continue
 			                
 			            if(artikel_number in page_results.keys()):
-			                splited_lines =lines.split(")")
-			                if(len(splited_lines) > 1):
-			                    #print(splited_lines[1])
-			                    page_results[artikel_number].append(splited_lines[1])
-			                else:
-			                    if(splited_lines[0] != ""):
-			                        page_results[artikel_number].append(splited_lines[0])
+			                if(lines ==""):
+			                    continue
+			                if(img1_id == "2"):
+			                    if(len(lines)) == 10:
+			                        if(not check_apha(lines)):
+			                            print(artikel_number,"2",lines)
+			                            page_results[artikel_number].append(lines)
+			                    else:
+			                        continue
+			                    #print("2",lines)
+			                if(img1_id == "3"):
+			                    if(len(lines)) == 10:
+			                        if(not check_apha(lines)):
+			                            #print(artikel_number,"3",lines)
+			                            page_results[artikel_number].append(lines)
+			                    else:
+			                        continue
+			                
+			                if(img1_id == "0" or img1_id == "1"):
+			                    splited_lines =lines.split(")")
+			                    if(len(splited_lines) > 1):
+			                        #print(splited_lines[1])
+			                        page_results[artikel_number].append(splited_lines[1])
+			                    else:
+			                        if(splited_lines[0] != ""):
+			                            page_results[artikel_number].append(splited_lines[0])
 
 			for val in page_results:
 			    val_ = page_results[val]
 			    val_  = val_[:11]
 			    page_results[val] = val_
-			data = pd.DataFrame(list(page_results.values()), columns=["Bild1_nummer", "Bild1_label","Bild1 ML", "Artikel NO Bild1",
-    "Bild2_label" ,"Bild ML", "Artikel NO Bild2","BottleInfo1","BottleInfo2","BottleInfo3",
-                                            "packLable"#, "pack ML", "pack MAT", "pack MAT2", "pack 3"
+			data = pd.DataFrame(list(page_results.values()), columns=["Bild1_nummer", "Bild1_label", "Bild1_Date","Bild1 ML", "Artikel NO Bild1",
+    "Bild2_label", "Bild2_Date" ,"Bild ML", "Artikel NO Bild2","BottleInfo1","BottleInfo2"
                                            ])
 
 			df_merged = data.merge(df_dict, on='Bild1_nummer', how='inner')
@@ -2017,6 +2055,9 @@ def handle_pdf(n_clicks,upload_content, content, processed, api_input):
 			    df.loc[
 			        (df['Bild1_label'] == df['Bild2_label']) &
 			        (df['Bild1 ML'] == df['Bild ML']) &
+			        (df['BottleInfo1'] == df['BottleInfo2']) &
+			        (df['Bild1_Date'] == df['Bild2_Date']) &
+			        (df['Charge'] == df['BottleInfo1']) &
 			        (df['Artikel NO Bild1'] == df['Artikel NO Bild2']),
 			        'Match'
 			    ] = 'übereinstimmend'
@@ -2215,7 +2256,8 @@ app.css.append_css({
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True, port="8090")
+	#app.run(debug=True)
+    app.run(debug=True, port="8090")
 
 
 
