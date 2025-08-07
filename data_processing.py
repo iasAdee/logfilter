@@ -155,10 +155,10 @@ class DataPreprocessing:
 		if(input  == False):
 			data_required = self.data[["Auftragsmenge_Offen", "AME", "BME", "BereitStellDat", "Zähler",
 			                      "MatBez", "MatNr", "Auftragsmenge_bereits_geliefert",
-			                     "SalesOrder", "Werk", "KomplettLF_KZ", "Summe von BrGew_Offen", "WE_PLZ"]]
+			                     "SalesOrder", "Werk", "KomplettLF_KZ", "Summe von BrGew_Offen", "WE_PLZ","Auftragsmenge_Bestätigt","WE-Name","WE-Stadt","KzAZu"]]
 		else:
 			data_required = self.data[["Auftragsmenge_Offen", "AME", "BME", "BereitStellDat",
-			                      "MatBez", "MatNr", "Auftragsmenge_bereits_geliefert",
+			                      "MatBez", "MatNr", "Auftragsmenge_bereits_geliefert","Auftragsmenge_Bestätigt","WE-Name","WE-Stadt","KzAZu",
 			                      "Werk"]]
 	
 
@@ -198,6 +198,10 @@ class DataPreprocessing:
 		    MatNr = str(data_required["MatNr"][i])
 		    SKU_Zähler = data_required["SKU_Zähler"][i]
 		    wr = data_required["Werk"][i]
+		    ab = data_required["Auftragsmenge_Bestätigt"][i]
+		    wn = data_required["WE-Name"][i]
+		    ws = data_required["WE-Stadt"][i]
+		    kzu =data_required["KzAZu"][i]
 
 
 		    if(pd.isna(MatNr) or MatNr == "nan"):
@@ -233,12 +237,12 @@ class DataPreprocessing:
 		        if(pd.isna(order) or pd.isna(pallet) or pd.isna(pallet)):
 		            continue
 		        if(order < pallet):
-		            ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, order, 0,wr])
+		            ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, order, 0,wr,ab,wn,ws,kzu])
 		        else:
 		            pallet_ = int(order / pallet)
 		            pieces = abs(int(order / pallet) * pallet - order)
 
-		            ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, int(pieces), pallet_,wr])
+		            ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, int(pieces), pallet_,wr,ab,wn,ws,kzu])
 		        data_collection2.append(ls[0].copy())
 		        nodata = True
 		    if(ame == "KAR" and bme == "ST"):
@@ -252,12 +256,12 @@ class DataPreprocessing:
 
 		        comparison = pallet / pallet_val
 		        if(order < comparison):
-		            ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, order, 0,wr])
+		            ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, order, 0,wr,ab,wn,ws,kzu])
 		        else:
 		            pallet_ = int(order / comparison)
 		            pieces = abs(int(order / comparison) * comparison - order)
 
-		            ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, int(pieces), pallet_,wr])
+		            ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, int(pieces), pallet_,wr,ab,wn,ws,kzu])
 		        data_collection2.append(ls[0].copy())
 		        nodata = True
 		    if(ame == "KG" and bme == "KG"):
@@ -277,14 +281,14 @@ class DataPreprocessing:
 		            pallet_actual = pallet / kg #450/15 = 30 
 
 		            if(order_actual < pallet_actual):
-		                ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, order_actual, 0,wr])
+		                ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, order_actual, 0,wr,ab,wn,ws,kzu])
 		            else:
 		                #print(MatNr, pallet_actual)
 		                pallet_ = int(order_actual / pallet_actual)
 		                #print(pallet_)
 		                pieces = abs(int(order_actual / pallet_actual) * pallet_actual - order_actual)
 
-		                ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, int(pieces), pallet_,wr])
+		                ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, int(pieces), pallet_,wr,ab,wn,ws,kzu])
 		        data_collection2.append(ls[0].copy())
 		        nodata = True
 
@@ -302,12 +306,12 @@ class DataPreprocessing:
 		        else:
 		            req_num = pallet * kg
 		            if(order < req_num):
-		                ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, order, 0,wr])
+		                ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, order, 0,wr,ab,wn,ws,kzu])
 		            else:
 		                pallet_ = int(order / req_num)
 		                pieces = abs(int(order / req_num) * req_num - order)
 
-		                ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, int(pieces), pallet_,wr])
+		                ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, int(pieces), pallet_,wr,ab,wn,ws,kzu])
 
 		        data_collection2.append(ls[0].copy())
 		        nodata = True
@@ -323,12 +327,12 @@ class DataPreprocessing:
 
 		            num = int(order / com)
 		            if(num < pallet):
-		                ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, int(num), 0,wr])
+		                ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, int(num), 0,wr,ab,wn,ws,kzu])
 		            else:
 		                pallet_ = int(num / pallet)
 		                pieces = abs(int(num / pallet) * pallet - num)
 
-		                ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, int(pieces), pallet_,wr])
+		                ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, int(pieces), pallet_,wr,ab,wn,ws,kzu])
 		            data_collection2.append(ls[0])
 
 		        elif(n1 != 0 and n2 != 0):
@@ -336,12 +340,12 @@ class DataPreprocessing:
 		            num = int(order / nu)
 		            pallet1 = pallet / nu
 		            if(num < pallet1):
-		                ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, int(num), 0,wr])
+		                ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, int(num), 0,wr,ab,wn,ws,kzu])
 		            else:
 		                pallet_ = int(num / pallet)
 		                pieces = abs(int(num / pallet) * pallet - num)
 
-		                ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, int(pieces), pallet_,wr])
+		                ls.append([ame, bme, com, order, pallet, date, SKU_Zähler, MatBez, MatNr, int(pieces), pallet_,wr,ab,wn,ws,kzu])
 		            data_collection2.append(ls[0].copy())
 		            nodata = True
 
@@ -398,16 +402,16 @@ class DataPreprocessing:
 		if(input == False):
 			datahalf = pd.DataFrame(data_collection2, columns=["AME", "BME", "Auftragsmenge_bereits_geliefert", "Auftragsmenge_Offen",
 			                                                      "Zähler", "BereitStellDat","SKU_Zähler",
-			                                                      "MatBez", "MatNr", "Picks", "Pallets","Werk"])
+			                                                      "MatBez", "MatNr", "Picks", "Pallets","Werk","Auftragsmenge_Bestätigt","WE-Name","WE-Stadt","kzu"])
 
 			datextracted = pd.DataFrame(data_collection, columns=["AME", "BME", "Auftragsmenge_bereits_geliefert", "Auftragsmenge_Offen",
 			                                                      "Zähler", "BereitStellDat","SKU_Zähler",
-			                                                      "MatBez", "MatNr", "Picks", "Pallets","Werk", "KomplettLF_KZ", "SalesOrder", "WE_PLZ", "Gesamt"])
+			                                                      "MatBez", "MatNr", "Picks", "Pallets","Werk","Auftragsmenge_Bestätigt","WE-Name","WE-Stadt","kzu", "KomplettLF_KZ", "SalesOrder", "WE_PLZ", "Gesamt"])
 
 		else:
 			datahalf = pd.DataFrame(data_collection2, columns=["AME", "BME", "Auftragsmenge_bereits_geliefert", "Auftragsmenge_Offen",
 			                                                      "Zähler", "BereitStellDat","SKU_Zähler",
-			                                                      "MatBez", "MatNr", "Picks", "Pallets","Werk"])
+			                                                      "MatBez", "MatNr", "Picks", "Pallets","Werk","Auftragsmenge_Bestätigt","WE-Name","WE-Stadt","kzu"])
 
 		"""datextracted = datextracted[["AME", "BME", "com", "Auftragsmenge_Offen",
 								                                                      "Zähler", "BereitStellDat",
@@ -714,11 +718,86 @@ class DataPreprocessing:
 		)
 
 
+		datextracted["Auftragsmenge_Bestätigt_float"] = (
+		    datextracted["Auftragsmenge_Bestätigt"]
+		    .str.replace(",", "", regex=False)  # Remove commas
+		    .astype(float)                      # Convert to float
+		)
+
+		datextracted["Picks_per_Unit"] = datextracted["Picks"] / datextracted["Auftragsmenge_Bestätigt_float"]
+
+		filtted_rows =datextracted[["WE-Name", "WE-Stadt", "Picks", "Pallets", "Auftragsmenge_Bestätigt_float", "Picks_per_Unit","kzu"]]
+
+
+
+		grouped = filtted_rows.groupby(["WE-Name", "WE-Stadt"])
+
+		Names_list = []
+		komi_Pal =[]
+		for (name, city), group in grouped:
+			filtered_data = filtted_rows[(filtted_rows["WE-Name"] == name) & (filtted_rows["WE-Stadt"] == city)]
+			#print(filtered_data)
+
+			group_with_x = filtered_data[filtered_data["kzu"] == "X"]
+			total_picks_per_unit = group_with_x["Picks_per_Unit"].sum()
+
+			komi_pal = np.ceil(total_picks_per_unit).astype(int)
+
+			group_with_none = group[group["kzu"].isna()]
+			for idx, row in group_with_none.iterrows():
+			    nan_sum =np.ceil(row["Picks_per_Unit"]).astype(int)
+			    komi_pal+=nan_sum
+
+			Names_list.append(f"{name} \n {city}")
+			komi_Pal.append(komi_pal)
+
+
+		komipal_df = pd.DataFrame()
+		komipal_df["Names"] = Names_list
+		komipal_df["komi"] = komi_Pal
+
+		def wrap_label(label, width=15):
+			return '<br>'.join([label[i:i+width] for i in range(0, len(label), width)])
+
+		komipal_df['Names_wrapped'] = komipal_df['Names'].apply(wrap_label)
+
+		fig60 = go.Figure()
+		# Add Picks bar
+		fig60.add_trace(go.Bar(
+		    x=komipal_df['Names_wrapped'],
+		    y=komipal_df['komi'],
+		    text=komipal_df['komi'],
+		    marker_color='#F5B323',
+		    hoverinfo='text'  
+		))
+
+		"""fig60 =px.bar(
+									komipal_df, 
+									x="Names", 
+									y="komi", 
+									labels={"Names": "Names", "komi": "KomiPAL"},
+									title="KomiPAL Balkendiagramm",
+									marker_color='#F5B323'
+								)"""
+
+		# Update layout to adjust x-axis labels
+		fig60.update_layout(
+			xaxis_tickangle=45,           # Rotate x-axis labels by 45 degrees
+			height=450,
+			title='Komi PAL',
+		    xaxis=dict(title=''),
+		    yaxis=dict(title='KomiPal'),
+			plot_bgcolor='white',
+			paper_bgcolor='white',
+		)
+
+		#fig60.show()
+       
 
 		if(input == False):
-			return ls, ls2, datahalf.to_dict('records'), datextracted.to_dict('records') , fig, fig2, fig3, fig4, fig5, fig6, fig10, fig20
+			return ls, ls2, datahalf.to_dict('records'), datextracted.to_dict('records') , fig, fig2, fig3, fig4, fig5, fig6, fig10, fig20, fig60
 		else:
-			return ls, [], datahalf.to_dict('records'), pd.DataFrame().to_dict('records') , fig, fig2, fig3, fig4, {}, {}, fig10, fig20
+			return ls, [], datahalf.to_dict('records'), pd.DataFrame().to_dict('records') , fig, fig2, fig3, fig4, {}, {}, fig10, fig20,fig60
 
 
 
