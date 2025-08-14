@@ -28,6 +28,8 @@ from input import page_5_layout
 from filter import page_6_layout
 from image import page_7_layout
 from excel_to_word import page_10_layout
+from de30 import page_11_layout
+
 from docx import Document
 
 
@@ -612,6 +614,111 @@ def update_processedfiles(list_of_contents_new,list_of_contents_old, list_of_nam
 
 
 
+def get_results(required_column):
+
+    handling_Units = set(required_column["Handling Unit"])
+    ls = []
+    for i, unit in enumerate(handling_Units):
+        filtered=required_column[required_column["Handling Unit"] == unit]
+        #display(filtered)
+        unique_count = filtered['Bestandsart'].nunique()
+        x_count = filtered['Charge nicht fre'].astype(str).str.lower().eq('x').sum()
+
+
+        if(len(filtered)==1):
+            #print("Same Handline Unit: Same Bestandsrt: Ignore", x_count)
+            ls.append([unit , "Ignore"])
+            continue
+
+        if(unique_count ==1):
+            if(x_count == 0):
+                #print("Same Handline Unit: Same Bestandsrt: Filter", x_count)
+                ls.append([unit , "Filter"])
+            elif(x_count < len(filtered)):
+                #print("Same Handline Unit: Same Bestandsrt: Ignore", x_count)
+                ls.append([unit , "Ignore"])
+        else:      
+            if(x_count == 0):
+                #print("Same Handline Unit: Same Bestandsrt: Filter", x_count)
+                ls.append([unit , "Filter"])
+            elif(x_count < len(filtered)):
+                #print("Same Handline Unit: Same Bestandsrt: Ignore", x_count)
+                ls.append([unit , "Ignore"])
+
+
+    data=pd.DataFrame(ls, columns=["Handling Unit", "Status"])
+    
+    return data
+
+def counter_to_plotly(counter_data, title="De30 Status"):
+
+    labels = list(counter_data.keys())
+    values = list(counter_data.values())
+    
+    fig = go.Figure(data=[
+        go.Bar(
+            x=labels,
+            y=values,
+            text=values,
+            textposition='auto',
+            marker_color=['#1f77b4', '#ff7f0e']  # Different colors for each bar
+        )
+    ])
+    
+    fig.update_layout(
+        title=title,
+        xaxis_title="Categories",
+        yaxis_title="Count",
+        template='plotly_white'  # White background
+    )
+    
+    return fig
+from collections import Counter
+
+@callback(
+    Output('status_de30', 'children'),
+    Output('De30_Table', 'children'),
+    Output('plot_de30', 'figure'),
+    
+    Input('data_de30', 'data'),
+)
+def update_processedfiles(data):
+
+	df = pd.DataFrame(data)
+	if(len(df) >0):
+		data_cleaned = df.dropna(subset=['Handling Unit'])
+		required_column = data_cleaned[["Handling Unit","Bestandsart","Charge nicht fre",]]
+		data = get_results(required_column)
+
+		fig11 = counter_to_plotly(Counter(data.Status))
+
+		ls = []
+		ls.append(html.Div([
+		html.H2("Tabelle",style={'color': 'black','font-size': '13px'}),
+		dash_table.DataTable(
+		    style_table={'height': '800px', 'overflowY': 'auto', 'width':'98%', 'margin-left':'4px'},
+		    data=data.to_dict('records'),
+		    columns=[{"name": i, "id": i} for i in data.columns],
+		    
+		    sort_action="native",
+		    style_data={
+            'backgroundColor': 'lightcyan',
+            
+        	},
+		    style_header={
+		        'backgroundColor': 'darkslategrey',
+		        'color': 'white',
+		        'fontWeight': 'bold',
+		        'textAlign': 'center',
+		        'border': '1px solid black'
+		    }),html.Hr()])
+		)
+
+		return "data Uploaded", ls, fig11
+	else:
+		return "data Not Uploaded", [], {}
+
+
 @callback(
     #Output('output-data-upload', 'children'),
     Output('stored-data-5', 'data'),
@@ -630,6 +737,28 @@ def update_output3(list_of_contents, list_of_names, list_of_dates):
             df_combined = pd.concat([df_combined, df], ignore_index=True)
         return df_combined.to_dict('records')#, "Daten erfolgreich geladen"
     return {}#, ""
+
+
+@callback(
+    #Output('output-data-upload', 'children'),
+    Output('data_de30', 'data'),
+    [Input('upload-De30', 'contents')],
+    [State('upload-De30', 'filename'),
+     State('upload-De30', 'last_modified')]
+)
+def update_output3(list_of_contents, list_of_names, list_of_dates):
+
+    if list_of_contents is not None:
+        children = []
+        df_combined = pd.DataFrame()
+        for c, n, d in zip(list_of_contents, list_of_names, list_of_dates):
+            child, df = parse_contents(c, n, d)
+            children.append(child)
+            df_combined = pd.concat([df_combined, df], ignore_index=True)
+        return df_combined.to_dict('records')#, "Daten erfolgreich geladen"
+    return {}#, ""
+
+
 
 @callback(
     #Output('output-data-upload', 'children'),
@@ -2188,7 +2317,12 @@ app.layout = html.Div([
 	]),
 	html.Div(id='page-10-content', style={'display': 'none'}, children=[
 	    page_10_layout
+	]),
+
+	html.Div(id='page-11-content', style={'display': 'block'}, children=[
+	    page_11_layout
 	])
+
 
 	
 
@@ -2204,6 +2338,7 @@ app.layout = html.Div([
      Output('page-6-content', 'style'),
      Output('page-7-content', 'style'),
      Output('page-10-content', 'style'),
+     Output('page-11-content', 'style'),
 
      Output('success', 'children'),
 
@@ -2219,25 +2354,27 @@ def display_page(pathname,id_, pass_):
     if(id_ == "log" and pass_ == "log"):#C3asar!
 
         if pathname == '/page-2':
-            return {'display': 'block'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'none'},""
+            return {'display': 'block'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'none'},""
         elif(pathname == "/page1"):
-            return {'display': 'none'}, {'display': 'block'} ,{'display': 'none'},{'display': 'none'},{'display': 'none'}, {'display': 'none'},{'display': 'none'},{'display': 'none'},""
+            return {'display': 'none'}, {'display': 'block'} ,{'display': 'none'},{'display': 'none'},{'display': 'none'}, {'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'none'},""
         elif(pathname == "/page-3"):
-            return {'display': 'none'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'block'},{'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'none'},""
+            return {'display': 'none'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'block'},{'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'none'},""
         elif(pathname == "/page_input"):
-            return {'display': 'none'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'none'},{'display': 'block'},{'display': 'none'},{'display': 'none'},{'display': 'none'},"" 
+            return {'display': 'none'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'none'},{'display': 'block'},{'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'none'},"" 
         elif(pathname == "/page_filter"):
-            return {'display': 'none'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'none'},{'display': 'none'},{'display': 'block'},{'display': 'none'},{'display': 'none'},"" 
+            return {'display': 'none'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'none'},{'display': 'none'},{'display': 'block'},{'display': 'none'},{'display': 'none'},{'display': 'none'},"" 
         elif(pathname == "/image"):
-            return {'display': 'none'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'block'},{'display': 'none'},"" 
+            return {'display': 'none'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'block'},{'display': 'none'},{'display': 'none'},"" 
         elif(pathname == "/excel"):
-            return {'display': 'none'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'block'},"" 
+            return {'display': 'none'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'block'},{'display': 'none'},"" 
+        elif(pathname == "/de30"):
+            return {'display': 'none'}, {'display': 'none'} ,{'display': 'none'}, {'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'block'},"" 
         else:
-            return {'display': 'none'}, {'display': 'none'}, {'display': 'none'},{'display': 'none'},{'display': 'none'}, {'display': 'none'},{'display': 'none'},{'display': 'none'},""
+            return {'display': 'none'}, {'display': 'none'}, {'display': 'none'},{'display': 'none'},{'display': 'none'}, {'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'none'},""
     elif(id_ == "" and pass_ == ""):
-        return {'display': 'none'}, {'display': 'none'}, {'display': 'block'},{'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'none'},html.H6("Bitte ID und Passwort eintragen",style={"color":"black"})
+        return {'display': 'none'}, {'display': 'none'}, {'display': 'block'},{'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'none'},html.H6("Bitte ID und Passwort eintragen",style={"color":"black"})
     else:
-        return {'display': 'none'}, {'display': 'none'}, {'display': 'block'},{'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'none'},""
+        return {'display': 'none'}, {'display': 'none'}, {'display': 'block'},{'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'none'},{'display': 'none'},""
 
 
 app.title = "LogFilter"
