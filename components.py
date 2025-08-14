@@ -319,3 +319,52 @@ nav_content8 = html.Div([
     
 ])
 
+
+
+
+
+nav_content9 = html.Div([
+
+    html.Hr(style={'backgroundColor': '#F5B323'}),
+    html.H3("DE30 Bestandsart",id="headings11", style={'color': 'black'}),
+
+    html.Hr(style={'backgroundColor': '#F5B323'}),
+
+    dcc.Upload(
+        id='upload-De30',
+        children=html.Div([
+            'Drag & Drop ',
+            html.A('')
+        ]),
+        style={
+            'width': '100%',
+            'height': '60px',
+            'lineHeight': '60px',
+            'borderWidth': '1px',
+            'borderStyle': 'dashed',
+            'borderRadius': '5px',
+            'borderColor': '#F5B323',
+            'textAlign': 'center',
+            'margin': '10px',
+            'color':'black'
+        },
+        multiple=True
+    ),
+
+
+    html.Button('Process DE30', id='btn-DE30', n_clicks=0, disabled=True),
+    dcc.Store(id="data_de30", data=False),
+
+    html.H6(id="status_de30"),
+
+
+    dcc.Link('Neuer Filter', href='/page1',style={'color': '#F5B323','fontWeight': 'bold'}),
+    html.Br(),
+    dcc.Link('Dangerous Goods Declaration', href='/page-3',style={'color': '#F5B323', 'fontWeight':'bold'}),
+    html.Br(),
+    dcc.Link('M7 Kundenbestellungen', href='/page-3',style={'color': '#F5B323', 'fontWeight':'bold'}),
+    html.Br(),
+    html.A('Warenausgänge', href='/page-2',style={'color': '#F5B323', 'fontWeight':'bold'},target='_blank'),
+    
+])
+
