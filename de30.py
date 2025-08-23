@@ -21,12 +21,6 @@ page_11_layout = html.Div(
 			id='De30_Table',
 			style={"height": "500px", 'width': '100%'}
 			),
-		html.Div(
-		    dcc.Graph(id='plot_de30',
-		        ),
-		    
-		    style={"height": "100%", 'width': '100%', 'float': 'right','padding': '10px'}
-		),
 
 		],
 
