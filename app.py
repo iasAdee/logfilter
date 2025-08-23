@@ -620,37 +620,31 @@ def get_results(required_column):
     ls = []
     for i, unit in enumerate(handling_Units):
         filtered=required_column[required_column["Handling Unit"] == unit]
-        #display(filtered)
         unique_count = filtered['Bestandsart'].nunique()
         x_count = filtered['Charge nicht fre'].astype(str).str.lower().eq('x').sum()
 
 
         if(len(filtered)==1):
-            #print("Same Handline Unit: Same Bestandsrt: Ignore", x_count)
-            ls.append([unit , "Ignore"])
             continue
 
         if(unique_count ==1):
             if(x_count == 0):
-                #print("Same Handline Unit: Same Bestandsrt: Filter", x_count)
-                ls.append([unit , "Filter"])
+                filtered.loc[:,"Status"] = "Error"
+                ls.append(filtered)
             elif(x_count < len(filtered)):
-                #print("Same Handline Unit: Same Bestandsrt: Ignore", x_count)
-                ls.append([unit , "Ignore"])
+                continue
+
         else:      
             if(x_count == 0):
-                #print("Same Handline Unit: Same Bestandsrt: Filter", x_count)
-                ls.append([unit , "Filter"])
+                filtered.loc[:,"Status"] = "Error"
+                ls.append(filtered)
             elif(x_count < len(filtered)):
-                #print("Same Handline Unit: Same Bestandsrt: Ignore", x_count)
-                ls.append([unit , "Ignore"])
+                continue
 
+    result = pd.concat(ls, ignore_index=True)
+    return result
 
-    data=pd.DataFrame(ls, columns=["Handling Unit", "Status"])
-    
-    return data
-
-def counter_to_plotly(counter_data, title="De30 Status"):
+"""def counter_to_plotly(counter_data, title="De30 Status"):
 
     labels = list(counter_data.keys())
     values = list(counter_data.values())
@@ -673,12 +667,12 @@ def counter_to_plotly(counter_data, title="De30 Status"):
     )
     
     return fig
-from collections import Counter
+from collections import Counter"""
 
 @callback(
     Output('status_de30', 'children'),
     Output('De30_Table', 'children'),
-    Output('plot_de30', 'figure'),
+    #Output('plot_de30', 'figure'),
     
     Input('data_de30', 'data'),
 )
@@ -690,7 +684,7 @@ def update_processedfiles(data):
 		required_column = data_cleaned[["Handling Unit","Bestandsart","Charge nicht fre",]]
 		data = get_results(required_column)
 
-		fig11 = counter_to_plotly(Counter(data.Status))
+		#fig11 = counter_to_plotly(Counter(data.Status))
 
 		ls = []
 		ls.append(html.Div([
@@ -714,9 +708,9 @@ def update_processedfiles(data):
 		    }),html.Hr()])
 		)
 
-		return "data Uploaded", ls, fig11
+		return "data Uploaded", ls#, fig11
 	else:
-		return "data Not Uploaded", [], {}
+		return "data Not Uploaded", []#, {}
 
 
 @callback(
@@ -2039,6 +2033,8 @@ def handle_pdf(n_clicks,upload_content, content, processed, api_input):
 			    text_data = text.split("\n")
 			    
 			    charge =[val.strip().lower() for val in text_data if len(val) > 1]
+			    if(len(charge) <1):
+			    	continue
 			    
 			    second_val = ""
 			    first_val = ""
