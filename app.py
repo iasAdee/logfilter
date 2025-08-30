@@ -1910,7 +1910,6 @@ def process_200_images(image_bytes_list):
 
     prompt_parts = []
     for index, image_bytes in enumerate(image_bytes_list):  # Enumerate to get index
-        print(image_bytes[1])
         try:
             image = Image.open(BytesIO(image_bytes[0]))
             buffered = BytesIO()
