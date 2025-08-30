@@ -1910,7 +1910,7 @@ def process_200_images(image_bytes_list):
 
     prompt_parts = []
     for index, image_bytes in enumerate(image_bytes_list):  # Enumerate to get index
-        #print(image_bytes[0])
+        print(image_bytes[1])
         try:
             image = Image.open(BytesIO(image_bytes[0]))
             buffered = BytesIO()
@@ -1934,16 +1934,9 @@ def process_200_images(image_bytes_list):
     3) get ml value in digit after label 
     4) get artikel number a solo numeric number without any symbol or special character of length between 4 and 6
     
-    for given image with index end with "02" extract written text
-    for given image with index end with "03" extract written text
+    for given image with index end with "02" and "03" extract written text on round bottle cap only
 
     example output:
-    **Image PO: 18714618: 00**
-    1) Sika® Primer-3 N
-    2) 04/26
-    3) 1000ml
-    4) 122239
-
     **Image PO: 18714618: 01**
     1) Sika® Primer-3 N
     2) 04/26
@@ -1951,16 +1944,17 @@ def process_200_images(image_bytes_list):
     4) 122239
 
     **Image PO: 18714618: 02**
-    MAT 123489
-    3009963434
-    1039
+    1) Sika® Primer-3 N
+    2) 04/26
+    3) 1000ml
+    4) 122239
 
     **Image PO: 18714618: 03**
-    Sika® Primer-3 N
-    1000ml
-    MAT 123489
     3009963434
-    719
+
+
+    **Image PO: 18714618: 04**
+    3009963434
     
     Return results for all the given images. 
 
@@ -1974,6 +1968,168 @@ def check_apha(text):
         return True
     else:
         return False
+
+
+
+def get_processed_text(responses):
+    rows = {}
+    for response in responses:
+        text_1 = response.text
+        entries = text_1.split("**Image PO:")
+        
+        for entry in entries:
+            entry = entry.strip()
+            if not entry:
+                continue
+
+            header_match = re.match(r"\s*(\d+):\s*(\d+)", entry)
+            if not header_match:
+                continue
+
+            po_number = header_match.group(1)
+            img_index = header_match.group(2)
+
+
+            fields = re.findall(r"\d\)\s*([^\n]+)", entry)
+
+
+            if not fields:
+                if(len(entry.split("**")[1].strip().split())>=2):
+                    fields = [entry.split("**")[1].strip().split()[2]]
+                else:
+                    fields = [entry.split("**")[1].strip().split()[0]]
+
+
+            while len(fields) < 4:
+                fields.append(None)
+
+
+
+            data_list = [po_number, img_index] 
+
+            if(po_number in rows.keys()):
+                rows[po_number].extend(fields[:4])
+            else:
+                rows[po_number] = fields[:4]
+
+    required_list_data = []
+    for key in rows:
+        val = rows[key]
+        new_list = [key]
+        without_none = [v for v in val if v != None]
+        new_list.extend(without_none)
+        
+        required_list_data.append(new_list)
+        
+    data = pd.DataFrame(required_list_data, columns=["Bild1_nummer", "Bild1_label", "Bild1_Date","Bild1 ML", "Artikel NO Bild1",
+    "Bild2_label", "Bild2_Date" ,"Bild ML", "Artikel NO Bild2","BottleInfo1","BottleInfo2"
+                                           ])
+
+    
+    return data
+def create_match_column(df):
+
+	df['Match'] = 'nicht übereinstimmend'  
+	df.loc[
+	    (df['Bild1_label'] == df['Bild2_label']) &
+	    (df['Bild1 ML'] == df['Bild ML']) &
+	    (df['BottleInfo1'] == df['BottleInfo2']) &
+	    (df['Bild1_Date'] == df['Bild2_Date']) &
+	    (df['Charge'] == df['BottleInfo1']) &
+	    (df['Artikel NO Bild1'] == df['Artikel NO Bild2']),
+	    'Match'
+	] = 'übereinstimmend'
+
+	return df
+
+
+def make_image_lists(doc):
+    ref = {}
+    multi_images = []
+    images_list = []
+    for page_number in range(len(doc)):
+
+        page = doc[page_number]
+
+
+        text = page.get_text()
+        text_data = text.split("\n")
+
+        charge =[val.strip().lower() for val in text_data if len(val) > 1]
+
+        images = page.get_images(full=True) 
+        #print(len(images))
+
+        if(len(charge)<1):
+            if (page_number == len(doc)-1):
+                multi_images.append(images_list)
+                images_list = []   
+            continue
+
+        second_val = ""
+        first_val = ""
+        if("flaschennummer" in charge[-1]):
+            second_val = charge[-1].split(" ")
+            if(len(second_val) >=1):
+                second_val = second_val[1]
+            else:
+                second_val = charge[charge.index("flaschennummer")+1]
+
+        if("halb-charge" in charge):
+            first_val = charge[charge.index("halb-charge")+1]
+
+
+
+        text = ""
+        artikle = ""
+
+        for i, tex in enumerate(text_data):
+            if(tex.startswith("PO")):
+                text=tex
+
+            if(tex.startswith("FERT-Artikel-Nummer")):
+                artikle = text_data[i+1]
+
+
+        images = page.get_images(full=True) 
+        text_data = text.split(":")
+
+        text = text.split('  ')[0].strip()
+        #print(len(text))
+        if(len(text) == 0):
+            #print(len(text))
+            continue
+
+        images = page.get_images(full=True) 
+
+        images_sorted = sorted(images, key=lambda x: x[0])
+        for img_index, img in enumerate(images_sorted):
+
+            xref = img[0]  
+            if(img[3] <150):
+                print("Small Image")
+                continue
+
+
+
+            base_image = doc.extract_image(xref)  
+            image_bytes = base_image["image"]  
+
+            images_list.append((image_bytes, str(text+": "+str(page_number)+str(img_index))))
+
+
+            if(img_index>3):
+                break
+
+
+        ref[text.split(":")[1].strip()] = [first_val, second_val]
+
+        if((page_number != 0 and page_number%10 == 0) or page_number == len(doc)-1):
+            multi_images.append(images_list)
+            images_list = []
+            
+    return ref, multi_images
+
 
 @app.callback(
     Output("status9", "children"),
@@ -2008,8 +2164,6 @@ def handle_pdf(n_clicks,upload_content, content, processed, api_input):
 
 		if content is not None:
 
-			#print(contents)
-			#print(api_input)
 
 			os.environ["GEMINI_API_KEY"] = api_input 
 			genai.configure(api_key=os.environ["GEMINI_API_KEY"]) 
@@ -2019,76 +2173,9 @@ def handle_pdf(n_clicks,upload_content, content, processed, api_input):
 			content_type, content_string = content[0].split(',')
 			decoded = io.BytesIO(base64.b64decode(content_string))
 
-			# Extract text from the PDF
 			doc = fitz.open(stream=decoded, filetype="pdf")
 
-			ref = {}
-			multi_images = []
-			images_list = []
-			for page_number in range(len(doc)):
-			     
-			    page = doc[page_number]
-			    text = page.get_text()
-			    
-			    text_data = text.split("\n")
-			    
-			    charge =[val.strip().lower() for val in text_data if len(val) > 1]
-			    if(len(charge) <1):
-			    	continue
-			    
-			    second_val = ""
-			    first_val = ""
-			    if("flaschennummer" in charge[-1]):
-			        second_val = charge[-1].split(" ")
-			        if(len(second_val) >=1):
-			            second_val = second_val[1]
-			        else:
-			            second_val = charge[charge.index("flaschennummer")+1]
-			            
-			    if("halb-charge" in charge):
-			        first_val = charge[charge.index("halb-charge")+1]
-			    
-
-			        
-			    text = ""
-			    artikle = ""
-			    
-			    for i, tex in enumerate(text_data):
-			        if(tex.startswith("PO")):
-			            text=tex
-			            
-			        if(tex.startswith("FERT-Artikel-Nummer")):
-			            artikle = text_data[i+1]
-			        
-			            
-			    images = page.get_images(full=True) 
-			    text_data = text.split(":")
-			    
-			    text = text.split('  ')[0].strip()
-			    #print(len(text))
-			    if(len(text) == 0):
-			        #print(len(text))
-			        continue
-			        
-			    images = page.get_images(full=True) 
-			    for img_index, img in enumerate(images):
-			        xref = img[0]  
-			        
-			        if(img_index>3):
-			            break
-			            
-			        base_image = doc.extract_image(xref)  
-			        image_bytes = base_image["image"]  
-			 
-			        images_list.append((image_bytes, str(text+": "+str(page_number)+str(img_index))))
-			        #p = text+":"+str(page_number)+str(img_index)  
-			        
-			    ref[text.split(":")[1].strip()] = [first_val, second_val]
-			    
-			        
-			    if((page_number != 0 and page_number%10 == 0) or page_number == len(doc)-1):
-			        multi_images.append(images_list)
-			        images_list = []
+			ref, multi_images=  make_image_lists(doc)
 
 
 			df_dict = pd.DataFrame.from_dict(ref, orient='index', columns=['Charge', 'flaschennummer'])
@@ -2105,82 +2192,15 @@ def handle_pdf(n_clicks,upload_content, content, processed, api_input):
 			    try:
 			        response = model.generate_content(prompt_parts)
 			        responses.append(response)
-			        print(f"response: {i} completed") 
+			        print(f"response: completed") 
 			    except Exception as e:
 			        print(e)
 
-			page_results = {}
-			for response in responses:
-			    splited_respones = response.text.split("\n")
-			    artikel_number = ""
-			    img1_id = ""
+			data = get_processed_text(responses)
 
-			    for lines in splited_respones:
-			        if(len(lines)>30):
-			            continue
-			        else:
-			            if(lines.startswith("**")):
-			                img1_id = lines.split(" ")[3][:-2]
-			                img1_id = img1_id[-1]
-			                artikel_number = lines.split(" ")[2][:-1]
-			                if(artikel_number in page_results.keys()):
-			                    continue
-			                else:
-			                    page_results[artikel_number] = [artikel_number]
-			                    continue
-			                
-			            if(artikel_number in page_results.keys()):
-			                if(lines ==""):
-			                    continue
-			                if(img1_id == "2"):
-			                    if(len(lines)) == 10:
-			                        if(not check_apha(lines)):
-			                            print(artikel_number,"2",lines)
-			                            page_results[artikel_number].append(lines)
-			                    else:
-			                        continue
-			                    #print("2",lines)
-			                if(img1_id == "3"):
-			                    if(len(lines)) == 10:
-			                        if(not check_apha(lines)):
-			                            #print(artikel_number,"3",lines)
-			                            page_results[artikel_number].append(lines)
-			                    else:
-			                        continue
-			                
-			                if(img1_id == "0" or img1_id == "1"):
-			                    splited_lines =lines.split(")")
-			                    if(len(splited_lines) > 1):
-			                        #print(splited_lines[1])
-			                        page_results[artikel_number].append(splited_lines[1])
-			                    else:
-			                        if(splited_lines[0] != ""):
-			                            page_results[artikel_number].append(splited_lines[0])
-
-			for val in page_results:
-			    val_ = page_results[val]
-			    val_  = val_[:11]
-			    page_results[val] = val_
-			data = pd.DataFrame(list(page_results.values()), columns=["Bild1_nummer", "Bild1_label", "Bild1_Date","Bild1 ML", "Artikel NO Bild1",
-    "Bild2_label", "Bild2_Date" ,"Bild ML", "Artikel NO Bild2","BottleInfo1","BottleInfo2"
-                                           ])
+			print(data)
 
 			df_merged = data.merge(df_dict, on='Bild1_nummer', how='inner')
-            
-			def create_match_column(df):
-
-			    df['Match'] = 'nicht übereinstimmend'  
-			    df.loc[
-			        (df['Bild1_label'] == df['Bild2_label']) &
-			        (df['Bild1 ML'] == df['Bild ML']) &
-			        (df['BottleInfo1'] == df['BottleInfo2']) &
-			        (df['Bild1_Date'] == df['Bild2_Date']) &
-			        (df['Charge'] == df['BottleInfo1']) &
-			        (df['Artikel NO Bild1'] == df['Artikel NO Bild2']),
-			        'Match'
-			    ] = 'übereinstimmend'
-
-			    return df
 
 			data =create_match_column(df_merged)
 
