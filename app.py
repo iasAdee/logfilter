@@ -957,6 +957,89 @@ def store_word_template(contents, filename):
         return contents, html.Div([f"IMO geladen: {filename}"])
     return None, html.Div()
 
+
+
+
+def get_results(excel_data):
+    full_string = ""
+    kgs = ""
+    kgs2 = ""
+    count = 0
+    list_of_strings = []
+    list_of_kgs = []
+    list_of_kgs2 = []
+
+
+    for i in range(len(excel_data)):
+
+        first_kg = str(excel_data["Brutto"][i])
+        first_kg_char = str(excel_data["Gewichtseinheit"][i])
+
+
+        second_kg = str(excel_data["Netto"][i])
+        second_kg_char = str(excel_data["Gewichtseinheit"][i])
+
+        third = excel_data["Benennung"][i]
+        fourth = excel_data["UN-Nr."][i]
+
+        if(pd.isna(fourth)):
+            
+            if(count == 3 or i == len(excel_data)-1):
+                list_of_strings.append(full_string)
+                full_string = ""
+                list_of_kgs.append(kgs)
+                kgs = ""
+                list_of_kgs2.append(kgs2)
+                kgs2 = ""
+                count=0
+
+            continue
+
+        get_data = excel_data["UN-Homologation"][i]
+        zero_word = excel_data["Menge"][i]
+        tech = excel_data["Tech.Benennung 1"][i]
+
+        Flammpunkt = None
+        if("Flammpunkt" in excel_data.columns):
+            Flammpunkt = excel_data["Flammpunkt"][i]
+
+
+        if(pd.isna(get_data) or pd.isna(Flammpunkt)):
+            first_word = container_materials[get_data[1]]
+            second_word = container_types[int(get_data[0])]
+            data_to_add = str(zero_word)+" "+str(first_word)+" "+\
+                            str(second_word)+""+\
+                            str(fourth)+" "+str(third)+" "+str(tech) +"\n\n"
+
+            full_string += data_to_add
+        else:
+            first_word = container_materials[get_data[1]]
+            second_word = container_types[int(get_data[0])]
+            data_to_add = str(zero_word)+" "+str(first_word)+" "+\
+                            str(second_word)+" ("+str(get_data)+")\n"+\
+                            str(fourth)+" "+str(third)+" "+str(tech) +"\n"+str(Flammpunkt)+"\n\n"
+
+
+
+            full_string += data_to_add
+
+
+
+        kgs += first_kg+" "+first_kg_char+"\n\n\n\n\n"
+        kgs2 += second_kg+" "+second_kg_char+"\n\n\n\n\n"
+
+
+
+        count += 1
+        if(count == 3 or i == len(excel_data)-1):
+            list_of_strings.append(full_string)
+            full_string = ""
+            list_of_kgs.append(kgs)
+            kgs = ""
+            list_of_kgs2.append(kgs2)
+            kgs2 = ""
+            count=0
+    return list_of_kgs, list_of_kgs2, list_of_strings
 # Main processing callback
 @callback(
     Output('status11', 'children'),
@@ -976,74 +1059,7 @@ def make_pdf_from_excel(data, word_template, n_clicks):
 	if len(excel_data) == 0:
 	    return "Keine validen Daten gefunden  ", None
 
-	# Process Excel data
-	full_string = ""
-	kgs = ""
-	kgs2 = ""
-	count = 0
-	list_of_strings = []
-	list_of_kgs = []
-	list_of_kgs2 = []
-
-
-	for i in range(len(excel_data)):
-	    
-	    first_kg = str(excel_data["Brutto"][i])
-	    first_kg_char = str(excel_data["Gewichtseinheit"][i])
-	    
-	    
-	    second_kg = str(excel_data["Netto"][i])
-	    second_kg_char = str(excel_data["Gewichtseinheit"][i])
-	    
-	    third = excel_data["Benennung"][i]
-	    fourth = excel_data["UN-Nr."][i]
-	    
-	    if(pd.isna(fourth)):
-	        continue
-	    
-	    get_data = excel_data["UN-Homologation"][i]
-	    zero_word = excel_data["Menge"][i]
-	    tech = excel_data["Tech.Benennung 1"][i]
-	    
-	    Flammpunkt = None
-	    if("Flammpunkt" in excel_data.columns):
-	        Flammpunkt = excel_data["Flammpunkt"][i]
-	    
-	    
-	    if(pd.isna(get_data) or pd.isna(Flammpunkt)):
-	        first_word = container_materials[get_data[1]]
-	        second_word = container_types[int(get_data[0])]
-	        data_to_add = str(zero_word)+" "+str(first_word)+" "+\
-	                        str(second_word)+""+\
-	                        str(fourth)+" "+str(third)+" "+str(tech) +"\n\n"
-	        
-	        full_string += data_to_add
-	    else:
-	        first_word = container_materials[get_data[1]]
-	        second_word = container_types[int(get_data[0])]
-	        data_to_add = str(zero_word)+" "+str(first_word)+" "+\
-	                        str(second_word)+" ("+str(get_data)+")\n"+\
-	                        str(fourth)+" "+str(third)+" "+str(tech) +"\n"+str(Flammpunkt)+"\n\n"
-	        
-	        
-	        
-	        full_string += data_to_add
-	        
-	            
-	    
-	    kgs += first_kg+" "+first_kg_char+"\n\n\n\n\n"
-	    kgs2 += second_kg+" "+second_kg_char+"\n\n\n\n\n"
-	    
-	    
-	    count += 1
-	    if(count == 3 or i == len(excel_data)-1):
-	        list_of_strings.append(full_string)
-	        full_string = ""
-	        list_of_kgs.append(kgs)
-	        kgs = ""
-	        list_of_kgs2.append(kgs2)
-	        kgs2 = ""
-	        count=0
+	list_of_kgs, list_of_kgs2, list_of_strings = get_results(excel_data)
 
 
 	docx_file_path1 = 'layouts/IMO_Layout_new.docx'
@@ -1055,7 +1071,7 @@ def make_pdf_from_excel(data, word_template, n_clicks):
 	# Process Word document
 
 	print("Length of list: ", len(list_of_strings))
-	#print(list_of_strings)
+
 
 	list_of_strings=[val for val in list_of_strings if val !=""]
 	
@@ -1910,6 +1926,7 @@ def process_200_images(image_bytes_list):
 
     prompt_parts = []
     for index, image_bytes in enumerate(image_bytes_list):  # Enumerate to get index
+        print(image_bytes[1])
         try:
             image = Image.open(BytesIO(image_bytes[0]))
             buffered = BytesIO()
