@@ -362,7 +362,7 @@ nav_content9 = html.Div([
     ),
 
 
-    html.Button('Process DE30', id='btn-DE30', n_clicks=0, disabled=True),
+    html.Button('verarbeiten', id='btn-DE30', n_clicks=0, disabled=True),
     dcc.Store(id="data_de30", data=False),
 
     html.H6(id="status_de30"),
