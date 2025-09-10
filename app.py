@@ -227,7 +227,7 @@ def update_graph(data, n_clicks):
     names_update_lower = {key.lower(): value for key, value in names_update.items()}
     df.columns = [names_update_lower.get(col.lower().strip(), col) for col in df.columns]
 
-    print(df.columns)
+    #print(df.columns)
     expected_columns = ["Auftragsmenge_Offen", "Auftragsmenge_bereits_geliefert", 
     "Summe von BrGew_Offen", "Fakturasperre","KomplettLF_KZ", "SalesOrder", "WE_PLZ", "Werk",
     "MatNr","BereitStellDat", "AME", "BME", "Zähler","MatBez","Auftragsmenge_Bestätigt","WE-Name","WE-Stadt","KzAZu"]
@@ -246,7 +246,7 @@ def update_graph(data, n_clicks):
 
 
 
-    print(df["Summe von BrGew_Offen"].max())
+    #print(df["Summe von BrGew_Offen"].max())
 
     if "Summe von BrGew_Offen" not in df.columns:
         return default_return
@@ -503,13 +503,13 @@ def load_csv_with_best_encoding(file_bytes, encodings=None):
 def parse_contents(contents, filename, date):
     content_type, content_string = contents.split(',')
 
-    print(filename)
+    #print(filename)
     decoded = base64.b64decode(content_string)
     #print(filename)
     try:
         if 'csv' in filename:
 
-            print(filename)
+            #print(filename)
             # Assume that the user uploaded a CSV file
             df = load_csv_with_best_encoding(decoded, encodings=None)
             if df.empty:
@@ -708,9 +708,9 @@ def update_processedfiles(data):
 		    }),html.Hr()])
 		)
 
-		return "data Uploaded", ls#, fig11
+		return "Daten geladen ", ls#, fig11
 	else:
-		return "data Not Uploaded", []#, {}
+		return "Daten nicht geladen", []#, {}
 
 
 @callback(
@@ -1435,7 +1435,7 @@ def get_new_Data(data,order_id, client_id):
 
 	if(len(data) > 0):
 
-		print(data)
+		#print(data)
 
 
 		row_1_values = data.iloc[1].astype(str).tolist()  
@@ -1926,7 +1926,7 @@ def process_200_images(image_bytes_list):
 
     prompt_parts = []
     for index, image_bytes in enumerate(image_bytes_list):  # Enumerate to get index
-        print(image_bytes[1])
+        #print(image_bytes[1])
         try:
             image = Image.open(BytesIO(image_bytes[0]))
             buffered = BytesIO()
@@ -2214,7 +2214,7 @@ def handle_pdf(n_clicks,upload_content, content, processed, api_input):
 
 			data = get_processed_text(responses)
 
-			print(data)
+			#print(data)
 
 			df_merged = data.merge(df_dict, on='Bild1_nummer', how='inner')
 
