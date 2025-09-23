@@ -614,7 +614,7 @@ def update_processedfiles(list_of_contents_new,list_of_contents_old, list_of_nam
 
 
 
-def get_results(required_column):
+def get_results_de30(required_column):
 
     handling_Units = set(required_column["Handling Unit"])
     ls = []
@@ -682,7 +682,7 @@ def update_processedfiles(data):
 	if(len(df) >0):
 		data_cleaned = df.dropna(subset=['Handling Unit'])
 		required_column = data_cleaned[["Handling Unit","Bestandsart","Charge nicht fre",]]
-		data = get_results(required_column)
+		data = get_results_de30(required_column)
 
 		#fig11 = counter_to_plotly(Counter(data.Status))
 
