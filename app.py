@@ -94,6 +94,23 @@ def save_data(data1, n_clicks):
 		#df.to_csv("sped_data.csv", index=False)
 		return dcc.send_data_frame(df.to_csv, "checked_zeros.csv", index=False)
 
+
+## DE30
+@callback(
+	Output("download-dataframe-de30", "data"),
+	
+	Input('de30_results', 'data'),
+	Input('de30button', 'n_clicks'),
+
+	)
+
+def save_data(data1, n_clicks):
+	if(n_clicks != None):
+		df = pd.DataFrame(data1)
+		return dcc.send_data_frame(df.to_csv, "Checked_Errors.csv", index=False)
+
+
+
 @callback(
 	Output("download-dataframe-csv7f", "data"),
 	
@@ -500,7 +517,7 @@ def load_csv_with_best_encoding(file_bytes, encodings=None):
     
     return pd.DataFrame()
 
-def parse_contents(contents, filename, date):
+def parse_contents(contents, filename, date, de30=False):
     content_type, content_string = contents.split(',')
 
     #print(filename)
@@ -518,7 +535,10 @@ def parse_contents(contents, filename, date):
         if 'xls' in filename and not filename.endswith('xlsx'):
             df = pd.read_excel(io.BytesIO(decoded), engine='xlrd')
         elif filename.endswith('xlsx') or filename.endswith('XLSX'):
-            df = pd.read_excel(io.BytesIO(decoded), engine='openpyxl')
+            if(de30 == False):
+            	df = pd.read_excel(io.BytesIO(decoded), engine='openpyxl')
+            else:
+            	df = pd.read_excel(io.BytesIO(decoded), engine='openpyxl',dtype={'Handling Unit': 'str'})
     except Exception as e:
         print(e)
         return html.Div([
@@ -667,12 +687,14 @@ def get_results_de30(required_column):
     )
     
     return fig
-from collections import Counter"""
+"""
+
+from collections import Counter
 
 @callback(
     Output('status_de30', 'children'),
     Output('De30_Table', 'children'),
-    #Output('plot_de30', 'figure'),
+    Output('de30_results', 'data'),
     
     Input('data_de30', 'data'),
 )
@@ -680,14 +702,24 @@ def update_processedfiles(data):
 
 	df = pd.DataFrame(data)
 	if(len(df) >0):
+
 		data_cleaned = df.dropna(subset=['Handling Unit'])
+
+		print(data_cleaned.info())
+		#data_cleaned['Handling Unit'] = data_cleaned['Handling Unit'].astype(str)
+
 		required_column = data_cleaned[["Handling Unit","Bestandsart","Charge nicht fre",]]
+
+		print("Total Length: ", len(required_column))
 		data = get_results_de30(required_column)
 
 		#fig11 = counter_to_plotly(Counter(data.Status))
+		res =dict(Counter(data.Status))
+		total_erorrs = res["Error"]
 
 		ls = []
 		ls.append(html.Div([
+
 		html.H2("Tabelle",style={'color': 'black','font-size': '13px'}),
 		dash_table.DataTable(
 		    style_table={'height': '800px', 'overflowY': 'auto', 'width':'98%', 'margin-left':'4px'},
@@ -705,12 +737,16 @@ def update_processedfiles(data):
 		        'fontWeight': 'bold',
 		        'textAlign': 'center',
 		        'border': '1px solid black'
-		    }),html.Hr()])
+		    }),
+		html.Hr(),
+		html.H3(f"Total Errors Lines In Table are: {total_erorrs}")
+
+		])
 		)
 
-		return "Daten geladen ", ls#, fig11
+		return "Daten geladen ", ls, data.to_dict('records')
 	else:
-		return "Daten nicht geladen", []#, {}
+		return "Daten nicht geladen", [], []
 
 
 @callback(
@@ -746,7 +782,7 @@ def update_output3(list_of_contents, list_of_names, list_of_dates):
         children = []
         df_combined = pd.DataFrame()
         for c, n, d in zip(list_of_contents, list_of_names, list_of_dates):
-            child, df = parse_contents(c, n, d)
+            child, df = parse_contents(c, n, d, de30=True)
             children.append(child)
             df_combined = pd.concat([df_combined, df], ignore_index=True)
         return df_combined.to_dict('records')#, "Daten erfolgreich geladen"
@@ -956,7 +992,6 @@ def store_word_template(contents, filename):
     if contents is not None:
         return contents, html.Div([f"IMO geladen: {filename}"])
     return None, html.Div()
-
 
 
 
