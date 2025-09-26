@@ -704,13 +704,10 @@ def update_processedfiles(data):
 	if(len(df) >0):
 
 		data_cleaned = df.dropna(subset=['Handling Unit'])
-
-		print(data_cleaned.info())
 		#data_cleaned['Handling Unit'] = data_cleaned['Handling Unit'].astype(str)
 
 		required_column = data_cleaned[["Handling Unit","Bestandsart","Charge nicht fre",]]
 
-		print("Total Length: ", len(required_column))
 		data = get_results_de30(required_column)
 
 		#fig11 = counter_to_plotly(Counter(data.Status))
@@ -739,7 +736,7 @@ def update_processedfiles(data):
 		        'border': '1px solid black'
 		    }),
 		html.Hr(),
-		html.H3(f"Total Errors Lines In Table are: {total_erorrs}")
+		html.H3(f"Summe: {total_erorrs}")
 
 		])
 		)
