@@ -343,7 +343,7 @@ nav_content9 = html.Div([
     dcc.Upload(
         id='upload-De30',
         children=html.Div([
-            'Drag & Drop ',
+            'Drag & Drop | hochladen',
             html.A('')
         ]),
         style={
