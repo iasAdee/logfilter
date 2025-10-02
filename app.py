@@ -704,10 +704,13 @@ def update_processedfiles(data):
 	if(len(df) >0):
 
 		data_cleaned = df.dropna(subset=['Handling Unit'])
+
+		print(data_cleaned.info())
 		#data_cleaned['Handling Unit'] = data_cleaned['Handling Unit'].astype(str)
 
 		required_column = data_cleaned[["Handling Unit","Bestandsart","Charge nicht fre",]]
 
+		print("Total Length: ", len(required_column))
 		data = get_results_de30(required_column)
 
 		#fig11 = counter_to_plotly(Counter(data.Status))
@@ -736,7 +739,7 @@ def update_processedfiles(data):
 		        'border': '1px solid black'
 		    }),
 		html.Hr(),
-		html.H3(f"Summe: {total_erorrs}")
+		html.H3(f"Total Errors Lines In Table are: {total_erorrs}")
 
 		])
 		)
@@ -1951,14 +1954,13 @@ import base64
 import os
 
 
-
 def process_200_images(image_bytes_list):
     if len(image_bytes_list) > 80:
         return {"error": "The image_bytes_list must contain less than 110 images."}
 
     prompt_parts = []
     for index, image_bytes in enumerate(image_bytes_list):  # Enumerate to get index
-        #print(image_bytes[1])
+        print(image_bytes[1])
         try:
             image = Image.open(BytesIO(image_bytes[0]))
             buffered = BytesIO()
@@ -1978,24 +1980,27 @@ def process_200_images(image_bytes_list):
     prompt_parts.append("""
     for given images with index end with "00" and "01" extract
     1) get image label
-    2) Best before date:
+    2) Get Bacth No
+    3) Best before date
     3) get ml value in digit after label 
     4) get artikel number a solo numeric number without any symbol or special character of length between 4 and 6
     
-    for given image with index end with "02" and "03" extract written text on round bottle cap only
+    for given image with index end with "02" and "03" get that middle numeric number like in example from round bottle cap only
 
     example output:
     **Image PO: 18714618: 01**
     1) Sika® Primer-3 N
-    2) 04/26
-    3) 1000ml
-    4) 122239
+    2) 18467849391
+    3) 04/26 
+    4) 1000ml
+    5) 122239
 
     **Image PO: 18714618: 02**
     1) Sika® Primer-3 N
-    2) 04/26
-    3) 1000ml
-    4) 122239
+    2) 18467849391
+    3) 04/26
+    4) 1000ml
+    5) 122239
 
     **Image PO: 18714618: 03**
     3009963434
@@ -2009,6 +2014,8 @@ def process_200_images(image_bytes_list):
     """)
     
     return prompt_parts
+
+
 
 
 def check_apha(text):
@@ -2048,17 +2055,16 @@ def get_processed_text(responses):
                     fields = [entry.split("**")[1].strip().split()[0]]
 
 
-            while len(fields) < 4:
+            while len(fields) < 5:
                 fields.append(None)
-
 
 
             data_list = [po_number, img_index] 
 
             if(po_number in rows.keys()):
-                rows[po_number].extend(fields[:4])
+                rows[po_number].extend(fields[:5])
             else:
-                rows[po_number] = fields[:4]
+                rows[po_number] = fields[:5]
 
     required_list_data = []
     for key in rows:
@@ -2069,18 +2075,21 @@ def get_processed_text(responses):
         
         required_list_data.append(new_list)
         
-    data = pd.DataFrame(required_list_data, columns=["Bild1_nummer", "Bild1_label", "Bild1_Date","Bild1 ML", "Artikel NO Bild1",
-    "Bild2_label", "Bild2_Date" ,"Bild ML", "Artikel NO Bild2","BottleInfo1","BottleInfo2"
+        
+    data = pd.DataFrame(required_list_data, columns=["Bild1_nummer", "Bild1_label","BatchNO1" ,"Bild1_Date","Bild1 ML", "Artikel NO Bild1",
+    "Bild2_label","BatchNO2", "Bild2_Date" ,"Bild ML", "Artikel NO Bild2","BottleInfo1","BottleInfo2"
                                            ])
 
     
     return data
+        
 def create_match_column(df):
 
 	df['Match'] = 'nicht übereinstimmend'  
 	df.loc[
 	    (df['Bild1_label'] == df['Bild2_label']) &
 	    (df['Bild1 ML'] == df['Bild ML']) &
+	    (df['BatchNO1'] == df['BatchNO2']) &
 	    (df['BottleInfo1'] == df['BottleInfo2']) &
 	    (df['Bild1_Date'] == df['Bild2_Date']) &
 	    (df['Charge'] == df['BottleInfo1']) &
@@ -2215,7 +2224,7 @@ def handle_pdf(n_clicks,upload_content, content, processed, api_input):
 
 			os.environ["GEMINI_API_KEY"] = api_input 
 			genai.configure(api_key=os.environ["GEMINI_API_KEY"]) 
-			model = genai.GenerativeModel("gemini-1.5-flash")
+			model = genai.GenerativeModel("gemini-2.5-flash")
 
 			
 			content_type, content_string = content[0].split(',')
