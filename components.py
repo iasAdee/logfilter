@@ -85,6 +85,8 @@ nav_content = html.Div([
     dcc.Link('Bilderkennung', href='/image',style={'color': '#F5B323', 'fontWeight':'bold'}),
     html.Br(),
     dcc.Link('DE30 Bestandsart', href='/de30',style={'color': '#F5B323', 'fontWeight':'bold'}),
+    html.Br(),
+    html.A('Feuerwehrliste DE01', href='/rgb',style={'color': '#F5B323', 'fontWeight':'bold'},target='_blank'),
     
 ])
 
@@ -139,6 +141,8 @@ nav_content5 = html.Div([
     dcc.Link('Bilderkennung', href='/image',style={'color': '#F5B323', 'fontWeight':'bold'}),
     html.Br(),
     dcc.Link('DE30 Bestandsart', href='/de30',style={'color': '#F5B323', 'fontWeight':'bold'}),
+    html.Br(),
+    html.A('Feuerwehrliste DE01', href='/rgb',style={'color': '#F5B323', 'fontWeight':'bold'},target='_blank'),
     
 ])
 
@@ -209,6 +213,8 @@ nav_content6 = html.Div([
     dcc.Link('Bilderkennung', href='/image',style={'color': '#F5B323', 'fontWeight':'bold'}),
     html.Br(),
     dcc.Link('DE30 Bestandsart', href='/de30',style={'color': '#F5B323', 'fontWeight':'bold'}),
+    html.Br(),
+    html.A('Feuerwehrliste DE01', href='/rgb',style={'color': '#F5B323', 'fontWeight':'bold'},target='_blank'),
     
 ])
 
@@ -305,6 +311,8 @@ nav_content7 = html.Div([
     html.A('Warenausgänge', href='/page-2',style={'color': '#F5B323', 'fontWeight':'bold'},target='_blank'),
     html.Br(),
     dcc.Link('DE30 Bestandsart', href='/de30',style={'color': '#F5B323', 'fontWeight':'bold'}),
+    html.Br(),
+    html.A('Feuerwehrliste DE01', href='/rgb',style={'color': '#F5B323', 'fontWeight':'bold'},target='_blank'),
     
 ])
 
@@ -326,9 +334,10 @@ nav_content8 = html.Div([
     html.Hr(style={'backgroundColor': '#F5B323'}),
     html.Br(),
     dcc.Link('DE30 Bestandsart', href='/de30',style={'color': '#F5B323', 'fontWeight':'bold'}),
+    html.Br(),
+    html.A('Feuerwehrliste DE01', href='/rgb',style={'color': '#F5B323', 'fontWeight':'bold'},target='_blank'),
     
 ])
-
 
 
 
@@ -343,7 +352,7 @@ nav_content9 = html.Div([
     dcc.Upload(
         id='upload-De30',
         children=html.Div([
-            'Drag & Drop | hochladen',
+            'Drag & Drop ',
             html.A('')
         ]),
         style={
@@ -366,6 +375,55 @@ nav_content9 = html.Div([
     dcc.Store(id="data_de30", data=False),
 
     html.H6(id="status_de30"),
+
+
+    dcc.Link('Neuer Filter', href='/page1',style={'color': '#F5B323','fontWeight': 'bold'}),
+    html.Br(),
+    dcc.Link('Dangerous Goods Declaration', href='/page-3',style={'color': '#F5B323', 'fontWeight':'bold'}),
+    html.Br(),
+    dcc.Link('M7 Kundenbestellungen', href='/page-3',style={'color': '#F5B323', 'fontWeight':'bold'}),
+    html.Br(),
+    html.A('Warenausgänge', href='/page-2',style={'color': '#F5B323', 'fontWeight':'bold'},target='_blank'),
+    html.Br(),
+    html.A('Feuerwehrliste DE01', href='/rgb',style={'color': '#F5B323', 'fontWeight':'bold'},target='_blank'),
+    
+])
+
+
+
+nav_content10 = html.Div([
+
+    html.Hr(style={'backgroundColor': '#F5B323'}),
+    html.H3("Feuerwehrliste DE01",id="headings12", style={'color': 'black'}),
+
+    html.Hr(style={'backgroundColor': '#F5B323'}),
+
+    dcc.Upload(
+        id='upload-cc',
+        children=html.Div([
+            'Drag & Drop ',
+            html.A('')
+        ]),
+        style={
+            'width': '100%',
+            'height': '60px',
+            'lineHeight': '60px',
+            'borderWidth': '1px',
+            'borderStyle': 'dashed',
+            'borderRadius': '5px',
+            'borderColor': '#F5B323',
+            'textAlign': 'center',
+            'margin': '10px',
+            'color':'black'
+        },
+        multiple=True
+    ),
+
+
+    html.Button('verarbeiten', id='btn-DE31', n_clicks=0, disabled=True),
+    dcc.Store(id="data_de31", data=False),
+
+    html.H6(id="status_de31", children=["please upload file"]),
 
 
     dcc.Link('Neuer Filter', href='/page1',style={'color': '#F5B323','fontWeight': 'bold'}),
