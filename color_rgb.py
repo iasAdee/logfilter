@@ -26,6 +26,8 @@ page_12_layout = html.Div(
 				html.Div(id='results_g',),
 				html.Div(id='results_o',),
 				html.Div(id='results_r',),
+				html.Div(dcc.Graph(id='plot_rgb',),
+		        ),
 			],
 			style={"height": "100%", 'width': '80%', 'float': 'right', 'backgroundColor': 'lightgray'}
 		),	
