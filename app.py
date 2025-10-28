@@ -593,11 +593,13 @@ def check_colors(data):
 
 
     ls = []
+    ls2 =[]
     for i, row in data.iterrows():
         val1 = row[col_1]
         val2 = float(str(row[col_2]).replace(',', ''))
         if(pd.isna(val1)):
             ls.append(None)
+            ls2.append(None)
         else:
             if(val1 == "E2" or val1 == "E1"):
                 if(val2<=1379000):
@@ -636,9 +638,74 @@ def check_colors(data):
                     ls.append("red")
             else:
                 ls.append(None)
+            
+            ls2.append(val1)
                 
     data["result"] = ls
+    data["lable"] = ls2
     return data
+
+
+from plotly.subplots import make_subplots
+import math
+
+def make_multi_plot(color_distributions):
+    """
+    color_distributions: dict of {name: {color: count, ...}}
+        Example:
+        {
+            "P5c": {"green": 27, "orange": 5, "red": 4},
+            "P4b": {"green": 10, "orange": 15, "red": 2},
+            ...
+        }
+    """
+    n = len(color_distributions)
+    cols = 2
+    rows = math.ceil(n / cols)
+
+    fig = make_subplots(rows=rows, cols=cols, subplot_titles=list(color_distributions.keys()))
+
+    for i, (name, color_data) in enumerate(color_distributions.items()):
+        row = i // cols + 1
+        col = i % cols + 1
+
+        positions = [(0, 0), (2, 0), (4, 0)]
+        x, y, sizes, colors, labels = [], [], [], [], []
+        for (color, count), (x_pos, y_pos) in zip(color_data.items(), positions):
+            x.append(x_pos)
+            y.append(y_pos)
+            sizes.append(count * 10)  # scaling
+            colors.append(color)
+            labels.append(f"{color}<br>{count}")
+
+        # Add scatter for this subplot
+        fig.add_trace(
+            go.Scatter(
+                x=x, y=y,
+                mode='markers+text',
+                marker=dict(size=100, color=colors, line=dict(width=2, color='black'), opacity=0.6),
+                text=labels,
+                textposition='middle center',
+                hoverinfo='text'
+            ),
+            row=row, col=col
+        )
+
+    # Global layout
+    fig.update_layout(
+        title="Color Distributions Across Groups",
+        showlegend=False,
+        plot_bgcolor='white',
+        height=350 * rows,
+    )
+
+    # Hide axes for all subplots
+    fig.update_xaxes(visible=False)
+    fig.update_yaxes(visible=False)
+
+    return fig
+
+
 
 @callback(
     #Output('output-data-upload', 'children'),
@@ -668,6 +735,7 @@ def update_output(list_of_contents, list_of_names, list_of_dates):
 	Output('results_o', 'children'),
 	Output('results_g', 'children'),
 	Output('results_counter', 'children'),
+	Output("plot_rgb", "figure"),
 	[Input('cc', 'data')],
 )
 def update_output(data):
@@ -676,6 +744,23 @@ def update_output(data):
 	if(len(df)>0):
 		data  = check_colors(df)
 		counter= dict(Counter(data["result"]))
+		full_data = {k: v for k, v in counter.items() if k is not None}
+
+
+		counter_data = {"All Data":full_data}
+		for value in set(data["lable"]):
+		    
+		    filtered_Data = data[data["lable"] == value]
+		    
+		    if(pd.isna(value)):
+		        continue
+		    counter = Counter(filtered_Data["result"])
+		    if(len(counter)<=1):
+		        key=dict(counter).keys()
+		        if(pd.isna(list(key)[0])):
+		            continue
+		    counter_data[value]=counter
+		fig = make_multi_plot(counter_data)
 
 		
 		red = data[data["result"] == "red"]
@@ -740,9 +825,9 @@ def update_output(data):
 		lso = get_ls(orange, '#ffe5b4',size="350px")    # Light orange
 		lsg = get_ls(green, '#d4fdda',size="350px")     # Light green
 
-		return "Daten geladen",ls, lsr, lso, lsg, html.H3(f"Total Errors Lines In Table are: {counter}")
+		return "Daten geladen",ls, lsr, lso, lsg, html.H3(f"Total Errors Lines In Table are: {counter}"), fig
 	else:
-		return "data Not uploade yet",[], [],[],[],""
+		return "data Not uploade yet",[], [],[],[],"", {}
 
 
 #############################################
@@ -2273,19 +2358,25 @@ def create_match_column(df):
 	return df
 
 
+
 def make_image_lists(doc):
     ref = {}
     multi_images = []
     images_list = []
+    
+    print("Total Pages", len(doc))
     for page_number in range(len(doc)):
+        
+        #print(page_number)
 
         page = doc[page_number]
-
+        
 
         text = page.get_text()
         text_data = text.split("\n")
 
         charge =[val.strip().lower() for val in text_data if len(val) > 1]
+        #print(charge)
 
         images = page.get_images(full=True) 
         #print(len(images))
@@ -2327,17 +2418,24 @@ def make_image_lists(doc):
         text = text.split('  ')[0].strip()
         #print(len(text))
         if(len(text) == 0):
-            #print(len(text))
+            print(len(text), text_data, page_number)
             continue
 
         images = page.get_images(full=True) 
 
         images_sorted = sorted(images, key=lambda x: x[0])
+        #print(images_sorted)
+        if(len(images_sorted)<4):
+            #print(f"{page_number} rejected: {text.split(':')[1].strip()}, {len(doc)}")
+            continue
+        #else:
+        #    print(f"{page_number} accepted: {text.split(':')[1].strip()}, {len(doc)}")
+
         for img_index, img in enumerate(images_sorted):
 
             xref = img[0]  
             if(img[3] <150):
-                print("Small Image")
+                #print(img_index, "Small Image")
                 continue
 
 
@@ -2347,6 +2445,9 @@ def make_image_lists(doc):
 
             images_list.append((image_bytes, str(text+": "+str(page_number)+str(img_index))))
 
+            #image = Image.open(io.BytesIO(image_bytes))
+            #print(f"Showing image {img_index} on page {page_number} (xref={xref})")
+            #display(image)
 
             if(img_index>3):
                 break
@@ -2641,4 +2742,7 @@ app.css.append_css({
 if __name__ == '__main__':
 	#app.run(debug=True)
     app.run(debug=True, port="8090")
+
+
+
 
