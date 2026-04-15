@@ -126,9 +126,9 @@ def get_home_layout():
                     color="rgb(142, 177, 212)"
                 ),
                 get_card(
-                    title="M7 Kundenbestellungen",
+                    title="IMO Dangerous Goods Declaration",
                     #description="Create interactive charts and graphs from your data",
-                    icon="📈",
+                    icon="⚠️",
                     page_link="/analysis",
                     color="rgb(110, 149, 178)"
                 ),
@@ -140,9 +140,9 @@ def get_home_layout():
                     color="rgb(145, 189, 188)"
                 ),
                 get_card(
-                    title="Dangerous Goods Declaration",
+                    title="Analysis",
                     #description="Generate reports and export data in various formats",
-                    icon="⚠️",
+                    icon="📋",
                     page_link="/analysis",
                     color="rgb(216, 40, 47)"
                 ),
