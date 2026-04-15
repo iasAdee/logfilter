@@ -293,8 +293,8 @@ def parse_po_responses(responses):
     df = pd.DataFrame(rows, columns=["Bild1_nummer"] + columns)
     return df
 
-#api:
 def calculate_pdf_scores(doc, api_key=""):
+    
     ref, multi_images = make_image_lists(doc)
     df_dict = pd.DataFrame.from_dict(ref, orient='index', columns=['Material', 'Quantity'])
     df_dict.index.name = 'Bild1_nummer'
