@@ -34,6 +34,9 @@ def register_routing_callbacks(app):
 
         elif pathname == '/visualization':
             return get_visualization_page_layout()
+        
+        elif pathname == '/ML':
+            return get_ml_page_layout()
 
         elif pathname == '/table':
             return get_table_page_layout()
