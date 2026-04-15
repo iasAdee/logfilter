@@ -295,8 +295,8 @@ def create_match_column(df):
 
     return df
 
-def select_model(api_key, model = "2"):
-    if(model == "2"):
+def select_model(api_key, model = "gem25"):
+    if(model == "gem25"):
         os.environ["GEMINI_API_KEY"] = api_key
         genai.configure(api_key=os.environ["GEMINI_API_KEY"]) 
         model = genai.GenerativeModel("gemini-2.5-flash")
@@ -308,9 +308,9 @@ def select_model(api_key, model = "2"):
         return model
 
 
-def get_results(doc, api_key=""):
+def get_results(doc, selected_model, api_key=""):
     
-    model = select_model(api_key, model = "2")
+    model = select_model(api_key, model = selected_model)
     prompt_list,df_dict = make_image_lists(doc)
 
     #calling LLM model gemini
