@@ -9,6 +9,8 @@ import os
 import time
 import pandas as pd
 import json
+import google.generativeai as genai
+import re
 
 def extract_text_tesseract(image_input):
     """
@@ -293,18 +295,24 @@ def create_match_column(df):
 
     return df
 
-import google.generativeai as genai
-import re
+def select_model(api_key, model = "2"):
+    if(model == "2"):
+        os.environ["GEMINI_API_KEY"] = api_key
+        genai.configure(api_key=os.environ["GEMINI_API_KEY"]) 
+        model = genai.GenerativeModel("gemini-2.5-flash")
+        return model
+    else:
+        key = api_key or os.getenv("GEMINI_API_KEY")
+        genai.configure(api_key=key)
+        model = genai.GenerativeModel("gemini-3.1-pro-preview")
+        return model
+
 
 def get_results(doc, api_key=""):
     
-    os.environ["GEMINI_API_KEY"] = api_key
-    genai.configure(api_key=os.environ["GEMINI_API_KEY"]) 
-    model = genai.GenerativeModel("gemini-2.5-flash")
-
+    model = select_model(api_key, model = "2")
     prompt_list,df_dict = make_image_lists(doc)
-    
-    
+
     #calling LLM model gemini
     responses= []
     print(f"Total Responses {len(prompt_list)}")
