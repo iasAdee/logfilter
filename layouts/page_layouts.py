@@ -67,7 +67,7 @@ def get_analysis_page_layout():
         html.Hr(),
         dcc.Download(id="download-docx"),
         html.Div(id='analysis-content', children=[
-            html.Div("Upload a file to see analysis", style={'textAlign': 'center', 'padding': '50px'})
+            html.Div("Laden Sie eine Datei hoch, um Visualisierungen anzuzeigen", style={'textAlign': 'center', 'padding': '50px'})
         ]),
         
     ], style={'maxWidth': '1200px', 'margin': '0 auto', 'padding': '20px'})
@@ -143,7 +143,18 @@ def get_visualization_page_layout():
                                 {'label': 'OCR+LLM (kann mehrmals aufgerufen werden)', 'value': 'ocrllm'},
                                 {'label': 'LLM (nur 1 Aufruf)', 'value': 'llm'},
                             ],
-                            value='ocrllm',
+                            value='llm',
+                            inline=True,
+                            style={'fontSize': '15px'},
+                            inputStyle={'marginRight': '6px', 'marginLeft': '12px'}
+                        ),
+                        dcc.RadioItems(
+                            id='model_selector',
+                            options=[
+                                {'label': 'Gemini 2.5 Stable', 'value': 'gem25'},
+                                {'label': 'Gemini 3.1 Preview', 'value': 'gem31'},
+                            ],
+                            value='gem25',
                             inline=True,
                             style={'fontSize': '15px'},
                             inputStyle={'marginRight': '6px', 'marginLeft': '12px'}
@@ -196,14 +207,6 @@ def get_ml_page_layout():
             dcc.Download(id="download-docx"),
             html.Div([
                 html.Div(id='table-page-controls', children=[
-                    html.Label("Rows per page:"),
-                    dcc.Dropdown(
-                        id='table-page-size', 
-                        options=[10, 20, 50, 100], 
-                        value=20, 
-                        clearable=False,
-                        style={'width':'160px'}
-                    ),
                      html.Button(
                                 "Word file speichern",
                                 id="download_word",
