@@ -293,17 +293,28 @@ def parse_po_responses(responses):
     df = pd.DataFrame(rows, columns=["Bild1_nummer"] + columns)
     return df
 
-def calculate_pdf_scores(doc, api_key=""):
+
+def select_model(api_key, model = "gem25"):
+    if(model == "gem25"):
+        os.environ["GEMINI_API_KEY"] = api_key
+        genai.configure(api_key=os.environ["GEMINI_API_KEY"]) 
+        model = genai.GenerativeModel("gemini-2.5-flash")
+        return model
+    else:
+        key = api_key or os.getenv("GEMINI_API_KEY")
+        genai.configure(api_key=key)
+        model = genai.GenerativeModel("gemini-3.1-pro-preview")
+        return model
     
+
+def calculate_pdf_scores(doc, selected_model,  api_key=""):
+
     ref, multi_images = make_image_lists(doc)
     df_dict = pd.DataFrame.from_dict(ref, orient='index', columns=['Material', 'Quantity'])
     df_dict.index.name = 'Bild1_nummer'
     df_dict.reset_index(inplace=True)
 
-    os.environ["GEMINI_API_KEY"] = api_key
-    genai.configure(api_key=os.environ["GEMINI_API_KEY"]) 
-    model = genai.GenerativeModel("gemini-2.5-flash")
-
+    model = select_model(api_key, model = selected_model)
 
     prompt_list =[]
     for bulk in multi_images:
