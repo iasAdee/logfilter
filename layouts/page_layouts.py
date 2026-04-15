@@ -7,6 +7,38 @@ import plotly.express as px
 from layouts.upload_layout import get_upload_layout
 
 
+import dash
+from dash import html
+from dash.dependencies import Input, Output
+from layouts.styles import external_stylesheets, nav_style
+
+from dash import Dash, dcc, html, dash_table, Input, Output, State, callback
+import dash_bootstrap_components as dbc
+
+
+nav_content8 = html.Div([
+
+    html.Hr(style={'backgroundColor': '#F5B323'}),
+    
+
+    dcc.Link('Neuer Filter', href='/page1',style={'color': '#F5B323','fontWeight': 'bold'}),
+    html.Br(),
+    dcc.Link('M7 Kundenbestellungen', href='/page-3',style={'color': '#F5B323', 'fontWeight':'bold'}),
+    html.Br(),
+    html.A('Wareneingänge', href='/page_input',style={'color': '#F5B323', 'fontWeight':'bold'},target='_blank'),
+    html.Br(),
+    dcc.Link('Bestandsüberprüfung', href='/page_filter',style={'color': '#F5B323', 'fontWeight':'bold'}),
+    html.Br(),
+    dcc.Link('Bilderkennung', href='/image',style={'color': '#F5B323', 'fontWeight':'bold'}),
+    html.Hr(style={'backgroundColor': '#F5B323'}),
+    html.Br(),
+    dcc.Link('DE30 Bestandsart', href='/de30',style={'color': '#F5B323', 'fontWeight':'bold'}),
+    html.Br(),
+    html.A('Feuerwehrliste DE01', href='/rgb',style={'color': '#F5B323', 'fontWeight':'bold'},target='_blank'),
+    
+])
+
+
 def get_page_header(title, icon, description):
     """Common header for all pages."""
     return html.Div([
@@ -29,12 +61,15 @@ def get_page_header(title, icon, description):
 
 def get_analysis_page_layout():
     """Layout for Data Analysis page."""
+
     return html.Div([
-        get_page_header("📊 CSV, Xlsx, DOCX file will be processed", "📊", "The pages will be implemented soon!"),
+        get_page_header("Warenausgänge", "📊", "Logfilter"),
         html.Hr(),
+        dcc.Download(id="download-docx"),
         html.Div(id='analysis-content', children=[
             html.Div("Upload a file to see analysis", style={'textAlign': 'center', 'padding': '50px'})
-        ])
+        ]),
+        
     ], style={'maxWidth': '1200px', 'margin': '0 auto', 'padding': '20px'})
 
 
@@ -154,13 +189,35 @@ def get_export_page_layout():
 
 def get_ml_page_layout():
     """Layout for Machine Learning page."""
+
     return html.Div([
-        get_page_header("🤖 Machine Learning", "🤖", "Apply ML models to your data"),
-        html.Hr(),
-        html.Div(id='ml-content', children=[
-            html.Div("Upload a file to apply ML models", style={'textAlign': 'center', 'padding': '50px'})
-        ])
-    ], style={'maxWidth': '1200px', 'margin': '0 auto', 'padding': '20px'})
+            get_page_header("IMO - Dangerous Goods Declaration", "📋", "Uploaded data"),
+            html.Hr(),
+            dcc.Download(id="download-docx"),
+            html.Div([
+                html.Div(id='table-page-controls', children=[
+                    html.Label("Rows per page:"),
+                    dcc.Dropdown(
+                        id='table-page-size', 
+                        options=[10, 20, 50, 100], 
+                        value=20, 
+                        clearable=False,
+                        style={'width':'160px'}
+                    ),
+                     html.Button(
+                                "Word file speichern",
+                                id="download_word",
+                                n_clicks=0,
+                                style={
+                                    'padding': '10px 24px',
+                                    'fontSize': '16px',
+                                    'cursor': 'pointer'
+                                }
+                            ),
+                ], style={'display':'flex', 'gap':'12px', 'alignItems':'center', 'marginBottom': '20px'}),
+                html.Div(id='table-page-content')
+            ])
+        ], style={'maxWidth': '1200px', 'margin': '0 auto', 'padding': '20px'})
 
 
 def get_table_page_layout():
