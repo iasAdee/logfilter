@@ -3,6 +3,8 @@
 import uuid
 from typing import Dict, Optional, Any
 import pandas as pd
+import logging
+
 
 
 class DataManager:
@@ -44,6 +46,7 @@ class DataManager:
         """
         obj = self.cache.get(key)
         if obj is None:
+            logging.info("Cache key is returning nothing")
             return None
         
         # Handle both old format (direct data) and new format (with metadata)
@@ -63,6 +66,7 @@ class DataManager:
         """
         obj = self.cache.get(key)
         if obj is None:
+            logging.info("Cache key is returning nothing")
             return None
         
         # Ensure consistent format
@@ -87,4 +91,6 @@ class DataManager:
         data = self.get_data(key)
         if isinstance(data, pd.DataFrame):
             return data
+        
+        logging.info("Data is not instance of Datafarme")
         return None
