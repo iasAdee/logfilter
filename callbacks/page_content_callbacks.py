@@ -8,6 +8,14 @@ from algorithms.ocrllm import get_results
 import base64
 import logging
 
+import sys
+
+logging.basicConfig(
+    level=logging.INFO,
+    stream=sys.stdout,
+    format="%(asctime)s [%(levelname)s] %(message)s"
+)
+
 
 
 def register_page_content_callbacks(app, data_manager):
