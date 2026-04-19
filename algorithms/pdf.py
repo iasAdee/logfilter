@@ -9,6 +9,13 @@ import string
 import pandas as pd
 import io
 import os
+
+import os
+import logging
+os.environ['GRPC_VERBOSITY'] = 'ERROR'
+os.environ['GLOG_minloglevel'] = '2'
+# Silence standard python logging for the generativeai library
+logging.getLogger('google.generativeai').setLevel(logging.ERROR)
 import google.generativeai as genai
 
 
@@ -19,12 +26,8 @@ def make_image_lists(doc):
     
     print("Total Pages", len(doc))
     for page_number in range(len(doc)):
-        
-        #print(page_number)
 
         page = doc[page_number]
-        
-
         text = page.get_text()
         text_data = text.split("\n")
 
@@ -314,6 +317,8 @@ def calculate_pdf_scores(doc, selected_model,  api_key=""):
     df_dict.index.name = 'Bild1_nummer'
     df_dict.reset_index(inplace=True)
 
+    print("Slected ",selected_model)
+    print(api_key)
     model = select_model(api_key, model = selected_model)
 
     prompt_list =[]
