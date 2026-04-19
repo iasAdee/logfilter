@@ -4,15 +4,7 @@ import uuid
 from typing import Dict, Optional, Any
 import pandas as pd
 import logging
-
-import sys
-
-logging.basicConfig(
-    level=logging.INFO,
-    stream=sys.stdout,
-    format="%(asctime)s [%(levelname)s] %(message)s"
-)
-
+import pickle
 
 
 class DataManager:
@@ -24,18 +16,11 @@ class DataManager:
     def store_data(self, data: Any, metadata: Dict[str, Any] = None) -> str:
         """
         Store data in cache and return a unique key.
-        
-        Args:
-            data: The data to store (DataFrame, dict, etc.)
-            metadata: Optional metadata about the data
-        
-        Returns:
-            Cache key for retrieval
         """
         key = str(uuid.uuid4())
         
         storage_obj = {
-            "data": data,
+            "data": pickle.dumps(data),
             "metadata": metadata or {}
         }
         
@@ -45,41 +30,32 @@ class DataManager:
     def get_data(self, key: str) -> Optional[Any]:
         """
         Retrieve data from cache by key.
-        
-        Args:
-            key: Cache key
-        
-        Returns:
-            The stored data or None if not found
         """
         obj = self.cache.get(key)
         if obj is None:
             logging.info("Cache key is returning nothing")
             return None
         
-        # Handle both old format (direct data) and new format (with metadata)
         if isinstance(obj, dict) and "data" in obj:
-            return obj["data"]
+            return pickle.loads(obj["data"])
+        
         return obj
     
     def get_full_object(self, key: str) -> Optional[Dict[str, Any]]:
         """
         Retrieve full object including metadata.
-        
-        Args:
-            key: Cache key
-        
-        Returns:
-            Dictionary with 'data' and 'metadata' or None
         """
         obj = self.cache.get(key)
         if obj is None:
             logging.info("Cache key is returning nothing")
             return None
         
-        # Ensure consistent format
         if isinstance(obj, dict) and "data" in obj:
-            return obj
+            return {
+                "data": pickle.loads(obj["data"]),
+                "metadata": obj.get("metadata", {})
+            }
+        
         return {"data": obj, "metadata": {}}
     
     def clear_cache(self):
@@ -89,16 +65,11 @@ class DataManager:
     def get_dataframe(self, key: str) -> Optional[pd.DataFrame]:
         """
         Convenience method to get DataFrame specifically.
-        
-        Args:
-            key: Cache key
-        
-        Returns:
-            DataFrame or None
         """
         data = self.get_data(key)
+        
         if isinstance(data, pd.DataFrame):
             return data
         
-        logging.info("Data is not instance of Datafarme")
+        logging.info("Data is not instance of DataFrame")
         return None
