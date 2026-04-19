@@ -118,11 +118,14 @@ def register_page_content_callbacks(app, data_manager):
         State('uploaded-cache-key', 'data'),
         State('url', 'pathname'),
         State('api_input', 'value'),
-        State('algorithm_selector', 'value'),
+        State('model_selector', 'value'),
         prevent_initial_call=True
     )
     def update_visualization_content(n_clicks, cache_key, pathname, api_input, selected_model):
 
+        print(selected_model)
+        print(api_input)
+        
         if not n_clicks:
             raise dash.exceptions.PreventUpdate
         
@@ -155,11 +158,13 @@ def register_page_content_callbacks(app, data_manager):
         obj = data_manager.get_data(cache_key)
         pdf_doc = fitz.open(stream=obj["bytes"], filetype="pdf")
 
+
+       
         # Handle PDF
         if(selected_model == "ocrllm"):
-            df = get_results(pdf_doc, api_key=api_input)
+            df = get_results(pdf_doc, selected_model,api_key=api_input)
         else:
-            df = calculate_pdf_scores(pdf_doc, api_key=api_input)
+            df = calculate_pdf_scores(pdf_doc,selected_model, api_key=api_input)
 
         correct = len(df[df['Match'] == 'übereinstimmend'])
         incorrect = len(df[df['Match'] == 'nicht übereinstimmend'])#(df['Match'] == '')
