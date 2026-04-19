@@ -5,6 +5,14 @@ from typing import Dict, Optional, Any
 import pandas as pd
 import logging
 
+import sys
+
+logging.basicConfig(
+    level=logging.INFO,
+    stream=sys.stdout,
+    format="%(asctime)s [%(levelname)s] %(message)s"
+)
+
 
 
 class DataManager:
