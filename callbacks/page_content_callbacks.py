@@ -306,7 +306,7 @@ def register_page_content_callbacks(app, data_manager):
             raise dash.exceptions.PreventUpdate
         
         
-        print("Printing cache from inside app call", cache_key)
+        print("Printing cache from inside ML app call", cache_key, flush=True)
         obj = data_manager.get_data(cache_key)
         if obj is None:
             return html.Div([
