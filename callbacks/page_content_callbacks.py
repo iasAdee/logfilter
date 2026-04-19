@@ -6,6 +6,7 @@ import fitz
 from algorithms.pdf import calculate_pdf_scores
 from algorithms.ocrllm import get_results
 import base64
+import logging
 
 
 
@@ -306,8 +307,11 @@ def register_page_content_callbacks(app, data_manager):
             raise dash.exceptions.PreventUpdate
         
         
-        print("Printing cache from inside ML app call", cache_key, flush=True)
         obj = data_manager.get_data(cache_key)
+        logging.info(f"Printing cache from inside ML app call {cache_key}")
+        logging.info(f"TYPE: {type(obj)}")
+        logging.info(f"CONTENT: {obj}")
+
         if obj is None:
             return html.Div([
                 html.Div([
@@ -337,7 +341,7 @@ def register_page_content_callbacks(app, data_manager):
             df = obj
             page_size = 10
 
-            list_of_kgs, list_of_kgs2, list_of_strings = get_results(df)
+            list_of_kgs, list_of_kgs2, list_of_strings = get_results_word(df)
             docx_file_path1 = 'wlayouts/IMO_Layout_new.docx'
             docx_file_path2 = 'wlayouts/IMO_Layout_2.docx'
             docx_file_path3 = 'wlayouts/IMO_Layout_3.docx'  
@@ -467,7 +471,7 @@ def register_page_content_callbacks(app, data_manager):
     
 
 
-def get_results(excel_data):
+def get_results_word(excel_data):
     full_string = ""
     kgs = ""
     kgs2 = ""
