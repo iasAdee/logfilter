@@ -9,46 +9,56 @@ from callbacks.auth_callbacks import register_auth_callbacks
 import pandas as pd
 
 
+def create_app():
 
-# Initialize Dash app with URL routing
-app = Dash(__name__, suppress_callback_exceptions=True)
-server = app.server
+    # Initialize Dash app with URL routing
+    app = Dash(__name__, suppress_callback_exceptions=True)
+    server = app.server
 
-# Setup cache
-cache = Cache(
-    server,
-    config={
-        "CACHE_TYPE": "SimpleCache",
-        "CACHE_DEFAULT_TIMEOUT": 60 * 60
-    }
-)
+    # Setup cache
+    cache = Cache(
+        server,
+        config={
+            "CACHE_TYPE": "SimpleCache",
+            "CACHE_DEFAULT_TIMEOUT": 60 * 60
+        }
+    )
 
-# Initialize data manager
-data_manager = DataManager(cache)
+    # Initialize data manager
+    data_manager = DataManager(cache)
 
-# Main app layout with routing
-app.layout = html.Div([
-    dcc.Location(id='url', refresh=False),
-    dcc.Store(
-        id='auth-store',
-        storage_type='session',
-        data={'logged_in': False}
-    ),
-    dcc.Store(id='uploaded-cache-key'),
-	dcc.Store(id="stored_results"),
-	dcc.Download(id="download-dataframe-pdf"),
-    html.Div(id='page-content')
-])
+    # Main layout
+    app.layout = html.Div([
+        dcc.Location(id='url', refresh=False),
 
-# Register all callbacks
-register_auth_callbacks(app)
-register_upload_callbacks(app, data_manager)  
-register_routing_callbacks(app)
-register_page_content_callbacks(app, data_manager)
+        dcc.Store(
+            id='auth-store',
+            storage_type='session',
+            data={'logged_in': False}
+        ),
+
+        dcc.Store(id='uploaded-cache-key'),
+        dcc.Store(id="stored_results"),
+        dcc.Download(id="download-dataframe-pdf"),
+
+        html.Div(id='page-content')
+    ])
+
+    # Register all callbacks
+    register_auth_callbacks(app)
+    register_upload_callbacks(app, data_manager)
+    register_routing_callbacks(app)
+    register_page_content_callbacks(app, data_manager)
+
+    return app, server
 
 
+app, server = create_app()
 
 
-
-if __name__ == '__main__':
-    app.run(debug=True,host='0.0.0.0', port=8060)
+if __name__ == "__main__":
+    app.run(
+        debug=True,
+        host="0.0.0.0",
+        port=8060
+    )
