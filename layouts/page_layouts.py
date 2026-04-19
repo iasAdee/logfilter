@@ -152,7 +152,11 @@ def get_visualization_page_layout():
                             id='model_selector',
                             options=[
                                 {'label': 'Gemini 2.5 Stable', 'value': 'gem25'},
-                                {'label': 'Gemini 3.1 Preview', 'value': 'gem31'},
+                                {
+                                    'label': 'Gemini 3.1 Preview (Coming Soon)',
+                                    'value': 'gem31',
+                                    'disabled': True   # 👈 disables it
+                                },
                             ],
                             value='gem25',
                             inline=True,
