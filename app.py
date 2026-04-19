@@ -51,4 +51,4 @@ register_page_content_callbacks(app, data_manager)
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=8060)
+    app.run(debug=True,host='0.0.0.0', port=8060)
