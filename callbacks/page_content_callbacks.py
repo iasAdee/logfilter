@@ -607,44 +607,33 @@ def load_docx_and_print_tables(file_content,full_string, kgs, kgs2, target_row_n
         
         table_count = 0
         for i, table in enumerate(document.tables):
-            #print(f"\nTable {i + 1}:")  # Add 1 to i for user-friendly indexing
-            check = False
-            check_2 = False
-            count = 0
+            check = False  # reset per table
+            count = 0      # reset per table
+
             for row in table.rows:
                 for cell in row.cells:
-                    
-                    if(cell.text.startswith("3")):
-                        cell.text = ""#f"3. Page {table_count+1} of {table_count+1} pages"
+                    # More specific condition to avoid overwriting full_string
+                    if cell.text.strip().startswith("3."):  # match "3. Page..." pattern only
+                        cell.text = ""
                         paragraph = cell.paragraphs[0]
-                        run = paragraph.add_run(f"3. Page {table_count+1} of {len(full_string)} pages")
-                        run.font.size = Pt(8)  
+                        run = paragraph.add_run(f"3. Page {table_count+1} of {table_count+1} pages")
+                        run.font.size = Pt(8)
 
-                    if(cell.text.startswith("9") and check_2 == False):
-                        paragraph = cell.paragraphs[3]
-                        run = paragraph.add_run(f"\nBEFÖRDERUNG NACH ABSATZ 1.1.4.2.1")
-                        run.font.size = Pt(10)
-                        run.bold = True 
-                        check_2 = True
-
-
-                    #print(cell.text)
-                    if(cell.text.startswith("14")):
-                        
-                        table_count +=1 
-                        #print(table_count)
+                    if cell.text.startswith("14"):
+                        table_count += 1
                         check = True
-                    if(check == True and cell.text.strip() == ""):
-                        #print(cell.text)
-                        count+=1
-                        if(count == 1 or count == 5):
+                        count = 0  # reset count when new section found
+
+                    if check and cell.text.strip() == "":
+                        count += 1
+                        if count == 1 or count == 5:
                             continue
-                        elif(count == 2):
-                            cell.text = full_string[table_count-1]
-                        elif(count == 3):
-                            cell.text = kgs[table_count-1]
-                        elif(count == 4):
-                            cell.text = kgs2[table_count-1]
+                        elif count == 2:
+                            cell.text = full_string[table_count - 1]
+                        elif count == 3:
+                            cell.text = kgs[table_count - 1]
+                        elif count == 4:
+                            cell.text = kgs2[table_count - 1]
                             
 
             #print("-" * 20)  # Separator for readability
