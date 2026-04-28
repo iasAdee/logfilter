@@ -17,6 +17,7 @@ os.environ['GLOG_minloglevel'] = '2'
 # Silence standard python logging for the generativeai library
 logging.getLogger('google.generativeai').setLevel(logging.ERROR)
 import google.generativeai as genai
+import time
 
 
 def make_image_lists(doc):
@@ -42,7 +43,7 @@ def make_image_lists(doc):
             if (page_number == len(doc)-1):
                 multi_images.append(images_list)
                 images_list = []   
-                print("Breaking from here")
+                print(f"Adding image from lasat {page_number} total images = ", len(images_list))
             continue
 
         second_val = ""
@@ -56,7 +57,6 @@ def make_image_lists(doc):
 
         if("halb-charge" in charge):
             first_val = charge[charge.index("halb-charge")+1]
-
 
 
         text = ""
@@ -95,10 +95,7 @@ def make_image_lists(doc):
             if(img[3] <150):
                 #print(img_index, "Small Image")
                 continue
-
-
-                
-                
+   
             base_image = doc.extract_image(xref)
             image_bytes = base_image["image"]
             ext = base_image["ext"]  # e.g. 'png', 'jpeg'
@@ -113,22 +110,21 @@ def make_image_lists(doc):
 
             images_list.append((image_bytes, str(text+": "+str(page_number)+str(img_index))))
 
-            #image = Image.open(io.BytesIO(image_bytes))
-            #print(f"Showing image {img_index} on page {page_number} (xref={xref})")
-            #display(image)
-
             if(img_index>3):
                 break
 
         ref[text.split(":")[1].strip()] = [first_val, second_val]
 
-        if((page_number != 0 and page_number%10 == 0) or page_number == len(doc)-1):
-            print("adding image list from here", len(images_list))
+        if((page_number != 0 and page_number %4 == 0) or page_number == len(doc)-1):
+            print(f"Adding image {page_number} total images = ", len(images_list))
             multi_images.append(images_list)
             
             images_list = []
             
     return ref, multi_images
+
+import pandas 
+
 
 def process_200_images(image_bytes_list):
     if len(image_bytes_list) > 80:
@@ -313,6 +309,7 @@ def select_model(api_key, model = "gem25"):
 def calculate_pdf_scores(doc, selected_model,  api_key=""):
 
     ref, multi_images = make_image_lists(doc)
+
     df_dict = pd.DataFrame.from_dict(ref, orient='index', columns=['Material', 'Quantity'])
     df_dict.index.name = 'Bild1_nummer'
     df_dict.reset_index(inplace=True)
@@ -327,15 +324,28 @@ def calculate_pdf_scores(doc, selected_model,  api_key=""):
         prompt_parts = process_200_images(bulk)
         prompt_list.append(prompt_parts)
 
-    responses= []
-    for prompt_parts in prompt_list:
-        try:
-            response = model.generate_content(prompt_parts)
-            responses.append(response)
-            print(f"response: completed") 
-            #break
-        except Exception as e:
-            print(e)
+    responses = []
+    print("Waiting 5s to stabilize connection...")
+    time.sleep(5)
+
+    for i, prompt_parts in enumerate(prompt_list):
+        success = False
+        while not success:
+            try:
+                response = model.generate_content(prompt_parts)
+                responses.append(response)
+                print(f"Prompt {i+1}: Success")
+                
+                success = True # This breaks the 'while' loop and moves to the next 'for' item
+                time.sleep(10) # Your standard 10s safety delay
+                
+            except Exception as e:
+                if "429" in str(e) or "Quota" in str(e):
+                    print(f"Quota hit on prompt {i+1}. Sleeping 30s before retrying same prompt...")
+                    time.sleep(30)
+                else:
+                    print(f"Different error occurred: {e}")
+                    break # Stops retrying this specific prompt if the error isn't about quota
 
     responses_text = [res.text for res in responses]
     data=parse_po_responses(responses_text)
