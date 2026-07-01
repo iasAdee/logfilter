@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+.env
+
+# VSCode or PyCharm configs (optional)
+.vscode/
+.idea/
+
+# Mac system files
+.DS_Store
+
+# Data files
+*.csv
+*.xlsx
+
+# Environment
+*.env
+
+
+# Google credentials
+client_secret_55510915480-svqk9iuor9f2l8hq8jsfsoapdjngjuuu.apps.googleusercontent.com.json
+gen-lang-client-0539342818-916f6d795c2a.json
