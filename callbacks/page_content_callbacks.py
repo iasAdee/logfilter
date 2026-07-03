@@ -46,6 +46,9 @@ def register_page_content_callbacks(app, data_manager):
                     'margin': '40px auto'
                 })
             ])
+
+        logging.info(f"Path: {pathname}")
+        logging.info(f"Cache key: {cache_key}")
         
         df = data_manager.get_dataframe(cache_key)
         if df is None:

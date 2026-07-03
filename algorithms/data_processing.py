@@ -450,6 +450,9 @@ class DataPreprocessing:
         #print(datahalf)
         #print(datextracted)
 
+        #datahalf.to_csv("pal_pick.csv", index=False)
+        #datextracted.to_csv("pal_pick_with_toff.csv", index=False)
+
 
         ls.append(html.Div([
         dash_table.DataTable(
