@@ -49,7 +49,7 @@ def register_page_content_callbacks(app, data_manager):
 
         logging.info(f"Path: {pathname}")
         logging.info(f"Cache key: {cache_key}")
-        
+
         df = data_manager.get_dataframe(cache_key)
         if df is None:
             return html.Div([
@@ -829,15 +829,16 @@ def load_docx_and_print_tables(file_content,full_string, kgs, kgs2, target_row_n
         #print("Tables:")
         
         table_count = 0
+        
         for i, table in enumerate(document.tables):
             #print(f"\nTable {i + 1}:")  # Add 1 to i for user-friendly indexing
+            count = 0
             check = False
             check_2 = False
-            count = 0
             for row in table.rows:
                 for cell in row.cells:
                     
-                    if(cell.text.startswith("3")):
+                    if(cell.text.startswith("3") and check == False):
                         cell.text = ""#f"3. Page {table_count+1} of {table_count+1} pages"
                         paragraph = cell.paragraphs[0]
                         run = paragraph.add_run(f"3. Page {table_count+1} of {len(full_string)} pages")
@@ -863,6 +864,8 @@ def load_docx_and_print_tables(file_content,full_string, kgs, kgs2, target_row_n
                         if(count == 1 or count == 5):
                             continue
                         elif(count == 2):
+                            print(full_string[table_count-1])
+                            print(cell)
                             cell.text = full_string[table_count-1]
                         elif(count == 3):
                             cell.text = kgs[table_count-1]
