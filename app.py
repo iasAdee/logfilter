@@ -34,9 +34,13 @@ app.layout = html.Div([
         storage_type='session',
         data={'logged_in': False}
     ),
+    dcc.Store(id="current-page", data=0),
     dcc.Store(id='uploaded-cache-key'),
 	dcc.Store(id="stored_results"),
+    dcc.Store(id="results-table"),
+    dcc.Store(id="data_full"),
 	dcc.Download(id="download-dataframe-pdf"),
+    #dcc.Download(id="pal_pick_data"),
     html.Div(id='page-content')
 ])
 

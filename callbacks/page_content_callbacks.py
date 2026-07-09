@@ -8,23 +8,82 @@ from algorithms.ocrllm import get_results
 from algorithms.pal_pick_logic import get_results
 import base64
 import logging
+from dash import ctx
 
 
 
 def register_page_content_callbacks(app, data_manager):
     """Register callbacks that populate page content with uploaded data."""
+
+
+    @app.callback(
+        Output("pal_pick_data", "data"),
+        Input("full", "n_clicks"),
+        State("data_full", "data"),
+        prevent_initial_call=True,
+    )
+    def download_full_data(n_clicks, data):
+
+        if not data:
+            raise dash.exceptions.PreventUpdate
+
+        df = pd.DataFrame(data)
+
+        return dcc.send_data_frame(
+            df.to_csv,
+            "pal_pick_results.csv",
+            index=False
+        )
+    @app.callback(
+        Output("results-table", "data"),
+        Output("current-page", "data"),
+        Input("next-btn", "n_clicks"),
+        Input("prev-btn", "n_clicks"),
+        Input("full", "n_clicks"),
+        State("current-page", "data"),
+        State("uploaded-cache-key", "data"),
+        prevent_initial_call=True,
+    )
+    def change_page(next_clicks, prev_clicks, full,  page, cache_key):
+
+        df = data_manager.get_dataframe(cache_key)
+
+        if(df.empty):
+            raise dash.exceptions.PreventUpdate
+
+        trigger = ctx.triggered_id
+
+        full = False
+        if trigger == "next-btn":
+            if (page + 1) * 10 < len(df):
+                page += 1
+
+        elif trigger == "prev-btn":
+            if page > 0:
+                page -= 1
+        elif trigger == "full":
+            start = 0
+            end = len(df)
+            full =True
+
+        if not full:
+            start = page * 10
+            end = start + 10
+
+        # Only these 10 rows are sent to the browser
+        return df.iloc[start:end].to_dict("records"), page
     
     # Analysis Page Content
     @app.callback(
         Output('analysis-content', 'children'),
-        Input('uploaded-cache-key', 'data'),
+        Input("results-table", "data"),
         Input('url', 'pathname')
     )
-    def update_analysis_content(cache_key, pathname):
-        if pathname != '/analysis' or not cache_key:
+    def update_analysis_content(input_data, pathname):
+        if pathname != '/analysis' or not input_data:
             raise dash.exceptions.PreventUpdate
         
-        if not cache_key:
+        if not input_data:
             return html.Div([
                 html.Div([
                     html.Div("⚠️", style={'fontSize': '48px', 'marginBottom': '20px'}),
@@ -35,7 +94,7 @@ def register_page_content_callbacks(app, data_manager):
                     html.P("Bitte laden Sie eine PDF-Datei von der Startseite hoch.", style={
                         'color': 'rgb(124, 124, 124)',
                         'fontSize': '14px'
-                    })
+                    }),
                 ], style={
                     'textAlign': 'center',
                     'padding': '60px 20px',
@@ -45,13 +104,14 @@ def register_page_content_callbacks(app, data_manager):
                     'maxWidth': '500px',
                     'margin': '40px auto'
                 })
-            ])
+            ])#, dash.no_update
 
-        logging.info(f"Path: {pathname}")
-        logging.info(f"Cache key: {cache_key}")
+        #logging.info(f"Path: {pathname}")
+        #logging.info(f"Cache key: {cache_key}")
 
-        df = data_manager.get_dataframe(cache_key)
-        if df is None:
+        df = pd.DataFrame(input_data)
+        #df = data_manager.get_dataframe(cache_key)
+        if df.empty:
             return html.Div([
                 html.Div([
                     html.Div("❌", style={'fontSize': '48px', 'marginBottom': '20px'}),
@@ -72,7 +132,7 @@ def register_page_content_callbacks(app, data_manager):
                     'maxWidth': '500px',
                     'margin': '40px auto'
                 })
-            ])
+            ])#,dash.no_update
         
         CARD_STYLE = {
             "backgroundColor": "white",
@@ -324,7 +384,7 @@ def register_page_content_callbacks(app, data_manager):
                 "backgroundColor": "#f4f6f9",
                 "minHeight": "100vh",
             },
-        )
+        )#,df_full.to_dict("records")
             
     
     @app.callback(
