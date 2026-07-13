@@ -162,7 +162,7 @@ def register_page_content_callbacks(app, data_manager):
                 # Header
                 html.Div(
                     [
-                        html.H2("Dataset Analysis"),
+                        html.H2("Datenanalyse"),
                     ],
                     style=HEADER_STYLE,
                 ),

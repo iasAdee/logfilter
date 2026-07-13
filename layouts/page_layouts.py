@@ -74,7 +74,7 @@ def get_page_header(title, icon, description):
 
         html.Div([
             html.Button(
-                "← Previous 10",
+                "← zurück 10",
                 id="prev-btn",
                 style={
                     "backgroundColor": "#6c757d",
@@ -91,7 +91,7 @@ def get_page_header(title, icon, description):
             ),
 
             html.Button(
-                "Next 10 →",
+                "nächste 10 →",
                 id="next-btn",
                 style={
                     "backgroundColor": "#2E86C1",
@@ -107,7 +107,7 @@ def get_page_header(title, icon, description):
             ),
 
             html.Button(
-                "Full Results",
+                "Gesamtergebnis",
                 id="full",
                 style={
                     "backgroundColor": "#2E86C1",
