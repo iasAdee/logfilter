@@ -24,6 +24,8 @@ def register_routing_callbacks(app):
         # 🔒 Not logged in → always show login
         if not logged_in:
             return login_layout()
+        
+        print(pathname)
 
         # ✅ Logged in → normal routing
         if pathname in ['/', '/home']:
@@ -37,6 +39,9 @@ def register_routing_callbacks(app):
         
         elif pathname == '/ML':
             return get_ml_page_layout()
+        
+        elif pathname == '/storage':
+            return get_cleaning_page_layout()
 
         elif pathname == '/table':
             return get_table_page_layout()

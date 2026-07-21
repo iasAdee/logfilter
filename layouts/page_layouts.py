@@ -40,95 +40,131 @@ nav_content8 = html.Div([
 
 
 def get_page_header(title, icon, description):
-    return html.Div([
-        html.Div([
-            html.Span(icon, style={
-                'fontSize': '48px',
-                'marginRight': '20px'
-            }),
+    print(title)
+    if(title == "Warenausgänge"):
+        return html.Div([
             html.Div([
-                html.H2(title, style={
-                    'margin': '0',
-                    'color': '#2c3e50'
+                html.Span(icon, style={
+                    'fontSize': '48px',
+                    'marginRight': '20px'
                 }),
-                html.P(description, style={
-                    'margin': '5px 0 0 0',
-                    'color': '#7f8c8d'
-                })
-            ])
-        ], style={
-            'display': 'flex',
-            'alignItems': 'center',
-            'marginBottom': '20px'
-        }),
+                html.Div([
+                    html.H2(title, style={
+                        'margin': '0',
+                        'color': '#2c3e50'
+                    }),
+                    html.P(description, style={
+                        'margin': '5px 0 0 0',
+                        'color': '#7f8c8d'
+                    })
+                ])
+            ], style={
+                'display': 'flex',
+                'alignItems': 'center',
+                'marginBottom': '20px'
+            }),
 
-        html.A(
-            '← Zurück zur Startseite',
-            href='/',
-            style={
-                'textDecoration': 'none',
-                'color': '#3498db',
-                'fontSize': '16px'
-            }
-        ),
-
-        html.Div([
-            html.Button(
-                "← zurück 10",
-                id="prev-btn",
+            html.A(
+                '← Zurück zur Startseite',
+                href='/',
                 style={
-                    "backgroundColor": "#6c757d",
-                    "color": "white",
-                    "border": "none",
-                    "padding": "10px 22px",
-                    "borderRadius": "8px",
-                    "fontSize": "15px",
-                    "fontWeight": "600",
-                    "cursor": "pointer",
-                    "marginRight": "10px",
-                    "boxShadow": "0 2px 6px rgba(0,0,0,0.15)"
+                    'textDecoration': 'none',
+                    'color': '#3498db',
+                    'fontSize': '16px'
                 }
             ),
 
-            html.Button(
-                "nächste 10 →",
-                id="next-btn",
-                style={
-                    "backgroundColor": "#2E86C1",
-                    "color": "white",
-                    "border": "none",
-                    "padding": "10px 22px",
-                    "borderRadius": "8px",
-                    "fontSize": "15px",
-                    "fontWeight": "600",
-                    "cursor": "pointer",
-                    "boxShadow": "0 2px 6px rgba(0,0,0,0.15)"
-                }
-            ),
+            html.Div([
+                html.Button(
+                    "← zurück 10",
+                    id="prev-btn",
+                    style={
+                        "backgroundColor": "#6c757d",
+                        "color": "white",
+                        "border": "none",
+                        "padding": "10px 22px",
+                        "borderRadius": "8px",
+                        "fontSize": "15px",
+                        "fontWeight": "600",
+                        "cursor": "pointer",
+                        "marginRight": "10px",
+                        "boxShadow": "0 2px 6px rgba(0,0,0,0.15)"
+                    }
+                ),
 
-            html.Button(
-                "Gesamtergebnis",
-                id="full",
+                html.Button(
+                    "nächste 10 →",
+                    id="next-btn",
+                    style={
+                        "backgroundColor": "#2E86C1",
+                        "color": "white",
+                        "border": "none",
+                        "padding": "10px 22px",
+                        "borderRadius": "8px",
+                        "fontSize": "15px",
+                        "fontWeight": "600",
+                        "cursor": "pointer",
+                        "boxShadow": "0 2px 6px rgba(0,0,0,0.15)"
+                    }
+                ),
+
+                html.Button(
+                    "Gesamtergebnis",
+                    id="full",
+                    style={
+                        "backgroundColor": "#2E86C1",
+                        "color": "white",
+                        "border": "none",
+                        "padding": "10px 22px",
+                        "borderRadius": "8px",
+                        "fontSize": "15px",
+                        "fontWeight": "600",
+                        "cursor": "pointer",
+                        "boxShadow": "0 2px 6px rgba(0,0,0,0.15)"
+                    }
+                ),
+            ], style={
+                "display": "flex",
+                "justifyContent": "flex-end",
+                "alignItems": "center",
+                "marginTop": "20px",
+                "gap": "10px"
+            })
+        ])
+    else:
+            return html.Div([
+            html.Div([
+                html.Span(icon, style={
+                    'fontSize': '48px',
+                    'marginRight': '20px'
+                }),
+                html.Div([
+                    html.H2(title, style={
+                        'margin': '0',
+                        'color': '#2c3e50'
+                    }),
+                    html.P(description, style={
+                        'margin': '5px 0 0 0',
+                        'color': '#7f8c8d'
+                    })
+                ])
+            ], style={
+                'display': 'flex',
+                'alignItems': 'center',
+                'marginBottom': '20px'
+            }),
+
+            html.A(
+                '← Zurück zur Startseite',
+                href='/',
                 style={
-                    "backgroundColor": "#2E86C1",
-                    "color": "white",
-                    "border": "none",
-                    "padding": "10px 22px",
-                    "borderRadius": "8px",
-                    "fontSize": "15px",
-                    "fontWeight": "600",
-                    "cursor": "pointer",
-                    "boxShadow": "0 2px 6px rgba(0,0,0,0.15)"
+                    'textDecoration': 'none',
+                    'color': '#3498db',
+                    'fontSize': '16px'
                 }
             ),
-        ], style={
-            "display": "flex",
-            "justifyContent": "flex-end",
-            "alignItems": "center",
-            "marginTop": "20px",
-            "gap": "10px"
-        })
-    ])
+        ])
+
 
 def get_analysis_page_layout():
     """Layout for Data Analysis page."""
@@ -254,9 +290,9 @@ def get_visualization_page_layout():
 def get_cleaning_page_layout():
     """Layout for Data Cleaning page."""
     return html.Div([
-        get_page_header("🧹 Data Cleaning", "🧹", "Clean and transform your data"),
+        get_page_header("Storage Colors", "🧹", "Colors based on tonnes"),
         html.Hr(),
-        html.Div(id='cleaning-content', children=[
+        html.Div(id='storage-content', children=[
             html.Div("Upload a file to clean data", style={'textAlign': 'center', 'padding': '50px'})
         ])
     ], style={'maxWidth': '1200px', 'margin': '0 auto', 'padding': '20px'})

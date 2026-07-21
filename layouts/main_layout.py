@@ -126,10 +126,10 @@ def get_home_layout():
                     color="rgb(142, 177, 212)"
                 ),
                 get_card(
-                    title="M7 Kundenbestellungen",
+                    title="Storage Colors",
                     #description="Create interactive charts and graphs from your data",
                     icon="📈",
-                    page_link="/analysis",
+                    page_link="/storage",
                     color="rgb(110, 149, 178)"
                 ),
                 get_card(

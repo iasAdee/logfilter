@@ -560,6 +560,165 @@ def register_page_content_callbacks(app, data_manager):
         
         return html.Div(""), pd.DataFrame().to_dict('records')
     
+
+    def calculate_stock_mdi(df):
+        """
+        Calculate stock weight for Storage Locations 4, 5, and 105.
+
+        Returns:
+            dict with individual sums, total, and status.
+        """
+
+        STORAGE_COL = "Plant"
+        WEIGHT_COL = "Stock MDI (in kg)"   # Column containing values like "20.000 kg"
+
+        print(df.columns)
+
+        # Copy dataframe
+
+        print(df)
+        data = df.copy()
+
+        print(data)
+        # Keep only required storage locations
+        data = data[data[STORAGE_COL].isin([4, 5, 105])]
+
+        print(data)
+
+        print(data[WEIGHT_COL])
+        # Extract numeric weight
+        data["weight_kg"] = (
+            data[WEIGHT_COL]
+            .astype(str)
+            .str.strip()
+            .str.replace(".", "", regex=False)   # Remove thousands separator
+            .str.replace(",", ".", regex=False)  # Convert decimal separator
+        )
+
+        print(data["weight_kg"])
+        data["weight_kg"] = pd.to_numeric(data["weight_kg"], errors="coerce").fillna(0)
+
+        # Sum by storage location
+        sums = data.groupby(STORAGE_COL)["weight_kg"].sum()
+
+        #print(df["Storage Location"].unique())
+
+        storage4 = sums.get(4, 0)
+        storage5 = sums.get(5, 0)
+        storage105 = sums.get(105, 0)
+
+        total = storage4 + storage5 + storage105
+
+        capacity = 200000.0          # 200 tonnes in kg
+        green_limit = capacity * 0.60
+        yellow_limit = capacity * 0.90
+
+        if total < green_limit:
+            status = "Green"
+        elif total <= yellow_limit:
+            status = "Yellow"
+        else:
+            status = "Red"
+
+        return {
+            "Storage 4 (kg)": round(storage4, 2),
+            "Storage 5 (kg)": round(storage5, 2),
+            "Storage 105 (kg)": round(storage105, 2),
+            "Total (kg)": round(total, 2),
+            "Capacity (kg)": capacity,
+            "Utilization (%)": round(total / capacity * 100, 2),
+            "Status": status
+        }
+    
+
+    def stock_result_to_html(result):
+        color_map = {
+            "Green": "#28a745",
+            "Yellow": "#ffc107",
+            "Red": "#dc3545"
+        }
+
+        return html.Div(
+            [
+                html.H4("Stock MDI Summary"),
+
+                html.Table(
+                    [
+                        html.Tr([html.Th("Storage 4"), html.Td(f"{result['Storage 4 (kg)']:,.2f} kg")]),
+                        html.Tr([html.Th("Storage 5"), html.Td(f"{result['Storage 5 (kg)']:,.2f} kg")]),
+                        html.Tr([html.Th("Storage 105"), html.Td(f"{result['Storage 105 (kg)']:,.2f} kg")]),
+                        html.Tr([html.Th("Total"), html.Td(f"{result['Total (kg)']:,.2f} kg")]),
+                        html.Tr([html.Th("Capacity"), html.Td(f"{result['Capacity (kg)']:,.2f} kg")]),
+                        html.Tr([html.Th("Utilization"), html.Td(f"{result['Utilization (%)']:.2f}%")]),
+                    ],
+                    style={"width": "50%"}
+                ),
+
+                html.Br(),
+
+                html.Div(
+                    result["Status"],
+                    style={
+                        "backgroundColor": color_map[result["Status"]],
+                        "color": "white",
+                        "padding": "12px",
+                        "fontWeight": "bold",
+                        "fontSize": "20px",
+                        "textAlign": "center",
+                        "borderRadius": "8px",
+                        "width": "200px"
+                    },
+                ),
+            ]
+        )
+
+    # Analysis Page Content
+    @app.callback(
+        Output('storage-content', 'children'),
+        Input('url', 'pathname'),
+        State('uploaded-cache-key', 'data')
+    )
+    def update_storage_content(pathname,cache_key):
+
+        print(pathname, cache_key)
+        if pathname != '/storage' or not cache_key:
+            raise dash.exceptions.PreventUpdate
+        
+        if not cache_key:
+            return html.Div([
+                html.Div([
+                    html.Div("⚠️", style={'fontSize': '48px', 'marginBottom': '20px'}),
+                    html.H3("Keine Daten verfügbar", style={
+                        'color': 'rgb(75, 75, 75)',
+                        'marginBottom': '10px'
+                    }),
+                    html.P("Bitte laden Sie eine PDF-Datei von der Startseite hoch.", style={
+                        'color': 'rgb(124, 124, 124)',
+                        'fontSize': '14px'
+                    }),
+                ], style={
+                    'textAlign': 'center',
+                    'padding': '60px 20px',
+                    'backgroundColor': 'rgb(255, 255, 255)',
+                    'borderRadius': '12px',
+                    'border': '2px dashed rgb(208, 208, 208)',
+                    'maxWidth': '500px',
+                    'margin': '40px auto'
+                })
+            ])#, dash.no_update
+
+        #logging.info(f"Path: {pathname}")
+        #logging.info(f"Cache key: {cache_key}")
+
+        obj = data_manager.get_data(cache_key)
+
+        df = pd.DataFrame(obj)
+        
+        if(not df.empty):
+            #print(df)
+            result = calculate_stock_mdi(df)
+
+        return stock_result_to_html(result)
     
     # Table Page Content
     @app.callback(

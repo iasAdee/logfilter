@@ -31,7 +31,16 @@ def register_upload_callbacks(app, data_manager):
             data_to_store = df
 
         elif filename.lower().endswith(('.xls', '.xlsx')):
-            df = pd.read_excel(io.BytesIO(file_bytes))
+
+            if(filename.lower().endswith(".xls")):
+                df = pd.read_csv(
+                    io.BytesIO(file_bytes),
+                    encoding="utf-16",
+                    sep=None,          # Automatically detects comma, tab, semicolon, etc.
+                    engine="python"
+                )
+            else:
+                df = pd.read_excel(io.BytesIO(file_bytes))
             file_type = 'table'
             data_to_store = df
 
