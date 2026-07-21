@@ -570,7 +570,7 @@ def register_page_content_callbacks(app, data_manager):
         """
 
         STORAGE_COL = "Plant"
-        WEIGHT_COL = "Stock MDI (in kg)"   # Column containing values like "20.000 kg"
+        WEIGHT_COL = "MDI (%)"   # Column containing values like "20.000 kg"
 
         print(df.columns)
 
@@ -583,20 +583,17 @@ def register_page_content_callbacks(app, data_manager):
         # Keep only required storage locations
         data = data[data[STORAGE_COL].isin([4, 5, 105])]
 
-        print(data)
-
-        print(data[WEIGHT_COL])
         # Extract numeric weight
         data["weight_kg"] = (
             data[WEIGHT_COL]
             .astype(str)
             .str.strip()
-            .str.replace(".", "", regex=False)   # Remove thousands separator
-            .str.replace(",", ".", regex=False)  # Convert decimal separator
+            .str.replace("\xa0", "", regex=False)
+            .str.replace(".", "", regex=False)
+            .str.replace(",", ".", regex=False)
         )
 
-        print(data["weight_kg"])
-        data["weight_kg"] = pd.to_numeric(data["weight_kg"], errors="coerce").fillna(0)
+        data["weight_kg"] = pd.to_numeric(data["weight_kg"], errors="coerce")
 
         # Sum by storage location
         sums = data.groupby(STORAGE_COL)["weight_kg"].sum()
