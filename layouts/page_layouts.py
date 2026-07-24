@@ -290,7 +290,7 @@ def get_visualization_page_layout():
 def get_cleaning_page_layout():
     """Layout for Data Cleaning page."""
     return html.Div([
-        get_page_header("Storage Colors", "🧹", "Colors based on tonnes"),
+        get_page_header("MID", "🧹", "Stuttgart"),
         html.Hr(),
         html.Div(id='storage-content', children=[
             html.Div("Upload a file to clean data", style={'textAlign': 'center', 'padding': '50px'})

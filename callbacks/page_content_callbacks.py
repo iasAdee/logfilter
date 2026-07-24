@@ -607,8 +607,8 @@ def register_page_content_callbacks(app, data_manager):
         total = storage4 + storage5 + storage105
 
         capacity = 200000.0          # 200 tonnes in kg
-        green_limit = capacity * 0.60
-        yellow_limit = capacity * 0.90
+        green_limit = capacity * 0.80
+        yellow_limit = capacity * 0.95
 
         if total < green_limit:
             status = "Green"
@@ -618,12 +618,12 @@ def register_page_content_callbacks(app, data_manager):
             status = "Red"
 
         return {
-            "Storage 4 (kg)": round(storage4, 2),
-            "Storage 5 (kg)": round(storage5, 2),
-            "Storage 105 (kg)": round(storage105, 2),
-            "Total (kg)": round(total, 2),
-            "Capacity (kg)": capacity,
-            "Utilization (%)": round(total / capacity * 100, 2),
+            "Lagerung 4 (kg)": round(storage4, 2),
+            "Lagerung 5 (kg)": round(storage5, 2),
+            "Lagerung 105 (kg)": round(storage105, 2),
+            "Gesamt": round(total, 2),
+            "Kapa": capacity,
+            "Nutzungsgrad (%)": round(total / capacity * 100, 2),
             "Status": status
         }
     
@@ -637,16 +637,16 @@ def register_page_content_callbacks(app, data_manager):
 
         return html.Div(
             [
-                html.H4("Stock MDI Summary"),
+                html.H4("Resultat:"),
 
                 html.Table(
                     [
-                        html.Tr([html.Th("Storage 4"), html.Td(f"{result['Storage 4 (kg)']:,.2f} kg")]),
-                        html.Tr([html.Th("Storage 5"), html.Td(f"{result['Storage 5 (kg)']:,.2f} kg")]),
-                        html.Tr([html.Th("Storage 105"), html.Td(f"{result['Storage 105 (kg)']:,.2f} kg")]),
-                        html.Tr([html.Th("Total"), html.Td(f"{result['Total (kg)']:,.2f} kg")]),
-                        html.Tr([html.Th("Capacity"), html.Td(f"{result['Capacity (kg)']:,.2f} kg")]),
-                        html.Tr([html.Th("Utilization"), html.Td(f"{result['Utilization (%)']:.2f}%")]),
+                        html.Tr([html.Th("Lagerung 4"), html.Td(f"{result['Lagerung 4 (kg)']:,.2f} kg")]),
+                        html.Tr([html.Th("Lagerung 5"), html.Td(f"{result['Lagerung 5 (kg)']:,.2f} kg")]),
+                        html.Tr([html.Th("Lagerung 105"), html.Td(f"{result['Lagerung 105 (kg)']:,.2f} kg")]),
+                        html.Tr([html.Th("Gesamt"), html.Td(f"{result['Gesamt']:,.2f} kg")]),
+                        html.Tr([html.Th("Kapa"), html.Td(f"{result['Kapa']:,.2f} kg")]),
+                        html.Tr([html.Th("Nutzungsgrad"), html.Td(f"{result['Nutzungsgrad (%)']:.2f}%")]),
                     ],
                     style={"width": "50%"}
                 ),
@@ -654,7 +654,7 @@ def register_page_content_callbacks(app, data_manager):
                 html.Br(),
 
                 html.Div(
-                    result["Status"],
+                    "....",
                     style={
                         "backgroundColor": color_map[result["Status"]],
                         "color": "white",

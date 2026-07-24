@@ -126,7 +126,7 @@ def get_home_layout():
                     color="rgb(142, 177, 212)"
                 ),
                 get_card(
-                    title="Storage Colors",
+                    title="MID",
                     #description="Create interactive charts and graphs from your data",
                     icon="📈",
                     page_link="/storage",
