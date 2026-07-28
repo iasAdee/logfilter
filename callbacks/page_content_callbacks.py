@@ -611,11 +611,11 @@ def register_page_content_callbacks(app, data_manager):
         yellow_limit = capacity * 0.95
 
         if total < green_limit:
-            status = "Green"
+            status = "Unkritisch" #green
         elif total <= yellow_limit:
-            status = "Yellow"
+            status = "Kritisch"#"Yellow"
         else:
-            status = "Red"
+            status = "Maẞnahmen" #"Red" #
 
         return {
             "Lagerung 4 (kg)": round(storage4, 2),
@@ -630,9 +630,9 @@ def register_page_content_callbacks(app, data_manager):
 
     def stock_result_to_html(result):
         color_map = {
-            "Green": "#28a745",
-            "Yellow": "#ffc107",
-            "Red": "#dc3545"
+            "Unkritisch": "#28a745",
+            "Kritisch": "#ffc107",
+            "Maẞnahmen": "#dc3545"
         }
 
         return html.Div(
@@ -641,9 +641,9 @@ def register_page_content_callbacks(app, data_manager):
 
                 html.Table(
                     [
-                        html.Tr([html.Th("Lagerung 4"), html.Td(f"{result['Lagerung 4 (kg)']:,.2f} kg")]),
-                        html.Tr([html.Th("Lagerung 5"), html.Td(f"{result['Lagerung 5 (kg)']:,.2f} kg")]),
-                        html.Tr([html.Th("Lagerung 105"), html.Td(f"{result['Lagerung 105 (kg)']:,.2f} kg")]),
+                        html.Tr([html.Th("Lagerort 004"), html.Td(f"{result['Lagerung 4 (kg)']:,.2f} kg")]),
+                        html.Tr([html.Th("Lagerort 005"), html.Td(f"{result['Lagerung 5 (kg)']:,.2f} kg")]),
+                        html.Tr([html.Th("Lagerort 105"), html.Td(f"{result['Lagerung 105 (kg)']:,.2f} kg")]),
                         html.Tr([html.Th("Gesamt"), html.Td(f"{result['Gesamt']:,.2f} kg")]),
                         html.Tr([html.Th("Kapa"), html.Td(f"{result['Kapa']:,.2f} kg")]),
                         html.Tr([html.Th("Nutzungsgrad"), html.Td(f"{result['Nutzungsgrad (%)']:.2f}%")]),
@@ -654,7 +654,7 @@ def register_page_content_callbacks(app, data_manager):
                 html.Br(),
 
                 html.Div(
-                    "....",
+                    result["Status"],
                     style={
                         "backgroundColor": color_map[result["Status"]],
                         "color": "white",
