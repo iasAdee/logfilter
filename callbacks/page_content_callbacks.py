@@ -941,7 +941,6 @@ def get_results_word(excel_data):
         fourth = excel_data["UN-Nr."][i]
 
         if(pd.isna(fourth)):
-            
             if(count == 3 or i == len(excel_data)-1):
                 list_of_strings.append(full_string)
                 full_string = ""
@@ -952,14 +951,49 @@ def get_results_word(excel_data):
                 count=0
 
             continue
+        else:
+            print(f"UN-Nr is missing for line: {i+1}")
+            
 
         get_data = excel_data["UN-Homologation"][i]
         zero_word = excel_data["Menge"][i]
         tech = excel_data["Tech.Benennung 1"][i]
+        
+        #new variables added EmS-/ERG-Nr. 1
+        zettel = excel_data["Zettel 1/2/3"][i]
+        ems1 = excel_data["EmS-/ERG-Nr. 1"][i]
+        ems2 = excel_data["EmS-/ERG-Nr. 2"][i]
+        gef = excel_data["Gefahrgutvorschrift"][i]
+        imdgtext = excel_data["IMDG Trenngruppe text"][i]
+        ver = excel_data["Verpackungsgruppe"][i]
+        
+        
+        
+        if pd.notna(ems1) or pd.notna(ems2):
+            ems_text = f",EMS NO. {ems1} {ems2}, FLASH POINT"
+        else:
+            ems_text = ""
+
+        if pd.notna(ver):
+            ver = "PG "+ver+" "
+        else:
+            ver = ""
+            
+        if pd.notna(gef):
+            gef = f"{gef}, CODE segregation group "
+            
+        if pd.notna(tech):
+            pass
+        else:
+            tech = "" 
+            
 
         Flammpunkt = None
         if("Flammpunkt" in excel_data.columns):
             Flammpunkt = excel_data["Flammpunkt"][i]
+        else:
+            print(f"Flammpunkt is missing in columns: {i+1}")
+            
 
 
         if(pd.isna(get_data) or pd.isna(Flammpunkt)):
@@ -967,7 +1001,10 @@ def get_results_word(excel_data):
             second_word = container_types[int(get_data[0])]
             data_to_add = str(zero_word)+" "+str(first_word)+" "+\
                             str(second_word)+""+\
-                            str(fourth)+" "+str(third)+" "+str(tech) +"\n\n"
+                            str(fourth)+" "+str(third)+" "+\
+                                str(zettel)+", "+ver+\
+                                ems_text +str(tech) +"\n"+str(Flammpunkt)+"\n\n"+\
+                                   gef+imdgtext
 
             full_string += data_to_add
         else:
@@ -975,7 +1012,9 @@ def get_results_word(excel_data):
             second_word = container_types[int(get_data[0])]
             data_to_add = str(zero_word)+" "+str(first_word)+" "+\
                             str(second_word)+" ("+str(get_data)+")\n"+\
-                            str(fourth)+" "+str(third)+" "+str(tech) +"\n"+str(Flammpunkt)+"\n\n"
+                            str(fourth)+" "+str(third)+" "+str(zettel)+", "+ver+\
+                                ems_text +str(tech) +"\n"+str(Flammpunkt)+" "+\
+                                   gef+imdgtext
 
 
 
