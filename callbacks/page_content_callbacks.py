@@ -968,6 +968,16 @@ def get_results_word(excel_data):
         ver = excel_data["Verpackungsgruppe"][i]
         
         
+        if pd.notna(ems1) or pd.notna(ems2):
+            ems_text = f",EMS NO. {ems1} {ems2}, FLASH POINT "
+        else:
+            ems_text = ""
+            
+        if pd.notna(zettel):
+            zettel = f"CL {zettel}, "
+        else:
+            zettel = ""
+        
         
         if pd.notna(ems1) or pd.notna(ems2):
             ems_text = f",EMS NO. {ems1} {ems2}, FLASH POINT "
@@ -1007,7 +1017,7 @@ def get_results_word(excel_data):
             data_to_add = str(zero_word)+" "+str(first_word)+" "+\
                             str(second_word)+""+\
                             str(fourth)+" "+str(third)+" "+\
-                                str(zettel)+", "+ver+\
+                                zettel+ver+\
                                 ems_text +str(tech) +"\n"+str(Flammpunkt)+" "+\
                                    gef+imdgtext+"\n\n"
 
@@ -1017,16 +1027,16 @@ def get_results_word(excel_data):
             second_word = container_types[int(get_data[0])]
             data_to_add = str(zero_word)+" "+str(first_word)+" "+\
                             str(second_word)+" ("+str(get_data)+")\n"+\
-                            str(fourth)+" "+str(third)+" "+str(zettel)+", "+ver+\
-                                ems_text +str(tech) +" "+str(Flammpunkt)+" "+\
+                            str(fourth)+" "+str(third)+" "+zettel+ver+\
+                                ems_text +str(tech) +" "+str(Flammpunkt)+" c.c."+\
                                    gef+imdgtext+"\n\n"
 
             full_string += data_to_add
 
 
 
-        kgs += first_kg+" "+first_kg_char+"\n\n\n\n\n\n\n"
-        kgs2 += second_kg+" "+second_kg_char+"\n\n\n\n\n\n\n"
+        kgs += first_kg+" "+first_kg_char+"\n\n\n\n\n\n"
+        kgs2 += second_kg+" "+second_kg_char+"\n\n\n\n\n\n"
 
 
 
@@ -1105,7 +1115,7 @@ def load_docx_and_print_tables(file_content,full_string, kgs, kgs2, target_row_n
                     if(cell.text.startswith("9") and check_2 == False):
                         paragraph = cell.paragraphs[3]
                         run = paragraph.add_run(f"\nBEFÖRDERUNG NACH ABSATZ 1.1.4.2.1")
-                        run.font.size = Pt(10)
+                        run.font.size = Pt(8)
                         run.bold = True 
                         check_2 = True
 
@@ -1123,8 +1133,10 @@ def load_docx_and_print_tables(file_content,full_string, kgs, kgs2, target_row_n
                             continue
                         elif(count == 2):
                             print(full_string[table_count-1])
-                            print(cell)
                             cell.text = full_string[table_count-1]
+                            paragraph = cell.paragraphs[-1]
+                            for run in paragraph.runs:
+                                run.font.size = Pt(10)
                         elif(count == 3):
                             cell.text = kgs[table_count-1]
                         elif(count == 4):
