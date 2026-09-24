@@ -970,7 +970,7 @@ def get_results_word(excel_data):
         
         
         if pd.notna(ems1) or pd.notna(ems2):
-            ems_text = f",EMS NO. {ems1} {ems2}, FLASH POINT"
+            ems_text = f",EMS NO. {ems1} {ems2}, FLASH POINT "
         else:
             ems_text = ""
 
@@ -987,8 +987,13 @@ def get_results_word(excel_data):
         else:
             tech = "" 
             
+        if(pd.notna(imdgtext )):
+            pass
+        else:
+            imdgtext=""
+            
 
-        Flammpunkt = None
+        Flammpunkt = ""
         if("Flammpunkt" in excel_data.columns):
             Flammpunkt = excel_data["Flammpunkt"][i]
         else:
@@ -996,15 +1001,15 @@ def get_results_word(excel_data):
             
 
 
-        if(pd.isna(get_data) or pd.isna(Flammpunkt)):
+        if( pd.isna(get_data) or Flammpunkt ==""):
             first_word = container_materials[get_data[1]]
             second_word = container_types[int(get_data[0])]
             data_to_add = str(zero_word)+" "+str(first_word)+" "+\
                             str(second_word)+""+\
                             str(fourth)+" "+str(third)+" "+\
                                 str(zettel)+", "+ver+\
-                                ems_text +str(tech) +"\n"+str(Flammpunkt)+"\n\n"+\
-                                   gef+imdgtext
+                                ems_text +str(tech) +"\n"+str(Flammpunkt)+" "+\
+                                   gef+imdgtext+"\n\n"
 
             full_string += data_to_add
         else:
@@ -1013,17 +1018,15 @@ def get_results_word(excel_data):
             data_to_add = str(zero_word)+" "+str(first_word)+" "+\
                             str(second_word)+" ("+str(get_data)+")\n"+\
                             str(fourth)+" "+str(third)+" "+str(zettel)+", "+ver+\
-                                ems_text +str(tech) +"\n"+str(Flammpunkt)+" "+\
-                                   gef+imdgtext
-
-
+                                ems_text +str(tech) +" "+str(Flammpunkt)+" "+\
+                                   gef+imdgtext+"\n\n"
 
             full_string += data_to_add
 
 
 
-        kgs += first_kg+" "+first_kg_char+"\n\n\n\n\n"
-        kgs2 += second_kg+" "+second_kg_char+"\n\n\n\n\n"
+        kgs += first_kg+" "+first_kg_char+"\n\n\n\n\n\n\n"
+        kgs2 += second_kg+" "+second_kg_char+"\n\n\n\n\n\n\n"
 
 
 
